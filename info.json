@@ -1,0 +1,16 @@
+{
+  "name": "ltn-train-info",
+  "version": "0.0.1",
+  "title": "LTN Train information",
+  "description": "Returns information about trains scheduled for a stop.",
+  "author": "hgschmie",
+  "contact": "https://github.com/hgschmie/factorio-ltn-train-info/issues",
+  "homepage": "https://github.com/hgschmie/factorio-ltn-train-info",
+  "factorio_version": "1.1",
+  "dependencies": [
+    "base >= 1.1.0",
+    "stdlib >= 1.4.0",
+    "LogisticTrainNetwork > 1.18.0",
+    "? PickerDollies"
+  ]
+}
