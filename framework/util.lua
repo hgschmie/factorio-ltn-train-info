@@ -6,15 +6,29 @@ local Is = require('__stdlib__/stdlib/utils/is')
 local table = require('__stdlib__/stdlib/utils/table')
 
 ---@class FrameworkUtil
---- @field STATUS_TABLE table<defines.entity_status, string>
---- @field STATUS_SPRITES table<defines.entity_status, string>
---- @field STATUS_NAMES table<defines.entity_status, string>
---- @field STATUS_LEDS table<string, string>
+---@field STATUS_TABLE table<defines.entity_status, string>
+---@field STATUS_SPRITES table<defines.entity_status, string>
+---@field STATUS_NAMES table<defines.entity_status, string>
+---@field STATUS_LEDS table<string, string>
+---@field CREATION_EVENTS defines.events[]
+---@field DELETION_EVENTS defines.events[]
 local Util = {
     STATUS_LEDS = {},
     STATUS_TABLE = {},
     STATUS_NAMES = {},
     STATUS_SPRITES = {},
+    CREATION_EVENTS = {
+        defines.events.on_built_entity,
+        defines.events.on_robot_built_entity,
+        defines.events.script_raised_built,
+        defines.events.script_raised_revive,
+    },
+    DELETION_EVENTS = {
+        defines.events.on_player_mined_entity,
+        defines.events.on_robot_mined_entity,
+        defines.events.on_entity_died,
+        defines.events.script_raised_destroy,
+    },
 }
 
 --------------------------------------------------------------------------------
@@ -75,20 +89,18 @@ function Util.create_event_entity_matcher(attribute, values)
     return create_matcher(values, matcher)
 end
 
----@param values string|string[] One or more names to match to the ghost_name field.
----@return function(ev: EventData, pattern: any): boolean
-function Util.create_event_ghost_entity_name_matcher(values)
-    local matcher = function(entity) return entity and entity.type == 'entity-ghost' and entity.ghost_name end
-    return create_matcher(values, matcher)
-end
-
-
 ---@param attribute string The entity attribute to match.
 ---@param values string|string[] One or more values to match.
 ---@return function(ev: EventData, pattern: any): boolean
 function Util.create_event_ghost_entity_matcher(attribute, values)
     local matcher = function(entity) return entity and entity.type == 'entity-ghost' and entity[attribute] end
     return create_matcher(values, matcher)
+end
+
+---@param values string|string[] One or more names to match to the ghost_name field.
+---@return function(ev: EventData, pattern: any): boolean
+function Util.create_event_ghost_entity_name_matcher(values)
+    return Util.create_event_ghost_entity_matcher('ghost_name', values)
 end
 
 --------------------------------------------------------------------------------

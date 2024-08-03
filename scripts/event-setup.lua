@@ -133,19 +133,16 @@ Event.register(defines.events.on_train_changed_state, onTrainChangedState)
 
 -- entity creation/deletion
 local lti_entity_filter = Util.create_event_entity_matcher('name', const.lti_train_info)
-Util.event_register(const.creation_events, onEntityCreated, lti_entity_filter)
-Util.event_register(const.deletion_events, onEntityDeleted, lti_entity_filter)
+Util.event_register(Util.CREATION_EVENTS, onEntityCreated, lti_entity_filter)
+Util.event_register(Util.DELETION_EVENTS, onEntityDeleted, lti_entity_filter)
 
 local train_stop_filter = Util.create_event_entity_matcher('type', 'train-stop')
-Util.event_register(const.deletion_events, onTrainStopDeleted, train_stop_filter)
-Util.event_register(const.creation_events, onTrainStopCreated, train_stop_filter)
+Util.event_register(Util.DELETION_EVENTS, onTrainStopDeleted, train_stop_filter)
+Util.event_register(Util.CREATION_EVENTS, onTrainStopCreated, train_stop_filter)
 
 -- manage ghost building (robot building) Register all ghosts we are interested in
-local lti_ghost_filter = Util.create_event_ghost_entity_name_matcher(const.lti_train_info)
-Util.event_register(const.creation_events, Framework.ghost_manager.onGhostEntityCreated, lti_ghost_filter)
-local lti_ghost_trainstop_filter = Util.create_event_ghost_entity_matcher('ghost_type', 'train-stop')
-Util.event_register(const.creation_events, Framework.ghost_manager.onGhostEntityCreated, lti_ghost_trainstop_filter)
-
+Framework.ghost_manager.register_for_ghost_names(const.lti_train_info)
+Framework.ghost_manager.register_for_ghost_attributes('ghost_type', 'train-stop')
 
 -- entity destroy
 Event.register(defines.events.on_entity_destroyed, onEntityDestroyed)
