@@ -32,10 +32,7 @@ Constants.signal_type = {
     one = 3,
 }
 
-Constants.delivery_type = {
-    src = 1,
-    dst = 2,
-}
+Constants.delivery_type = table.array_to_dictionary({'src', 'dst'})
 
 --------------------------------------------------------------------------------
 -- Framework intializer
@@ -86,24 +83,6 @@ Constants.lti_range = 3
 -- names of the supported "train" stops
 Constants.lti_train_stop_names = { 'logistic-train-stop', 'ltn-port', }
 Constants.lti_train_stops = table.array_to_dictionary(Constants.lti_train_stop_names)
-
---------------------------------------------------------------------------------
--- Events
---------------------------------------------------------------------------------
-
-Constants.creation_events = {
-    defines.events.on_built_entity,
-    defines.events.on_robot_built_entity,
-    defines.events.script_raised_built,
-    defines.events.script_raised_revive,
-}
-
-Constants.deletion_events = {
-    defines.events.on_player_mined_entity,
-    defines.events.on_robot_mined_entity,
-    defines.events.on_entity_died,
-    defines.events.script_raised_destroy,
-}
 
 --------------------------------------------------------------------------------
 -- localization

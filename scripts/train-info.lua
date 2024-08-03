@@ -304,7 +304,7 @@ function Lti:update_delivery(entities, shipment, train_id, delivery_type)
 
                 if shipment then
                     -- figure out which delivery config is responsible for the current delivery
-                    local delivery_cfg = (delivery_type == const.delivery_type.src) and lti_config.src or lti_config.dst --[[@as TrainInfoDeliveryConfig ]]
+                    local delivery_cfg = lti_config[delivery_type] --[[@as TrainInfoDeliveryConfig ]]
 
                     -- if not enabled, don't add any signals
                     if delivery_cfg.enabled then
@@ -337,7 +337,7 @@ function Lti:update_delivery(entities, shipment, train_id, delivery_type)
 
                         -- add virtual signals
                         if lti_config.virtual then
-                            local signal_name = (delivery_type == 1) and 'signal-S' or 'signal-D'
+                            local signal_name = (delivery_type == 'src') and 'signal-S' or 'signal-D'
 
                             table.insert(signals, { signal = { type = 'virtual', name = signal_name }, count = 1, index = idx })
                             if train_id then

@@ -17,7 +17,7 @@ local ModGui = {}
 
 -- callback predefines
 local onWindowClosed, onToggleEnable, onRadioButtonQuantity, onRadioButtonOne, onToggleNegate
-local onToggleVirtual, onToggleUseStack, onDivideBySlider, onDivideByText
+local onToggleVirtual, onDivideBySlider, onDivideByText
 -- forward declarations
 local gui_updater
 
@@ -138,6 +138,7 @@ local function get_ui(lti_entity)
                                     children = {
                                         type = 'checkbox',
                                         name = 'delivery-src',
+                                        elem_tags = { config = const.delivery_type.src },
                                         caption = { const:locale('enabled') },
                                         handler = { [defines.events.on_gui_checked_state_changed] = onToggleEnable },
                                         state = false,
@@ -157,6 +158,7 @@ local function get_ui(lti_entity)
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-quantity') },
                                             name = 'signal-type-quantity-src',
+                                            elem_tags = { config = const.delivery_type.src },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonQuantity },
                                             state = false,
                                         },
@@ -164,6 +166,7 @@ local function get_ui(lti_entity)
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-stacksize') },
                                             name = 'signal-type-stacksize-src',
+                                            elem_tags = { config = const.delivery_type.src },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonStackSize },
                                             state = false,
                                         },
@@ -171,6 +174,7 @@ local function get_ui(lti_entity)
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-one') },
                                             name = 'signal-type-one-src',
+                                            elem_tags = { config = const.delivery_type.src },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonOne },
                                             state = false,
                                         },
@@ -179,6 +183,7 @@ local function get_ui(lti_entity)
                                 {
                                     type = 'checkbox',
                                     name = 'negate-src',
+                                    elem_tags = { config = const.delivery_type.src },
                                     handler = { [defines.events.on_gui_checked_state_changed] = onToggleNegate },
                                     state = false,
                                     caption = { const:locale('negate') },
@@ -208,6 +213,7 @@ local function get_ui(lti_entity)
                                     children = {
                                         type = 'checkbox',
                                         name = 'delivery-dst',
+                                        elem_tags = { config = const.delivery_type.dst },
                                         caption = { const:locale('enabled') },
                                         handler = { [defines.events.on_gui_checked_state_changed] = onToggleEnable },
                                         state = false,
@@ -227,6 +233,7 @@ local function get_ui(lti_entity)
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-quantity') },
                                             name = 'signal-type-quantity-dst',
+                                            elem_tags = { config = const.delivery_type.dst },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonQuantity },
                                             state = false,
                                         },
@@ -234,6 +241,7 @@ local function get_ui(lti_entity)
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-stacksize') },
                                             name = 'signal-type-stacksize-dst',
+                                            elem_tags = { config = const.delivery_type.dst },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonStackSize },
                                             state = false,
                                         },
@@ -241,6 +249,7 @@ local function get_ui(lti_entity)
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-one') },
                                             name = 'signal-type-one-dst',
+                                            elem_tags = { config = const.delivery_type.dst },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonOne },
                                             state = false,
                                         },
@@ -249,6 +258,7 @@ local function get_ui(lti_entity)
                                 {
                                     type = 'checkbox',
                                     name = 'negate-dst',
+                                    elem_tags = { config = const.delivery_type.dst },
                                     handler = { [defines.events.on_gui_checked_state_changed] = onToggleNegate },
                                     state = false,
                                     caption = { const:locale('negate') },
@@ -389,8 +399,7 @@ onToggleEnable = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
 
-    local config_name = event.element.name:ends_with('src') and 'src' or 'dst'
-    local config = lti_entity.config[config_name]
+    local config = lti_entity.config[event.element.tags['config']]
 
     config.enabled = event.element.state
 end
@@ -400,8 +409,7 @@ onRadioButtonQuantity = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
 
-    local config_name = event.element.name:ends_with('src') and 'src' or 'dst'
-    local config = lti_entity.config[config_name]
+    local config = lti_entity.config[event.element.tags['config']]
 
     config.signal_type = const.signal_type.quantity
 end
@@ -411,8 +419,7 @@ onRadioButtonStackSize = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
 
-    local config_name = event.element.name:ends_with('src') and 'src' or 'dst'
-    local config = lti_entity.config[config_name]
+    local config = lti_entity.config[event.element.tags['config']]
 
     config.signal_type = const.signal_type.stack_size
 end
@@ -422,8 +429,7 @@ onRadioButtonOne = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
 
-    local config_name = event.element.name:ends_with('src') and 'src' or 'dst'
-    local config = lti_entity.config[config_name]
+    local config = lti_entity.config[event.element.tags['config']]
 
     config.signal_type = const.signal_type.one
 end
@@ -433,8 +439,7 @@ onToggleNegate = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
 
-    local config_name = event.element.name:ends_with('src') and 'src' or 'dst'
-    local config = lti_entity.config[config_name]
+    local config = lti_entity.config[event.element.tags['config']]
 
     config.negate = event.element.state
 end
