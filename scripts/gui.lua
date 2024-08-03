@@ -528,11 +528,11 @@ update_gui_state = function(gui, lti_entity)
     connection_frame.visible = lti_config.enabled
 
     local connection_label = gui:find_element('connection-label')
-    local connection_name = #lti_config.stop_ids > 1 and 'connection-info-p' or 'connection-info-s'
+    local connection_name = #lti_entity.stop_ids > 1 and 'connection-info-p' or 'connection-info-s'
     connection_label.caption = { const:locale(connection_name) }
 
     local connection = gui:find_element('connection')
-    connection.caption = string.join(', ', lti_config.stop_ids)
+    connection.caption = string.join(', ', lti_entity.stop_ids)
 
     -- deal with provide and request
     update_gui_delivery(gui, 'provide', lti_config.provide)
@@ -545,6 +545,8 @@ update_gui_state = function(gui, lti_entity)
     divide_by_slider.slider_value = lti_config.divide_by
     local divide_by_text = gui:find_element('divide_by_text')
     divide_by_text.text = tostring(lti_config.divide_by)
+
+    lti_config.modified = false
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -562,7 +564,6 @@ gui_updater = function(ev, lti_gui)
     if not (lti_gui.last_config and table.compare(lti_gui.last_config, lti_entity.config)) then
         update_gui_state(lti_gui.gui, lti_entity)
         This.lti:update_delivery(lti_entity)
-        lti_entity.config.modified = false
         lti_gui.last_config = table.deepcopy(lti_entity.config)
     end
 end
@@ -604,6 +605,7 @@ local function onGuiOpened(event)
         last_config = nil,
     }
 
+    lti_entity.config.modified = false
     Event.register(-1, gui_updater, nil, player_data.lti_gui)
 
     player.opened = gui.root

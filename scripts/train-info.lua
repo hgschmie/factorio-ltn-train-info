@@ -52,7 +52,6 @@ function Lti:get_new_config()
         },
         virtual = false,
         divide_by = 1,
-        stop_ids = {},
     }
 end
 
@@ -159,11 +158,13 @@ function Lti:create(main, player)
     local lti_entity = {
         main = main,
         config = self:get_new_config(),
+        stop_ids = {},
     }
 
     self:setEntity(entity_id, lti_entity)
 
     self:update_status(entity_id, player)
+
     return lti_entity
 end
 
@@ -173,7 +174,7 @@ function Lti:destroy(entity_id)
 
     self:setEntity(entity_id, nil)
 
-    for _, stop_id in pairs(lti_entity.config.stop_ids) do
+    for _, stop_id in pairs(lti_entity.stop_ids) do
         self:remove_stop_entity(stop_id, entity_id)
     end
 end
@@ -199,9 +200,9 @@ function Lti:deleteTrainStop(train_stop_id)
     for lti_entity_id in pairs(lti_entity_ids) do
         local lti_entity = self:entity(lti_entity_id)
         if lti_entity then
-            for idx, stop_id in pairs(lti_entity.config.stop_ids) do
+            for idx, stop_id in pairs(lti_entity.stop_ids) do
                 if train_stop_id == stop_id then
-                    table.remove(lti_entity.config.stop_ids, idx)
+                    table.remove(lti_entity.stop_ids, idx)
                     self:update_status(lti_entity_id)
                 end
             end
@@ -217,7 +218,7 @@ function Lti:update_status(entity_id, player)
 
     if player then
         -- unregister existing stops
-        for _, stop_id in pairs(lti_entity.config.stop_ids) do
+        for _, stop_id in pairs(lti_entity.stop_ids) do
             self:remove_stop_entity(stop_id, entity_id)
         end
 
@@ -230,24 +231,24 @@ function Lti:update_status(entity_id, player)
         }
 
         -- re-register newly found stops
-        local stops = {}
+        local stop_ids = {}
 
         if table_size(train_stops) > 0 then
             for _, train_stop in pairs(train_stops) do
                 if const.lti_train_stops[train_stop.name] then
-                    table.insert(stops, train_stop.unit_number)
+                    table.insert(stop_ids, train_stop.unit_number)
                     self:add_stop_entity(train_stop.unit_number, entity_id)
                 end
             end
         end
 
-        lti_entity.config.stop_ids = stops
+        lti_entity.stop_ids = stop_ids
     end
 
-    lti_entity.config.enabled = (#lti_entity.config.stop_ids > 0) and true or false
+    lti_entity.config.enabled = (#lti_entity.stop_ids > 0) and true or false
+    lti_entity.config.modified = true
 
-    local control = lti_entity.main.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
-    control.enabled = lti_entity.config.enabled
+    self:update_delivery(lti_entity)
 end
 
 ------------------------------------------------------------------------
