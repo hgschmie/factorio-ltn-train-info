@@ -40,8 +40,8 @@
 
 ---@class TrainInfoConfig
 ---@field enabled boolean
----@field src TrainInfoDeliveryConfig
----@field dst TrainInfoDeliveryConfig
+---@field provide TrainInfoDeliveryConfig
+---@field request TrainInfoDeliveryConfig
 ---@field virtual boolean
 ---@field divide_by integer
 ---@field stop_ids integer[]

@@ -40,12 +40,12 @@ end
 function Lti:get_new_config()
     return {
         enabled = false,
-        src = {
+        provide = {
             enabled = true,
             signal_type = const.signal_type.quantity,
             negate = false,
         },
-        dst = {
+        request = {
             enabled = true,
             signal_type = const.signal_type.quantity,
             negate = false,
@@ -363,7 +363,7 @@ function Lti:train_arrived(train)
         if lti_entity then
             ---@type TrainInfoDelivery
             lti_entity.current_delivery = {
-                delivery_type = (delivery.from_id == station_id) and const.delivery_type.src or const.delivery_type.dst,
+                delivery_type = (delivery.from_id == station_id) and const.delivery_type.provide or const.delivery_type.request,
                 shipment = delivery.shipment,
                 train_id = train.id,
             }

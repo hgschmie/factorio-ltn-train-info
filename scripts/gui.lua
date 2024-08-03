@@ -124,8 +124,8 @@ local function get_ui(lti_entity)
                     {
                         type = 'frame',
                         style = const:with_prefix('delivery-settings'),
-                        caption = { const:locale('source') },
-                        children = { -- src settings
+                        caption = { const:locale('provide') },
+                        children = { -- provide settings
                             type = 'table',
                             column_count = 3,
                             style_mods = {
@@ -137,8 +137,8 @@ local function get_ui(lti_entity)
                                     direction = 'horizontal',
                                     children = {
                                         type = 'checkbox',
-                                        name = 'delivery-src',
-                                        elem_tags = { config = const.delivery_type.src },
+                                        name = 'delivery-provide',
+                                        elem_tags = { config = const.delivery_type.provide },
                                         caption = { const:locale('enabled') },
                                         handler = { [defines.events.on_gui_checked_state_changed] = onToggleEnable },
                                         state = false,
@@ -157,24 +157,24 @@ local function get_ui(lti_entity)
                                         {
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-quantity') },
-                                            name = 'signal-type-quantity-src',
-                                            elem_tags = { config = const.delivery_type.src },
+                                            name = 'signal-type-quantity-provide',
+                                            elem_tags = { config = const.delivery_type.provide },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonQuantity },
                                             state = false,
                                         },
                                         {
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-stacksize') },
-                                            name = 'signal-type-stacksize-src',
-                                            elem_tags = { config = const.delivery_type.src },
+                                            name = 'signal-type-stacksize-provide',
+                                            elem_tags = { config = const.delivery_type.provide },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonStackSize },
                                             state = false,
                                         },
                                         {
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-one') },
-                                            name = 'signal-type-one-src',
-                                            elem_tags = { config = const.delivery_type.src },
+                                            name = 'signal-type-one-provide',
+                                            elem_tags = { config = const.delivery_type.provide },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonOne },
                                             state = false,
                                         },
@@ -182,8 +182,8 @@ local function get_ui(lti_entity)
                                 },
                                 {
                                     type = 'checkbox',
-                                    name = 'negate-src',
-                                    elem_tags = { config = const.delivery_type.src },
+                                    name = 'negate-provide',
+                                    elem_tags = { config = const.delivery_type.provide },
                                     handler = { [defines.events.on_gui_checked_state_changed] = onToggleNegate },
                                     state = false,
                                     caption = { const:locale('negate') },
@@ -198,8 +198,8 @@ local function get_ui(lti_entity)
                     {
                         type = 'frame',
                         style = const:with_prefix('delivery-settings'),
-                        caption = { const:locale('destination') },
-                        children = { -- dst settings
+                        caption = { const:locale('request') },
+                        children = { -- request settings
                             type = 'table',
                             column_count = 3,
                             -- style = 'bordered_table',
@@ -212,8 +212,8 @@ local function get_ui(lti_entity)
                                     direction = 'horizontal',
                                     children = {
                                         type = 'checkbox',
-                                        name = 'delivery-dst',
-                                        elem_tags = { config = const.delivery_type.dst },
+                                        name = 'delivery-request',
+                                        elem_tags = { config = const.delivery_type.request },
                                         caption = { const:locale('enabled') },
                                         handler = { [defines.events.on_gui_checked_state_changed] = onToggleEnable },
                                         state = false,
@@ -232,24 +232,24 @@ local function get_ui(lti_entity)
                                         {
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-quantity') },
-                                            name = 'signal-type-quantity-dst',
-                                            elem_tags = { config = const.delivery_type.dst },
+                                            name = 'signal-type-quantity-request',
+                                            elem_tags = { config = const.delivery_type.request },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonQuantity },
                                             state = false,
                                         },
                                         {
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-stacksize') },
-                                            name = 'signal-type-stacksize-dst',
-                                            elem_tags = { config = const.delivery_type.dst },
+                                            name = 'signal-type-stacksize-request',
+                                            elem_tags = { config = const.delivery_type.request },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonStackSize },
                                             state = false,
                                         },
                                         {
                                             type = 'radiobutton',
                                             caption = { const:locale('signal-type-one') },
-                                            name = 'signal-type-one-dst',
-                                            elem_tags = { config = const.delivery_type.dst },
+                                            name = 'signal-type-one-request',
+                                            elem_tags = { config = const.delivery_type.request },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonOne },
                                             state = false,
                                         },
@@ -257,8 +257,8 @@ local function get_ui(lti_entity)
                                 },
                                 {
                                     type = 'checkbox',
-                                    name = 'negate-dst',
-                                    elem_tags = { config = const.delivery_type.dst },
+                                    name = 'negate-request',
+                                    elem_tags = { config = const.delivery_type.request },
                                     handler = { [defines.events.on_gui_checked_state_changed] = onToggleNegate },
                                     state = false,
                                     caption = { const:locale('negate') },
@@ -534,9 +534,9 @@ update_gui_state = function(gui, lti_entity)
     local connection = gui:find_element('connection')
     connection.caption = string.join(', ', lti_config.stop_ids)
 
-    -- deal with src and dst
-    update_gui_delivery(gui, 'src', lti_config.src)
-    update_gui_delivery(gui, 'dst', lti_config.dst)
+    -- deal with provide and request
+    update_gui_delivery(gui, 'provide', lti_config.provide)
+    update_gui_delivery(gui, 'request', lti_config.request)
 
     local virtual = gui:find_element('virtual')
     virtual.state = lti_config.virtual

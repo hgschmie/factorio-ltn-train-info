@@ -32,11 +32,11 @@ Constants.signal_type = {
     one = 3,
 }
 
-Constants.delivery_type = table.array_to_dictionary({'src', 'dst'})
+Constants.delivery_type = table.array_to_dictionary({'provide', 'request'})
 
 Constants.delivery_signals = {
-    [Constants.delivery_type.src] = 'signal-S',
-    [Constants.delivery_type.dst] = 'signal-D',
+    [Constants.delivery_type.provide] = 'signal-P',
+    [Constants.delivery_type.request] = 'signal-R',
 }
 
 --------------------------------------------------------------------------------
