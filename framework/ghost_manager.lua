@@ -11,25 +11,13 @@ local Util = require('framework.util')
 ---@class FrameworkGhostManager
 local FrameworkGhostManager = {}
 
----@class FrameworkAttachedEntity
----@field entity LuaEntity
----@field name string?
----@field position MapPosition?
----@field orientation float?
----@field tags Tags?
----@field player_index integer
----@field tick integer
-
 --- @return FrameworkGhostManagerState state Manages ghost state
 function FrameworkGhostManager:state()
     local storage = Framework.runtime:storage()
 
     if not storage.ghost_manager then
-        ---@class FrameworkGhostManagerState
-        ---@field count integer running count of all known UIs
-        ---@field guis table<number, FrameworkGui> All registered and known guis for this manager.
+        ---@type FrameworkGhostManagerState
         storage.ghost_manager = {
-            ---@type FrameworkAttachedEntity[]
             ghost_entities = {},
         }
     end

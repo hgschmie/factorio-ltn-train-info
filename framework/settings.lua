@@ -1,3 +1,4 @@
+---@meta
 ----------------------------------------------------------------------------------------------------
 -- framework settings support -- inspired by flib
 ----------------------------------------------------------------------------------------------------
@@ -33,17 +34,11 @@ local loaded = {
    player = nil,
 }
 
----@class FrameworkSettings
----@field values table<string,(integer|boolean|double|string|Color)?>|table<string, table<string, (integer|boolean|double|string|Color)?>?>?
----@field load_value function(name: string, player_index: integer?): ModSetting?
----@field get_values function(self: FrameworkSettings, player_index: integer?): table<string, (integer|boolean|double|string|Color)?>
----@field set_values function(self: FrameworkSettings, values: table<string, (integer|boolean|double|string|Color)?>, player_index: integer?)
----@field clear function(self: FrameworkSettings, player_index: integer?)
-
 ---@type table<string, FrameworkSettings>
 local settings_table = {
    startup = {
       values = nil,
+      definitions = {},
       load_value = function(name) return settings.startup[name] end,
       get_values = function(self) return self.values end,
       set_values = function(self, values) self.values = values end,
@@ -52,6 +47,7 @@ local settings_table = {
 
    runtime = {
       values = nil,
+      definitions = {},
       load_value = function(name) return settings.global[name] end,
       get_values = function(self) return self.values end,
       set_values = function(self, values) self.values = values end,
@@ -60,6 +56,7 @@ local settings_table = {
 
    player = {
       values = {},
+      definitions = {},
       load_value = function(name, player_index)
          if player_index then
             return settings.get_player_settings(player_index)[name]

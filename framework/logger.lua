@@ -11,6 +11,7 @@ local dummy = function(...) end
 local default_logger = { log = log }
 
 --- Logging
+
 ---@class FrameworkLogger
 ---@field debug_mode boolean? If true, debug and debugf produce output lines
 ---@field core_logger table<string, any> The logging target

@@ -12,8 +12,8 @@ local Is = require('__stdlib__/stdlib/utils/is')
 local FrameworkGui = require('framework.gui')
 
 
---- @class FrameworkGuiManager
---- @field GUI_PREFIX string The prefix for all registered handlers and other global information.
+---@class FrameworkGuiManager
+---@field GUI_PREFIX string The prefix for all registered handlers and other global information.
 local FrameworkGuiManager = {
     GUI_PREFIX = Framework.PREFIX .. 'gui-',
 }
@@ -27,9 +27,7 @@ function FrameworkGuiManager:state()
     local storage = Framework.runtime:storage()
 
     if not storage.gui_manager then
-        ---@class FrameworkGuiManagerState
-        ---@field count integer running count of all known UIs
-        ---@field guis table<number, FrameworkGui> All registered and known guis for this manager.
+        ---@type FrameworkGuiManagerState
         storage.gui_manager = {
             count = 0,
             guis = {},
@@ -58,7 +56,7 @@ end
 function FrameworkGuiManager:dispatch(ev)
     if not ev then return false end
 
-    local elem = ev.element
+    local elem = ev.element --[[@as LuaGuiElement ]]
     if not Is.Valid(elem) then return false end
 
     -- see if this has the right tags
