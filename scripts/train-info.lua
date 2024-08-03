@@ -337,8 +337,10 @@ function Lti:update_delivery(lti_entity)
                     local signal_name = const.delivery_signals[lti_delivery.delivery_type]
 
                     table.insert(signals, { signal = { type = 'virtual', name = signal_name }, count = 1, index = idx })
-                    if lti_delivery.train_id then
-                        table.insert(signals, { signal = { type = 'virtual', name = 'signal-T' }, count = lti_delivery.train_id, index = idx + 1 })
+                    table.insert(signals, { signal = { type = 'virtual', name = 'signal-T' }, count = lti_delivery.train_id, index = idx + 1 })
+
+                    if delivery_cfg.signal_type ~= const.signal_type.one then
+                        table.insert(signals, { signal = { type = 'virtual', name = 'signal-D' }, count = lti_config.divide_by, index = idx + 2 })
                     end
                 end
             end
