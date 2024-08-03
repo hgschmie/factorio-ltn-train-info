@@ -402,6 +402,7 @@ onToggleEnable = function(event)
     local config = lti_entity.config[event.element.tags['config']]
 
     config.enabled = event.element.state
+    config.modified = true
 end
 
 --- @param event  EventData.on_gui_checked_state_changed
@@ -412,6 +413,7 @@ onRadioButtonQuantity = function(event)
     local config = lti_entity.config[event.element.tags['config']]
 
     config.signal_type = const.signal_type.quantity
+    config.modified = true
 end
 
 --- @param event  EventData.on_gui_checked_state_changed
@@ -422,6 +424,7 @@ onRadioButtonStackSize = function(event)
     local config = lti_entity.config[event.element.tags['config']]
 
     config.signal_type = const.signal_type.stack_size
+    config.modified = true
 end
 
 --- @param event  EventData.on_gui_checked_state_changed
@@ -432,6 +435,7 @@ onRadioButtonOne = function(event)
     local config = lti_entity.config[event.element.tags['config']]
 
     config.signal_type = const.signal_type.one
+    config.modified = true
 end
 
 --- @param event  EventData.on_gui_checked_state_changed
@@ -442,6 +446,7 @@ onToggleNegate = function(event)
     local config = lti_entity.config[event.element.tags['config']]
 
     config.negate = event.element.state
+    config.modified = true
 end
 
 
@@ -451,6 +456,7 @@ onToggleVirtual = function(event)
     if not lti_entity then return end
 
     lti_entity.config.virtual = event.element.state
+    lti_entity.config.modified = true
 end
 
 --- @param event  EventData.on_gui_value_changed
@@ -463,6 +469,7 @@ onDivideBySlider = function(event)
     value = math.min(const.divide_by_max, math.max(const.divide_by_min, value))
 
     lti_entity.config.divide_by = value
+    lti_entity.config.modified = true
 end
 
 --- @param event  EventData.on_gui_text_changed
@@ -475,8 +482,8 @@ onDivideByText = function(event)
     value = math.min(const.divide_by_max, math.max(const.divide_by_min, value))
 
     lti_entity.config.divide_by = value
+    lti_entity.config.modified = true
 end
-
 
 ----------------------------------------------------------------------------------------------------
 -- GUI state updater
@@ -553,8 +560,9 @@ gui_updater = function(ev, lti_gui)
     end
 
     if not (lti_gui.last_config and table.compare(lti_gui.last_config, lti_entity.config)) then
-        --         This.lti:reconfigure(lti_entity)
         update_gui_state(lti_gui.gui, lti_entity)
+        This.lti:update_delivery(lti_entity)
+        lti_entity.config.modified = false
         lti_gui.last_config = table.deepcopy(lti_entity.config)
     end
 end

@@ -34,6 +34,11 @@ Constants.signal_type = {
 
 Constants.delivery_type = table.array_to_dictionary({'src', 'dst'})
 
+Constants.delivery_signals = {
+    [Constants.delivery_type.src] = 'signal-S',
+    [Constants.delivery_type.dst] = 'signal-D',
+}
+
 --------------------------------------------------------------------------------
 -- Framework intializer
 --------------------------------------------------------------------------------

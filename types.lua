@@ -26,6 +26,12 @@
 ---@class TrainInfoData
 ---@field main LuaEntity
 ---@field config TrainInfoConfig
+---@field current_delivery TrainInfoDelivery?
+
+---@class TrainInfoDelivery
+---@field delivery_type string
+---@field shipment table<string, integer>
+---@field train_id integer
 
 ---@class TrainInfoDeliveryConfig
 ---@field enabled boolean
@@ -39,6 +45,7 @@
 ---@field virtual boolean
 ---@field divide_by integer
 ---@field stop_ids integer[]
+---@field modified boolean?
 
 ---@class LTNDelivery
 ---@field force LuaForce

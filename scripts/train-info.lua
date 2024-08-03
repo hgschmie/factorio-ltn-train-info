@@ -289,67 +289,62 @@ function Lti:delivery_failed(event)
     self:clear_delivery(event.train_id)
 end
 
-function Lti:update_delivery(entities, shipment, train_id, delivery_type)
-    for entity_id in pairs(entities) do
-        local lti_entity = self:entity(entity_id)
-        if lti_entity then
-            local control = lti_entity.main.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
-            if control then
-                ---@type ConstantCombinatorParameters[]
-                local signals = {}
-                local idx = 1
+function Lti:update_delivery(lti_entity)
+    local control = lti_entity.main.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
+    if control then
+        ---@type ConstantCombinatorParameters[]
+        local signals = {}
+        local idx = 1
 
-                local lti_config = lti_entity.config
-                control.enabled = lti_config.enabled
+        local lti_config = lti_entity.config
+        local lti_delivery = lti_entity.current_delivery
+        control.enabled = lti_config.enabled
 
-                if shipment then
-                    -- figure out which delivery config is responsible for the current delivery
-                    local delivery_cfg = lti_config[delivery_type] --[[@as TrainInfoDeliveryConfig ]]
+        if lti_delivery then
+            -- figure out which delivery config is responsible for the current delivery
+            local delivery_cfg = lti_config[lti_delivery.delivery_type] --[[@as TrainInfoDeliveryConfig ]]
 
-                    -- if not enabled, don't add any signals
-                    if delivery_cfg.enabled then
-                        -- add the shipping signals
-                        for type, quantity in pairs(shipment) do
-                            local fields = string.split(type, ',', false)
-                            -- default to 1
-                            local count = 1
-                            if delivery_cfg.signal_type == const.signal_type.stack_size and fields[1] == 'item' and game.item_prototypes[fields[2]] then
-                                -- if using stack size and element is an item, use the item stack size (fluids don't have a stack size)
-                                count = quantity / game.item_prototypes[fields[2]].stack_size
-                            elseif delivery_cfg.signal_type == const.signal_type.quantity then
-                                -- if quantity is desired, use the quantity
-                                count = quantity
-                            end
-
-                            count = count / lti_config.divide_by
-                            count = count * (delivery_cfg.negate and -1 or 1)
-
-                            table.insert(signals, {
-                                signal = {
-                                    type = fields[1],
-                                    name = fields[2]
-                                },
-                                count = count,
-                                index = idx
-                            })
-                            idx = idx + 1
-                        end
-
-                        -- add virtual signals
-                        if lti_config.virtual then
-                            local signal_name = (delivery_type == 'src') and 'signal-S' or 'signal-D'
-
-                            table.insert(signals, { signal = { type = 'virtual', name = signal_name }, count = 1, index = idx })
-                            if train_id then
-                                table.insert(signals, { signal = { type = 'virtual', name = 'signal-T' }, count = train_id, index = idx + 1 })
-                            end
-                        end
+            -- if not enabled, don't add any signals
+            if delivery_cfg.enabled then
+                -- add the shipping signals
+                for type, quantity in pairs(lti_delivery.shipment) do
+                    local fields = string.split(type, ',', false)
+                    -- default to 1
+                    local count = 1
+                    if delivery_cfg.signal_type == const.signal_type.stack_size and fields[1] == 'item' and game.item_prototypes[fields[2]] then
+                        -- if using stack size and element is an item, use the item stack size (fluids don't have a stack size)
+                        count = (quantity / game.item_prototypes[fields[2]].stack_size) / lti_config.divide_by
+                    elseif delivery_cfg.signal_type == const.signal_type.quantity then
+                        -- if quantity is desired, use the quantity
+                        count = quantity / lti_config.divide_by -- don't refactor this, the "1" for virtual signals must not be divided
                     end
+
+                    count = count * (delivery_cfg.negate and -1 or 1)
+
+                    table.insert(signals, {
+                        signal = {
+                            type = fields[1],
+                            name = fields[2]
+                        },
+                        count = count,
+                        index = idx
+                    })
+                    idx = idx + 1
                 end
 
-                control.parameters = signals
+                -- add virtual signals
+                if lti_config.virtual then
+                    local signal_name = const.delivery_signals[lti_delivery.delivery_type]
+
+                    table.insert(signals, { signal = { type = 'virtual', name = signal_name }, count = 1, index = idx })
+                    if lti_delivery.train_id then
+                        table.insert(signals, { signal = { type = 'virtual', name = 'signal-T' }, count = lti_delivery.train_id, index = idx + 1 })
+                    end
+                end
             end
         end
+
+        control.parameters = signals
     end
 end
 
@@ -363,8 +358,19 @@ function Lti:train_arrived(train)
     local delivery = self:delivery(train.id)
     if not delivery then return end
 
-    local delivery_type = (delivery.from_id == station_id) and const.delivery_type.src or const.delivery_type.dst
-    self:update_delivery(entities, delivery.shipment, train.id, delivery_type)
+    for entity_id in pairs(entities) do
+        local lti_entity = self:entity(entity_id)
+        if lti_entity then
+            ---@type TrainInfoDelivery
+            lti_entity.current_delivery = {
+                delivery_type = (delivery.from_id == station_id) and const.delivery_type.src or const.delivery_type.dst,
+                shipment = delivery.shipment,
+                train_id = train.id,
+            }
+
+            self:update_delivery(lti_entity)
+        end
+    end
 end
 
 function Lti:train_departed(train)
@@ -376,7 +382,14 @@ function Lti:train_departed(train)
     local entities = self:stop_entities(station_id)
     if not entities then return end
 
-    self:update_delivery(entities)
+    for entity_id in pairs(entities) do
+        local lti_entity = self:entity(entity_id)
+        if lti_entity then
+            lti_entity.current_delivery = nil
+        end
+
+        self:update_delivery(lti_entity)
+    end
 end
 
 ------------------------------------------------------------------------
