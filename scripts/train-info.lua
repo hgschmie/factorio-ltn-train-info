@@ -59,14 +59,19 @@ end
 -- attribute getters/setters
 ------------------------------------------------------------------------
 
+---@return LTNDelivery[] deliveries
 function Lti:deliveries()
     return global.lti_data.deliveries
 end
 
+---@param train_id integer
+---@return LTNDelivery?
 function Lti:delivery(train_id)
     return global.lti_data.deliveries[train_id]
 end
 
+---@param train_id integer
+---@param delivery LTNDelivery
 function Lti:set_delivery(train_id, delivery)
     if global.lti_data.deliveries[train_id] then
         Framework.logger:logf('[BUG] Overwriting existing delivery for train %d', train_id)
@@ -75,28 +80,41 @@ function Lti:set_delivery(train_id, delivery)
     global.lti_data.deliveries[train_id] = delivery
 end
 
+---@param train_id integer
 function Lti:clear_delivery(train_id)
     global.lti_data.deliveries[train_id] = nil
 end
 
 ------------------------------------------------------------------------
 
+---@param stop_id integer
+---@param entity_id integer?
 function Lti:add_stop_entity(stop_id, entity_id)
+    if not entity_id then return end
+    
     local stops = global.lti_data.stops[stop_id] or {}
     stops[entity_id] = true
     global.lti_data.stops[stop_id] = stops
 end
 
+---@param stop_id integer
+---@param entity_id integer?
 function Lti:remove_stop_entity(stop_id, entity_id)
+    if not entity_id then return end
+
     local stops = global.lti_data.stops[stop_id]
     if not stops then return end
     stops[entity_id] = nil
 end
 
+---@param stop_id integer
+---@return integer[] entity_ids
 function Lti:stop_entities(stop_id)
-    return global.lti_data.stops[stop_id]
+    local stops = global.lti_data.stops[stop_id] or {}
+    return stops
 end
 
+---@param stop_id integer
 function Lti:clear_stop_entities(stop_id)
     global.lti_data.stops[stop_id] = nil
 end
@@ -110,35 +128,70 @@ function Lti:entities()
 end
 
 --- Returns data for a given train info combinator.
----@param entity_id integer main unit number (== entity id)
+---@param entity_id integer? main unit number (== entity id)
 ---@return TrainInfoData? entity
 function Lti:entity(entity_id)
+    if not entity_id then return nil end
     return global.lti_data.lti[entity_id]
 end
 
---- Sets or clears a train info combinator entity
+--- Sets a train info combinator entity
 ---@param entity_id integer The unit_number of the combinator
 ---@param lti_entity TrainInfoData?
-function Lti:setEntity(entity_id, lti_entity)
-    if (lti_entity and global.lti_data.lti[entity_id]) then
+function Lti:set_entity(entity_id, lti_entity)
+    assert(lti_entity)
+
+    if (global.lti_data.lti[entity_id]) then
         Framework.logger:logf('[BUG] Overwriting existing lti_entity for unit %d', entity_id)
     end
 
     global.lti_data.lti[entity_id] = lti_entity
-    global.lti_data.count = global.lti_data.count + ((lti_entity and 1) or -1)
+    global.lti_data.count = global.lti_data.count + 1
+end
 
+---@param entity_id integer The unit_number of the combinator
+function Lti:clear_entity(entity_id)
+    global.lti_data.lti[entity_id] = nil
+    global.lti_data.count = global.lti_data.count - 1
     if global.lti_data.count < 0 then
         global.lti_data.count = table_size(global.lti_data.lti)
         Framework.logger:logf('Train Info count got negative (bug), size is now: %d', global.lti_data.count)
     end
 end
 
+------------------------------------------------------------------------
+
+---@param train_id integer
+---@param station_id integer
 function Lti:set_last_stop(train_id, station_id)
+    assert(station_id)
+
     global.last_stop[train_id] = station_id
 end
 
+---@param train_id integer
+function Lti:clear_last_stop(train_id)
+    global.last_stop[train_id] = nil
+end
+
+---@param train_id integer
+---@return integer? station_id
 function Lti:last_stop(train_id)
     return global.last_stop[train_id]
+end
+
+------------------------------------------------------------------------
+-- move
+------------------------------------------------------------------------
+
+---@param main LuaEntity
+function Lti:move(main)
+    if not Is.Valid(main) then return end
+
+    local lti_entity = self:entity(main.unit_number)
+    if not lti_entity then return end
+
+    self:update_status(main)
 end
 
 ------------------------------------------------------------------------
@@ -146,9 +199,9 @@ end
 ------------------------------------------------------------------------
 
 ---@param main LuaEntity
----@param player LuaPlayer
+---@param tags table<string, any>
 ---@return TrainInfoData?
-function Lti:create(main, player)
+function Lti:create(main, tags)
     if not Is.Valid(main) then return nil end
 
     local entity_id = main.unit_number --[[@as integer]]
@@ -157,42 +210,49 @@ function Lti:create(main, player)
 
     local lti_entity = {
         main = main,
-        config = self:get_new_config(),
+        config = tags and tags['lti_config'] or self:get_new_config(),
         stop_ids = {},
     }
 
-    self:setEntity(entity_id, lti_entity)
+    self:set_entity(entity_id, lti_entity)
 
-    self:update_status(entity_id, player)
+    self:update_status(main)
 
     return lti_entity
 end
 
+---@param entity_id integer
 function Lti:destroy(entity_id)
     local lti_entity = self:entity(entity_id)
     if not lti_entity then return end
 
-    self:setEntity(entity_id, nil)
+    self:clear_entity(entity_id)
 
     for _, stop_id in pairs(lti_entity.stop_ids) do
         self:remove_stop_entity(stop_id, entity_id)
     end
 end
 
-function Lti:createTrainStop(train_stop, player)
+------------------------------------------------------------------------
+-- manage related entities being created/destroyed
+------------------------------------------------------------------------
+
+---@param train_stop LuaEntity
+function Lti:createTrainStop(train_stop)
     local pos = Position.new(train_stop.position)
 
-    local entities = player.surface.find_entities_filtered {
+    local entities = train_stop.surface.find_entities_filtered {
         area = pos:expand_to_area(const.lti_range + 0.5),
-        force = player.force,
+        force = train_stop.force,
         name = const.lti_train_info,
     }
 
     for _, entity in pairs(entities) do
-        self:update_status(entity.unit_number, player)
+        self:update_status(entity)
     end
 end
 
+---@param train_stop_id integer
 function Lti:deleteTrainStop(train_stop_id)
     local lti_entity_ids = self:stop_entities(train_stop_id)
     if not lti_entity_ids then return end
@@ -203,7 +263,7 @@ function Lti:deleteTrainStop(train_stop_id)
             for idx, stop_id in pairs(lti_entity.stop_ids) do
                 if train_stop_id == stop_id then
                     table.remove(lti_entity.stop_ids, idx)
-                    self:update_status(lti_entity_id)
+                    self:update_status(lti_entity.main)
                 end
             end
         end
@@ -212,38 +272,44 @@ function Lti:deleteTrainStop(train_stop_id)
     self:clear_stop_entities(train_stop_id)
 end
 
-function Lti:update_status(entity_id, player)
+------------------------------------------------------------------------
+-- status control
+------------------------------------------------------------------------
+
+---@param entity LuaEntity
+function Lti:update_status(entity)
+    if not entity then return end
+
+    local entity_id = entity.unit_number
     local lti_entity = self:entity(entity_id)
     if not lti_entity then return end
 
-    if player then
-        -- unregister existing stops
-        for _, stop_id in pairs(lti_entity.stop_ids) do
-            self:remove_stop_entity(stop_id, entity_id)
-        end
+    -- unregister existing stops
+    for _, stop_id in pairs(lti_entity.stop_ids) do
+        self:remove_stop_entity(stop_id, entity_id)
+    end
 
-        local pos = Position.new(lti_entity.main.position)
+    local pos = Position.new(lti_entity.main.position)
 
-        local train_stops = player.surface.find_entities_filtered {
-            area = pos:expand_to_area(const.lti_range),
-            force = player.force,
-            type = 'train-stop',
-        }
+    local train_stops = entity.surface.find_entities_filtered {
+        area = pos:expand_to_area(const.lti_range),
+        force = entity.force,
+        type = 'train-stop',
+    }
 
-        -- re-register newly found stops
-        local stop_ids = {}
+    -- re-register newly found stops
+    local stop_ids = {}
 
-        if table_size(train_stops) > 0 then
-            for _, train_stop in pairs(train_stops) do
-                if const.lti_train_stops[train_stop.name] then
-                    table.insert(stop_ids, train_stop.unit_number)
-                    self:add_stop_entity(train_stop.unit_number, entity_id)
-                end
+    if table_size(train_stops) > 0 then
+        for _, train_stop in pairs(train_stops) do
+            if const.lti_train_stops[train_stop.name] then
+                table.insert(stop_ids, train_stop.unit_number)
+                self:add_stop_entity(train_stop.unit_number, entity_id)
             end
         end
-
-        lti_entity.stop_ids = stop_ids
     end
+
+    lti_entity.stop_ids = stop_ids
 
     lti_entity.config.enabled = (#lti_entity.stop_ids > 0) and true or false
     lti_entity.config.modified = true
@@ -251,45 +317,7 @@ function Lti:update_status(entity_id, player)
     self:update_delivery(lti_entity)
 end
 
-------------------------------------------------------------------------
--- move
-------------------------------------------------------------------------
-
-function Lti:move(main, start_pos, player)
-    if not Is.Valid(main) then return end
-
-    local lti_entity = self:entity(main.unit_number)
-    if not lti_entity then return end
-
-    self:update_status(main.unit_number, player)
-end
-
-------------------------------------------------------------------------
--- event callbacks
-------------------------------------------------------------------------
-
-function Lti:dispatcher_updated(event)
-    if table_size(self:deliveries()) == 0 then
-        -- load all deliveries
-        for train_id, delivery in pairs(event.deliveries) do
-            self:set_delivery(train_id, delivery)
-        end
-    else
-        -- only load new deliveries
-        for _, train_id in pairs(event.new_deliveries) do
-            self:set_delivery(train_id, event.deliveries[train_id])
-        end
-    end
-end
-
-function Lti:delivery_completed(event)
-    self:clear_delivery(event.train_id)
-end
-
-function Lti:delivery_failed(event)
-    self:clear_delivery(event.train_id)
-end
-
+---@param lti_entity TrainInfoData
 function Lti:update_delivery(lti_entity)
     local control = lti_entity.main.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
     if control then
@@ -351,8 +379,43 @@ function Lti:update_delivery(lti_entity)
     end
 end
 
+------------------------------------------------------------------------
+-- event callbacks
+------------------------------------------------------------------------
+
+---@param event LTNDispatcherUpdatedEvent
+function Lti:dispatcher_updated(event)
+    if table_size(self:deliveries()) == 0 then
+        -- load all deliveries
+        for train_id, delivery in pairs(event.deliveries) do
+            self:set_delivery(train_id, delivery)
+        end
+    else
+        -- only load new deliveries
+        for _, train_id in pairs(event.new_deliveries) do
+            local delivery = event.deliveries[train_id]
+            if delivery then
+                self:set_delivery(train_id, delivery)
+            end
+        end
+    end
+end
+
+---@param event LTNOnDeliveryCompleted
+function Lti:delivery_completed(event)
+    self:clear_delivery(event.train_id)
+end
+
+---@param event LTNOnDeliveryFailed
+function Lti:delivery_failed(event)
+    self:clear_delivery(event.train_id)
+end
+
+---@param train LuaTrain
 function Lti:train_arrived(train)
     local station_id = train.station.unit_number
+    if not station_id then return end
+
     self:set_last_stop(train.id, station_id)
 
     local entities = self:stop_entities(station_id)
@@ -376,11 +439,12 @@ function Lti:train_arrived(train)
     end
 end
 
+---@param train LuaTrain
 function Lti:train_departed(train)
     local station_id = self:last_stop(train.id)
     if not station_id then return end
     -- consume the event
-    self:set_last_stop(train.id)
+    self:clear_last_stop(train.id)
 
     local entities = self:stop_entities(station_id)
     if not entities then return end
@@ -389,9 +453,8 @@ function Lti:train_departed(train)
         local lti_entity = self:entity(entity_id)
         if lti_entity then
             lti_entity.current_delivery = nil
+            self:update_delivery(lti_entity)
         end
-
-        self:update_delivery(lti_entity)
     end
 end
 

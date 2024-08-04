@@ -7,14 +7,17 @@ local const = require('lib.constants')
 local LogisticsTrainNetwork = {}
 --------------------------------------------------------------------------------
 
+---@param event LTNDispatcherUpdatedEvent
 local function lti_dispatcher_updated(event)
     This.lti:dispatcher_updated(event)
 end
 
+---@param event LTNOnDeliveryCompleted
 local function lti_delivery_completed(event)
     This.lti:delivery_completed(event)
 end
 
+---@param event LTNOnDeliveryFailed
 local function lti_delivery_failed(event)
     This.lti:delivery_failed(event)
 end
@@ -38,6 +41,5 @@ LogisticsTrainNetwork.runtime = function()
     Event.on_init(ltn_init)
     Event.on_load(ltn_init)
 end
-
 
 return LogisticsTrainNetwork

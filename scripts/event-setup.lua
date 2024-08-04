@@ -5,6 +5,7 @@
 local Event = require('__stdlib__/stdlib/event/event')
 local Is = require('__stdlib__/stdlib/utils/is')
 local Player = require('__stdlib__/stdlib/event/player')
+local table = require('__stdlib__/stdlib/utils/table')
 
 local Util = require('framework.util')
 
@@ -38,9 +39,8 @@ local function onEntityCreated(event)
         player_index = player_index or entity_ghost.player_index
     end
 
-    local player = Player.get(player_index)
-
-    This.lti:create(entity, player)
+    local tags = {}
+    This.lti:create(entity, tags)
 end
 
 ---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_entity_died | EventData.script_raised_destroy
@@ -73,9 +73,7 @@ local function onTrainStopCreated(event)
         player_index = player_index or entity_ghost.player_index
     end
 
-    local player = Player.get(player_index)
-
-    This.lti:createTrainStop(entity, player)
+    This.lti:createTrainStop(entity)
 end
 
 
@@ -85,6 +83,41 @@ local function onTrainStopDeleted(event)
     if not entity then return end
 
     This.lti:deleteTrainStop(entity.unit_number)
+end
+
+--------------------------------------------------------------------------------
+-- Entity cloning
+--------------------------------------------------------------------------------
+
+--- @param event EventData.on_entity_cloned
+local function onEntityCloned(event)
+    if not (Is.Valid(event.source) and Is.Valid(event.destination)) then return end
+
+    local src_entity = This.lti:entity(event.source.unit_number)
+    if not src_entity then return end
+
+    local tags = { lti_config = src_entity.config } -- clone the config from the src to the destination
+
+    This.lti:create(event.destination, tags)
+end
+
+--------------------------------------------------------------------------------
+-- Entity settings pasting
+--------------------------------------------------------------------------------
+
+--- @param event EventData.on_entity_settings_pasted
+local function onEntitySettingsPasted(event)
+    local player = Player.get(event.player_index)
+
+    if not (Is.Valid(player) and player.force == event.source.force and player.force == event.destination.force) then return end
+
+    local src_entity = This.lti:entity(event.source.unit_number)
+    local dst_entity = This.lti:entity(event.destination.unit_number)
+
+    if not (src_entity and dst_entity) then return end
+
+    dst_entity.config = table.deepcopy(src_entity.config)
+    This.lti:update_status(src_entity.main)
 end
 
 --------------------------------------------------------------------------------
@@ -109,6 +142,7 @@ end
 -- Train code
 --------------------------------------------------------------------------------
 
+---@param event EventData.on_train_changed_state
 local function onTrainChangedState(event)
     local train = event.train
     if train.state == defines.train_state.wait_station then
@@ -149,3 +183,9 @@ Framework.ghost_manager.register_for_ghost_attributes('ghost_type', 'train-stop'
 
 -- entity destroy
 Event.register(defines.events.on_entity_destroyed, onEntityDestroyed)
+
+-- Entity settings pasting
+Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, lti_entity_filter)
+
+-- Entity cloning
+Event.register(defines.events.on_entity_cloned, onEntityCloned, lti_entity_filter)

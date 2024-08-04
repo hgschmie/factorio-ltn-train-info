@@ -19,9 +19,7 @@ PickerDolliesSupport.runtime = function()
     local picker_dollies_moved = function(event)
         if not Is.Valid(event.moved_entity) then return end
         if event.moved_entity.name ~= const.lti_train_info then return end
-
-        local player = Player.get(event.player_index)
-        This.lti:move(event.moved_entity, event.start_pos, player)
+        This.lti:move(event.moved_entity)
     end
 
     local picker_dollies_init = function()

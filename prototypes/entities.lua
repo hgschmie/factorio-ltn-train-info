@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Prototype for the optical connector
+-- Prototype for the LTN train info combinator
 ------------------------------------------------------------------------
 
 local const = require('lib.constants')

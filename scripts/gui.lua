@@ -12,7 +12,7 @@ local Util = require('framework.util')
 
 local const = require('lib.constants')
 
---- @class ModGui
+---@class ModGui
 local ModGui = {}
 
 -- callback predefines
@@ -583,7 +583,7 @@ local function onGuiOpened(event)
     onWindowClosed(event)
 
     local entity = event and event.entity --[[@as LuaEntity]]
-    local entity_id = entity.unit_number --[[@as integer]]
+    local entity_id = entity.unit_number
     local lti_entity = This.lti:entity(entity_id)
 
     if not lti_entity then
