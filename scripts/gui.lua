@@ -123,14 +123,12 @@ local function get_ui(lti_entity)
                     },
                     {
                         type = 'frame',
-                        style = const:with_prefix('delivery-settings'),
+                        style = const:with_prefix('gui-frame'),
                         caption = { const:locale('provide') },
                         children = { -- provide settings
                             type = 'table',
+                            style = const:with_prefix('delivery-settings-table'),
                             column_count = 3,
-                            style_mods = {
-                                vertical_align = 'center',
-                            },
                             children = {
                                 {
                                     type = 'flow',
@@ -147,12 +145,8 @@ local function get_ui(lti_entity)
                                 },
                                 {
                                     type = 'flow',
+                                    style = const:with_prefix('delivery-settings-radiobutton-flow'),
                                     direction = 'vertical',
-                                    style_mods = {
-                                        vertical_align = 'center',
-                                        left_padding = 10,
-                                        right_padding = 10,
-                                    },
                                     children = {
                                         {
                                             type = 'radiobutton',
@@ -197,15 +191,12 @@ local function get_ui(lti_entity)
                     },
                     {
                         type = 'frame',
-                        style = const:with_prefix('delivery-settings'),
+                        style = const:with_prefix('gui-frame'),
                         caption = { const:locale('request') },
                         children = { -- request settings
                             type = 'table',
+                            style = const:with_prefix('delivery-settings-table'),
                             column_count = 3,
-                            -- style = 'bordered_table',
-                            style_mods = {
-                                vertical_align = 'center',
-                            },
                             children = {
                                 {
                                     type = 'flow',
@@ -222,12 +213,8 @@ local function get_ui(lti_entity)
                                 },
                                 {
                                     type = 'flow',
+                                    style = const:with_prefix('delivery-settings-radiobutton-flow'),
                                     direction = 'vertical',
-                                    style_mods = {
-                                        vertical_align = 'center',
-                                        left_padding = 10,
-                                        right_padding = 10,
-                                    },
                                     children = {
                                         {
                                             type = 'radiobutton',
@@ -272,76 +259,52 @@ local function get_ui(lti_entity)
                     },
                     {
                         type = 'frame',
-                        style = 'container_invisible_frame_with_title',
+                        style = const:with_prefix('gui-frame'),
                         caption = { const:locale('settings') },
-                        style_mods = {
-                            top_padding = 10,
-                        },
-                        children = { -- settings
-                            {
-                                type = 'frame',
-                                style = 'invisible_frame',
-                                style_mods = {
-                                    top_padding = 10,
+                        children = {
+                            type = 'frame',
+                            style = 'invisible_frame',
+                            direction = 'vertical',
+                            children = {
+                                {     -- add virtual signals
+                                    type = 'checkbox',
+                                    caption = { const:locale('virtual') },
+                                    name = 'virtual',
+                                    handler = { [defines.events.on_gui_checked_state_changed] = onToggleVirtual },
+                                    state = false,
                                 },
-                                direction = 'vertical',
-                                children = {
-                                    { -- add virtual signals
-                                        type = 'checkbox',
-                                        caption = { const:locale('virtual') },
-                                        name = 'virtual',
-                                        handler = { [defines.events.on_gui_checked_state_changed] = onToggleVirtual },
-                                        state = false,
-                                    },
-                                    { -- divider
-                                        type = 'flow',
-                                        direction = 'horizontal',
-                                        style_mods = {
-                                            vertical_align = 'center',
+                                {     -- divider
+                                    type = 'flow',
+                                    style = const:with_prefix('divide-flow'),
+                                    direction = 'horizontal',
+                                    children = {
+                                        {
+                                            type = 'label',
+                                            style = const:with_prefix('settings-divide-label'),
+                                            caption = { const:locale('divide') },
                                         },
-                                        children = {
-                                            {
-                                                type = 'label',
-                                                style = 'label',
-                                                caption = { const:locale('divide') },
-                                                style_mods = {
-                                                    vertical_align = 'center',
-                                                    right_padding = 10,
-                                                },
-                                            },
-                                            {
-                                                type = 'slider',
-                                                name = 'divide_by_slider',
-                                                style_mods = {
-                                                    minimal_width = 80,
-                                                    horizontally_stretchable = false,
-                                                    vertical_align = 'center',
-                                                    right_padding = 5,
-                                                },
-                                                minimum_value = 1,
-                                                maximum_value = 20,
-                                                handler = { [defines.events.on_gui_value_changed] = onDivideBySlider, }
-                                            },
-                                            {
-                                                type = 'textfield',
-                                                name = 'divide_by_text',
-                                                style_mods = {
-                                                    vertical_align = 'center',
-                                                    minimal_width = 40,
-                                                    maximal_width = 40,
-                                                    horizontally_stretchable = false,
-                                                },
-                                                numeric = true,
-                                                allow_negative = false,
-                                                allow_decimal = true,
-                                                lose_focus_on_confirm = true,
-                                                clear_and_focus_on_right_click = true,
-                                                handler = { [defines.events.on_gui_confirmed] = onDivideByText, },
-                                            },
-                                            {
-                                                type = 'empty-widget',
-                                                style = 'framework_horizontal_pusher',
-                                            },
+                                        {
+                                            type = 'slider',
+                                            style = const:with_prefix('divide-slider'),
+                                            name = 'divide_by_slider',
+                                            minimum_value = 1,
+                                            maximum_value = 20,
+                                            handler = { [defines.events.on_gui_value_changed] = onDivideBySlider, }
+                                        },
+                                        {
+                                            type = 'textfield',
+                                            style = const:with_prefix('divide-text'),
+                                            name = 'divide_by_text',
+                                            numeric = true,
+                                            allow_negative = false,
+                                            allow_decimal = true,
+                                            lose_focus_on_confirm = true,
+                                            clear_and_focus_on_right_click = true,
+                                            handler = { [defines.events.on_gui_confirmed] = onDivideByText, },
+                                        },
+                                        {
+                                            type = 'empty-widget',
+                                            style = 'framework_horizontal_pusher',
                                         },
                                     },
                                 },
@@ -353,12 +316,9 @@ local function get_ui(lti_entity)
                     },
                     {
                         type = 'frame',
-                        style = 'container_invisible_frame_with_title',
+                        style = const:with_prefix('gui-frame'),
                         caption = { const:locale('signals-heading') },
-                        style_mods = {
-                            top_padding = 10,
-                        },
-                        children =  {
+                        children = {
                             type = 'table',
                             name = 'signals',
                             column_count = 10,
