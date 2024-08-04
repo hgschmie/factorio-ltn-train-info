@@ -25,6 +25,7 @@ local Is = require('__stdlib__/stdlib/utils/is')
 ---@field runtime FrameworkRuntime?
 ---@field gui_manager FrameworkGuiManager?
 ---@field ghost_manager FrameworkGhostManager?
+---@field blueprint FrameworkBlueprintManager?
 ---@field remote_api table<string, function>?
 ---@field render FrameworkRender?
 Framework = {
@@ -54,6 +55,8 @@ Framework = {
     gui_manager = nil,
 
     ghost_manager = nil,
+
+    blueprint = nil,
 
     remote_api = nil,
 
@@ -89,6 +92,7 @@ function Framework:init(config)
 
         self.gui_manager = require('framework.gui_manager')
         self.ghost_manager = require('framework.ghost_manager')
+        self.blueprint = require('framework.blueprint_manager')
 
         self.render = require('framework.render')
 

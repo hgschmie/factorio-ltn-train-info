@@ -33,13 +33,14 @@ local function onEntityCreated(event)
     script.register_on_entity_destroyed(entity)
 
     local player_index = event.player_index
+    local tags = event.tags
 
     local entity_ghost = Framework.ghost_manager:findMatchingGhost(entity)
     if entity_ghost then
         player_index = player_index or entity_ghost.player_index
+        tags = tags or entity_ghost.tags
     end
 
-    local tags = {}
     This.lti:create(entity, tags)
 end
 
@@ -153,6 +154,7 @@ local function onTrainChangedState(event)
     end
 end
 
+
 --------------------------------------------------------------------------------
 -- Event registration
 --------------------------------------------------------------------------------
@@ -180,6 +182,9 @@ Util.event_register(Util.CREATION_EVENTS, onTrainStopCreated, train_stop_filter)
 -- manage ghost building (robot building) Register all ghosts we are interested in
 Framework.ghost_manager.register_for_ghost_names(const.lti_train_info)
 Framework.ghost_manager.register_for_ghost_attributes('ghost_type', 'train-stop')
+
+-- Manage blueprint configuration setting
+Framework.blueprint:register_callback(const.lti_train_info, This.lti.blueprint_callback)
 
 -- entity destroy
 Event.register(defines.events.on_entity_destroyed, onEntityDestroyed)

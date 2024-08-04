@@ -91,7 +91,7 @@ end
 ---@param entity_id integer?
 function Lti:add_stop_entity(stop_id, entity_id)
     if not entity_id then return end
-    
+
     local stops = global.lti_data.stops[stop_id] or {}
     stops[entity_id] = true
     global.lti_data.stops[stop_id] = stops
@@ -270,6 +270,22 @@ function Lti:deleteTrainStop(train_stop_id)
     end
 
     self:clear_stop_entities(train_stop_id)
+end
+
+--------------------------------------------------------------------------------
+-- Blueprint
+--------------------------------------------------------------------------------
+
+---@param blueprint LuaItemStack
+---@param idx integer
+---@param entity LuaEntity
+function Lti.blueprint_callback(blueprint, idx, entity)
+    if not Is.Valid(entity) then return end
+
+    local lti_entity = This.lti:entity(entity.unit_number)
+    if not lti_entity then return end
+
+    blueprint.set_blueprint_entity_tag(idx, 'lti_config', lti_entity.config)
 end
 
 ------------------------------------------------------------------------

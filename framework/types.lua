@@ -89,10 +89,10 @@
 
 ---@class FrameworkSettings
 ---@field values table<string,(integer|boolean|double|string|Color)?>|table<string, table<string, (integer|boolean|double|string|Color)?>?>?
----@field load_value function(name: string, player_index: integer?): ModSetting?
----@field get_values function(self: FrameworkSettings, player_index: integer?): table<string, (integer|boolean|double|string|Color)?>
----@field set_values function(self: FrameworkSettings, values: table<string, (integer|boolean|double|string|Color)?>, player_index: integer?)
----@field clear function(self: FrameworkSettings, player_index: integer?)
+---@field load_value fun(name: string, player_index: integer?): ModSetting?
+---@field get_values fun(self: FrameworkSettings, player_index: integer?): table<string, (integer|boolean|double|string|Color)?>
+---@field set_values fun(self: FrameworkSettings, values: table<string, (integer|boolean|double|string|Color)?>, player_index: integer?)
+---@field clear fun(self: FrameworkSettings, player_index: integer?)
 
 ----------------------------------------------------------------------------------------------------
 --- util.lua
