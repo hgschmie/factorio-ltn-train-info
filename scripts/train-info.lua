@@ -334,14 +334,15 @@ function Lti:update_status(entity)
 end
 
 ---@param lti_entity TrainInfoData
+---@return ConstantCombinatorParameters[] signals
 function Lti:update_delivery(lti_entity)
+    ---@type ConstantCombinatorParameters[]
+    local signals = {}
+    local idx = 1
+
+    local lti_config = lti_entity.config
     local control = lti_entity.main.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
     if control then
-        ---@type ConstantCombinatorParameters[]
-        local signals = {}
-        local idx = 1
-
-        local lti_config = lti_entity.config
         local lti_delivery = lti_entity.current_delivery
         control.enabled = lti_config.enabled
 
@@ -382,10 +383,14 @@ function Lti:update_delivery(lti_entity)
                     local signal_name = const.delivery_signals[lti_delivery.delivery_type]
 
                     table.insert(signals, { signal = { type = 'virtual', name = signal_name }, count = 1, index = idx })
-                    table.insert(signals, { signal = { type = 'virtual', name = 'signal-T' }, count = lti_delivery.train_id, index = idx + 1 })
+                    idx = idx + 1
+
+                    table.insert(signals, { signal = { type = 'virtual', name = 'signal-T' }, count = lti_delivery.train_id, index = idx })
+                    idx = idx + 1
 
                     if delivery_cfg.signal_type ~= const.signal_type.one then
-                        table.insert(signals, { signal = { type = 'virtual', name = 'signal-D' }, count = lti_config.divide_by, index = idx + 2 })
+                        table.insert(signals, { signal = { type = 'virtual', name = 'signal-D' }, count = lti_config.divide_by, index = idx })
+                        idx = idx + 1
                     end
                 end
             end
@@ -393,6 +398,9 @@ function Lti:update_delivery(lti_entity)
 
         control.parameters = signals
     end
+
+    lti_config.modified = true
+    return signals
 end
 
 ------------------------------------------------------------------------

@@ -134,9 +134,6 @@ local function onConfigurationChanged(changed)
             force.recipes[const.lti_train_info].enabled = true
         end
     end
-
-    -- for _, lti_entity in pairs(This.lti:entities()) do
-    -- end
 end
 
 --------------------------------------------------------------------------------

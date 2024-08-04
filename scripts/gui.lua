@@ -348,6 +348,22 @@ local function get_ui(lti_entity)
                             },
                         },
                     },
+                    {
+                        type = 'line',
+                    },
+                    {
+                        type = 'frame',
+                        style = 'container_invisible_frame_with_title',
+                        caption = { const:locale('signals-heading') },
+                        style_mods = {
+                            top_padding = 10,
+                        },
+                        children =  {
+                            type = 'table',
+                            name = 'signals',
+                            column_count = 10,
+                        },
+                    }
                 },
             },
         },
@@ -493,24 +509,24 @@ end
 ---@param type string
 ---@param cfg TrainInfoDeliveryConfig
 local function update_gui_delivery(gui, type, cfg)
-    local delivery = gui:find_element('delivery-'.. type)
+    local delivery = gui:find_element('delivery-' .. type)
     delivery.state = cfg.enabled
 
-    local quantity = gui:find_element('signal-type-quantity-'.. type)
-    local stacksize = gui:find_element('signal-type-stacksize-'.. type)
-    local one = gui:find_element('signal-type-one-'.. type)
+    local quantity = gui:find_element('signal-type-quantity-' .. type)
+    local stacksize = gui:find_element('signal-type-stacksize-' .. type)
+    local one = gui:find_element('signal-type-one-' .. type)
 
     quantity.state = cfg.signal_type == const.signal_type.quantity
     stacksize.state = cfg.signal_type == const.signal_type.stack_size
     one.state = cfg.signal_type == const.signal_type.one
 
-    local negate = gui:find_element('negate-'.. type)
+    local negate = gui:find_element('negate-' .. type)
     negate.state = cfg.negate
 end
 
 ---@param gui FrameworkGui
 ---@param lti_entity TrainInfoData?
-update_gui_state = function(gui, lti_entity)
+update_gui_state = function(gui, lti_entity, signals)
     if not lti_entity then return end
 
     local lti_config = lti_entity.config
@@ -546,6 +562,19 @@ update_gui_state = function(gui, lti_entity)
     local divide_by_text = gui:find_element('divide_by_text')
     divide_by_text.text = tostring(lti_config.divide_by)
 
+    local signal_table = gui:find_element('signals')
+    signal_table.clear()
+
+    for idx, s in pairs(signals) do
+        local sprite_type = s.signal.type == 'virtual' and 'virtual-signal' or s.signal.type
+
+        signal_table.add {
+            type = 'sprite-button',
+            sprite = sprite_type .. '/' .. s.signal['name'],
+            number = s.count,
+        }
+    end
+
     lti_config.modified = false
 end
 
@@ -562,8 +591,8 @@ gui_updater = function(ev, lti_gui)
     end
 
     if not (lti_gui.last_config and table.compare(lti_gui.last_config, lti_entity.config)) then
-        update_gui_state(lti_gui.gui, lti_entity)
-        This.lti:update_delivery(lti_entity)
+        local signals = This.lti:update_delivery(lti_entity)
+        update_gui_state(lti_gui.gui, lti_entity, signals)
         lti_gui.last_config = table.deepcopy(lti_entity.config)
     end
 end
