@@ -1,0 +1,11 @@
+# LTN Train Information combinator
+
+Provides information about [Logistic Train Network (LTN)](https://mods.factorio.com/mod/LogisticTrainNetwork) deliveries to the logistic network:
+
+- An signal for each item in a delivery. Can be quantity, stack count or just '1'.
+- Virtual signals to denote whether the connected station is the requester or the provider of the delivery
+- Delivery signals can be negated or divided by a constant.
+- Signals can be configured separately for Requester and Provider.
+
+Signals always reflect the delivery as scheduled by the LTN, not the inventory of the train.
+

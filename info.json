@@ -1,8 +1,8 @@
 {
   "name": "ltn-train-info",
   "version": "0.0.1",
-  "title": "LTN Train information",
-  "description": "Returns information about trains scheduled for a stop.",
+  "title": "LTN Train Information combinator",
+  "description": "Provides LTN delivery signals to the logistic network",
   "author": "hgschmie",
   "contact": "https://github.com/hgschmie/factorio-ltn-train-info/issues",
   "homepage": "https://github.com/hgschmie/factorio-ltn-train-info",
@@ -12,5 +12,11 @@
     "stdlib >= 1.4.0",
     "LogisticTrainNetwork > 1.18.0",
     "? PickerDollies"
-  ]
+  ],
+  "package": {
+    "git_publish_branch": "main",
+    "readme": ".portal/README",
+    "gallery": [  ],
+    "sync_portal_details": true
+  }
 }
