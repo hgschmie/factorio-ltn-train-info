@@ -137,7 +137,8 @@ local function get_ui(lti_entity)
                                         type = 'checkbox',
                                         name = 'delivery-provide',
                                         elem_tags = { config = const.delivery_type.provide },
-                                        caption = { const:locale('enabled') },
+                                        caption = { "", { const:locale('enabled') }, ' [img=info]' },
+                                        tooltip = { const:locale('enabled-description') },
                                         handler = { [defines.events.on_gui_checked_state_changed] = onToggleEnable },
                                         state = false,
                                         text_padding = 0,
@@ -150,7 +151,8 @@ local function get_ui(lti_entity)
                                     children = {
                                         {
                                             type = 'radiobutton',
-                                            caption = { const:locale('signal-type-quantity') },
+                                            caption = { "", {  const:locale('signal-type-quantity') }, ' [img=info]' },
+                                            tooltip = { const:locale('signal-type-quantity-description') },
                                             name = 'signal-type-quantity-provide',
                                             elem_tags = { config = const.delivery_type.provide },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonQuantity },
@@ -158,7 +160,8 @@ local function get_ui(lti_entity)
                                         },
                                         {
                                             type = 'radiobutton',
-                                            caption = { const:locale('signal-type-stacksize') },
+                                            caption = { "", {  const:locale('signal-type-stacksize') }, ' [img=info]' },
+                                            tooltip = { const:locale('signal-type-stacksize-description') },
                                             name = 'signal-type-stacksize-provide',
                                             elem_tags = { config = const.delivery_type.provide },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonStackSize },
@@ -180,7 +183,8 @@ local function get_ui(lti_entity)
                                     elem_tags = { config = const.delivery_type.provide },
                                     handler = { [defines.events.on_gui_checked_state_changed] = onToggleNegate },
                                     state = false,
-                                    caption = { const:locale('negate') },
+                                    caption = { "", {  const:locale('negate') }, ' [img=info]' },
+                                    tooltip = { const:locale('negate-description') },
                                     text_padding = 0,
                                 },
                             }
@@ -205,7 +209,8 @@ local function get_ui(lti_entity)
                                         type = 'checkbox',
                                         name = 'delivery-request',
                                         elem_tags = { config = const.delivery_type.request },
-                                        caption = { const:locale('enabled') },
+                                        caption = { "", {  const:locale('enabled') }, ' [img=info]' },
+                                        tooltip = { const:locale('enabled-description') },
                                         handler = { [defines.events.on_gui_checked_state_changed] = onToggleEnable },
                                         state = false,
                                         text_padding = 0,
@@ -218,7 +223,8 @@ local function get_ui(lti_entity)
                                     children = {
                                         {
                                             type = 'radiobutton',
-                                            caption = { const:locale('signal-type-quantity') },
+                                            caption = { "", {  const:locale('signal-type-quantity') }, ' [img=info]' },
+                                            tooltip = { const:locale('signal-type-quantity-description') },
                                             name = 'signal-type-quantity-request',
                                             elem_tags = { config = const.delivery_type.request },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonQuantity },
@@ -226,7 +232,8 @@ local function get_ui(lti_entity)
                                         },
                                         {
                                             type = 'radiobutton',
-                                            caption = { const:locale('signal-type-stacksize') },
+                                            caption = { "", {  const:locale('signal-type-stacksize') }, ' [img=info]' },
+                                            tooltip = { const:locale('signal-type-stacksize-description') },
                                             name = 'signal-type-stacksize-request',
                                             elem_tags = { config = const.delivery_type.request },
                                             handler = { [defines.events.on_gui_checked_state_changed] = onRadioButtonStackSize },
@@ -248,7 +255,8 @@ local function get_ui(lti_entity)
                                     elem_tags = { config = const.delivery_type.request },
                                     handler = { [defines.events.on_gui_checked_state_changed] = onToggleNegate },
                                     state = false,
-                                    caption = { const:locale('negate') },
+                                    caption = { "", {  const:locale('negate') }, ' [img=info]' },
+                                    tooltip = { const:locale('negate-description') },
                                     text_padding = 0,
                                 },
                             }
@@ -266,14 +274,15 @@ local function get_ui(lti_entity)
                             style = 'invisible_frame',
                             direction = 'vertical',
                             children = {
-                                {     -- add virtual signals
+                                { -- add virtual signals
                                     type = 'checkbox',
-                                    caption = { const:locale('virtual') },
+                                    caption = { "", {  const:locale('virtual') }, ' [img=info]' },
+                                    tooltip = { const:locale('virtual-description') },
                                     name = 'virtual',
                                     handler = { [defines.events.on_gui_checked_state_changed] = onToggleVirtual },
                                     state = false,
                                 },
-                                {     -- divider
+                                { -- divider
                                     type = 'flow',
                                     style = const:with_prefix('divide-flow'),
                                     direction = 'horizontal',
@@ -281,7 +290,8 @@ local function get_ui(lti_entity)
                                         {
                                             type = 'label',
                                             style = const:with_prefix('settings-divide-label'),
-                                            caption = { const:locale('divide') },
+                                            caption = { "", {  const:locale('divide') }, ' [img=info]' },
+                                            tooltip = { const:locale('divide-description') },
                                         },
                                         {
                                             type = 'slider',
