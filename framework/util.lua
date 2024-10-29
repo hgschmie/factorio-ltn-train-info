@@ -78,7 +78,7 @@ local function create_matcher(values, entity_matcher)
             return matcher_map[entity_matcher(event.source, pattern)] and matcher_map[entity_matcher(event.destination, pattern)]
         end
 
-        return matcher_map[entity_matcher(event.created_entity or event.entity, pattern)]
+        return matcher_map[entity_matcher(event.entity, pattern)]
     end
 end
 

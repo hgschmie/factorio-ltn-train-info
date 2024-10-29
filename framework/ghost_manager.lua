@@ -11,7 +11,7 @@ local Util = require('framework.util')
 ---@class FrameworkGhostManager
 local FrameworkGhostManager = {}
 
---- @return FrameworkGhostManagerState state Manages ghost state
+---@return FrameworkGhostManagerState state Manages ghost state
 function FrameworkGhostManager:state()
     local storage = Framework.runtime:storage()
 
@@ -77,19 +77,19 @@ function FrameworkGhostManager:findMatchingGhost(entity)
     return nil
 end
 
---- @param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive | EventData.script_raised_built
+---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 function FrameworkGhostManager.onGhostEntityCreated(event)
-    local entity = event and (event.created_entity or event.entity)
+    local entity = event and event.entity
     if not Is.Valid(entity) then return end
 
-    script.register_on_entity_destroyed(entity)
+    script.register_on_object_destroyed(entity)
 
     Framework.ghost_manager:registerGhost(entity, event.player_index)
 end
 
----@param event EventData.on_entity_destroyed
+---@param event EventData.on_object_destroyed
 function FrameworkGhostManager.onEntityDestroyed(event)
-    Framework.ghost_manager:deleteGhost(event.unit_number)
+    Framework.ghost_manager:deleteGhost(event.useful_id)
 end
 
 function FrameworkGhostManager.register_for_ghost_names(values)
@@ -102,6 +102,6 @@ function FrameworkGhostManager.register_for_ghost_attributes(attribute, values)
     Util.event_register(Util.CREATION_EVENTS, Framework.ghost_manager.onGhostEntityCreated, ghost_filter)
 end
 
-Event.register(defines.events.on_entity_destroyed, FrameworkGhostManager.onEntityDestroyed)
+Event.register(defines.events.on_object_destroyed, FrameworkGhostManager.onEntityDestroyed)
 
 return FrameworkGhostManager

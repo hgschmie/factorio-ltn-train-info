@@ -84,7 +84,7 @@ end
 -- Event code
 ------------------------------------------------------------------------
 
---- @param event EventData.on_player_setup_blueprint
+---@param event EventData.on_player_setup_blueprint
 local function onPlayerSetupBlueprint(event)
     local player, player_data = Player.get(event.player_index)
 
@@ -112,7 +112,7 @@ local function onPlayerSetupBlueprint(event)
     end
 end
 
---- @param event EventData.on_player_configured_blueprint
+---@param event EventData.on_player_configured_blueprint
 local function onPlayerConfiguredBlueprint(event)
     local player, player_data = Player.get(event.player_index)
 

@@ -10,7 +10,7 @@ local table = require('__stdlib__/stdlib/utils/table')
 --- Access to all mod settings
 ---@class FrameworkSettings
 ---@field definitions table<string, table>
-local Settings = {
+local FrameworkSettings = {
    --- Contains setting definitions
    -- Each field must be a table with `setting = <default value>` items, as well as containing a
    -- `NAMES` table mapping settings fields to their in-game names (fields not present in NAMES will
@@ -34,11 +34,10 @@ local loaded = {
    player = nil,
 }
 
----@type table<string, FrameworkSettings>
+---@type table<string, FrameworkSettingDefinition>
 local settings_table = {
    startup = {
       values = nil,
-      definitions = {},
       load_value = function(name) return settings.startup[name] end,
       get_values = function(self) return self.values end,
       set_values = function(self, values) self.values = values end,
@@ -47,7 +46,6 @@ local settings_table = {
 
    runtime = {
       values = nil,
-      definitions = {},
       load_value = function(name) return settings.global[name] end,
       get_values = function(self) return self.values end,
       set_values = function(self, values) self.values = values end,
@@ -56,7 +54,6 @@ local settings_table = {
 
    player = {
       values = {},
-      definitions = {},
       load_value = function(name, player_index)
          if player_index then
             return settings.get_player_settings(player_index)[name]
@@ -86,7 +83,7 @@ local settings_table = {
 ---@param setting_type string
 ---@param definitions table<string, any>
 ---@return self FrameworkSettings
-function Settings:add_all(setting_type, definitions)
+function FrameworkSettings:add_all(setting_type, definitions)
    table.merge(self.definitions[setting_type], definitions)
 
    settings_table[setting_type]:clear()
@@ -96,21 +93,21 @@ end
 --- Add setting definitions to the startup table
 ---@param definitions table<string, any>
 ---@return self FrameworkSettings
-function Settings:add_startup(definitions)
+function FrameworkSettings:add_startup(definitions)
    return self:add_all('startup', definitions)
 end
 
 --- Add setting definitions to the runtime table
 ---@param definitions table<string, any>
 ---@return self FrameworkSettings
-function Settings:add_runtime(definitions)
+function FrameworkSettings:add_runtime(definitions)
    return self:add_all('runtime', definitions)
 end
 
 --- Add setting definitions to the player table
 ---@param definitions table<string, any>
 ---@return self FrameworkSettings
-function Settings:add_player(definitions)
+function FrameworkSettings:add_player(definitions)
    return self:add_all('player', definitions)
 end
 
@@ -118,7 +115,7 @@ end
 ---@param setting_type string Setting setting_type. Valid values are "startup", "runtime" and "player"
 ---@param player_index integer? The current player index.
 ---@return table<string, (integer|boolean|double|string|Color)?> result
-function Settings:get_settings(setting_type, player_index)
+function FrameworkSettings:get_settings(setting_type, player_index)
    local st = settings_table[setting_type]
 
    if (not st:get_values(player_index)) then
@@ -142,27 +139,27 @@ end
 
 --- Flushes all cached settings.
 --- The next access to a setting will reload them from the game.
-function Settings:flush()
+function FrameworkSettings:flush()
    settings_table['player']:clear()
    settings_table['runtime']:clear()
 end
 
 --- Access the startup settings.
 ---@return table<string, (integer|boolean|double|string|Color)?> result
-function Settings:startup()
+function FrameworkSettings:startup()
    return self:get_settings('startup')
 end
 
 --- Access the runtime settings.
 ---@return table<string, (integer|boolean|double|string|Color)?> result
-function Settings:runtime()
+function FrameworkSettings:runtime()
    return self:get_settings('runtime')
 end
 
 --- Access the player settings. If no player index is given, use the default player settings in settings.player.
 ---@param player_index integer? The current player index.
 ---@return table<string, (integer|boolean|double|string|Color)?> result
-function Settings:player(player_index)
+function FrameworkSettings:player(player_index)
    return self:get_settings('player', player_index)
 end
 
@@ -173,8 +170,8 @@ if script then
 
    -- Runtime settings changed
    Event.register(defines.events.on_runtime_mod_setting_changed, function()
-      Settings:flush()
+      FrameworkSettings:flush()
    end)
 end
 
-return Settings
+return FrameworkSettings

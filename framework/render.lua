@@ -14,8 +14,9 @@ function Rendering:clearRenderedText(player_index)
     local storage = Framework.runtime:player_storage(player_index)
 
     if storage.rendered_objects then
-        for _, rendered_object in pairs(storage.rendered_objects) do
-            rendering.destroy(rendered_object)
+        for _, render_id in pairs(storage.rendered_objects) do
+            local rendered_object = rendering.get_object_by_id(render_id)
+            if rendered_object then rendered_object.destroy() end
         end
     end
     storage.rendered_objects = {}

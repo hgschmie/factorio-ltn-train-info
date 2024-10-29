@@ -1,3 +1,4 @@
+---@meta
 ----------------------------------------------------------------------------------------------------
 -- Support for other (optional) mods.
 --
@@ -16,12 +17,12 @@
 local OtherMods = {}
 
 local OtherMods_mt = {
-    __index = function(table, stage)
+    __index = function(_, stage)
         return function()
             if not This then return end
-            for _, mod_name in pairs(This.other_mods) do
+            for mod_name, alias in pairs(This.other_mods) do
                 if (script and script.active_mods[mod_name]) or (mods and mods[mod_name]) or mod_name == 'framework' then
-                    local mod_support = require('scripts.other-mods.' .. mod_name)
+                    local mod_support = require('scripts.other-mods.' .. alias)
                     if mod_support[stage] then
                         mod_support[stage]()
                     end

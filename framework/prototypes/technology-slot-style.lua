@@ -4,10 +4,10 @@
 
 local styles = data.raw['gui-style']['default']
 
---- @param name string
---- @param y number
---- @param level_color Color
---- @param level_range_color Color
+---@param name string
+---@param y number
+---@param level_color Color
+---@param level_range_color Color
 local function build_technology_slot(name, y, level_color, level_range_color)
     styles['flib_technology_slot_' .. name] = {
         type = 'button_style',

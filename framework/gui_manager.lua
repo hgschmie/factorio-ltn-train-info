@@ -11,7 +11,6 @@ local Is = require('__stdlib__/stdlib/utils/is')
 
 local FrameworkGui = require('framework.gui')
 
-
 ---@class FrameworkGuiManager
 ---@field GUI_PREFIX string The prefix for all registered handlers and other global information.
 local FrameworkGuiManager = {
@@ -22,7 +21,7 @@ local FrameworkGuiManager = {
 --
 ------------------------------------------------------------------------
 
---- @return FrameworkGuiManagerState state Manages GUI state
+---@return FrameworkGuiManagerState state Manages GUI state
 function FrameworkGuiManager:state()
     local storage = Framework.runtime:storage()
 
@@ -40,7 +39,7 @@ end
 ------------------------------------------------------------------------
 
 --- Creates a new id for the guis.
---- @return number A unique gui id.
+---@return number A unique gui id.
 function FrameworkGuiManager:create_id()
     local state = self:state()
 
@@ -51,12 +50,13 @@ end
 ------------------------------------------------------------------------
 
 --- Dispatch an event to a registered gui.
---- @param ev FrameworkGuiEventData
---- @return boolean handled True if an event handler was called, False otherwise.
+---@param ev FrameworkGuiEventData
+---@return boolean handled True if an event handler was called, False otherwise.
 function FrameworkGuiManager:dispatch(ev)
     if not ev then return false end
 
-    local elem = ev.element --[[@as LuaGuiElement ]]
+    ---@type LuaGuiElement
+    local elem = ev.element
     if not Is.Valid(elem) then return false end
 
     -- see if this has the right tags
@@ -74,8 +74,8 @@ end
 ------------------------------------------------------------------------
 
 --- Finds a gui.
---- @param gui_id number?
---- @return FrameworkGui? framework_gui
+---@param gui_id number?
+---@return FrameworkGui? framework_gui
 function FrameworkGuiManager:find_gui(gui_id)
     if not gui_id then return nil end
     local state = self:state()
@@ -86,10 +86,10 @@ end
 ------------------------------------------------------------------------
 
 --- Creates a new GUI instance.
---- @param parent LuaGuiElement
---- @param ui_tree FrameworkGuiElemDef|FrameworkGuiElemDef[] The element definition, or an array of element definitions.
---- @param existing_elements table<string, LuaGuiElement>? Optional set of existing GUI elements.
---- @return FrameworkGui framework_gui A framework gui instance
+---@param parent LuaGuiElement
+---@param ui_tree FrameworkGuiElemDef|FrameworkGuiElemDef[] The element definition, or an array of element definitions.
+---@param existing_elements table<string, LuaGuiElement>? Optional set of existing GUI elements.
+---@return FrameworkGui framework_gui A framework gui instance
 function FrameworkGuiManager:create_gui(parent, ui_tree, existing_elements)
     assert(Is.Table(ui_tree) and #ui_tree == 0, 'The UI tree must have a single root!')
     local gui_id = self:create_id()
@@ -107,10 +107,10 @@ end
 ------------------------------------------------------------------------
 
 --- Destroys a GUI instance.
---- @param gui (FrameworkGui|number)? The gui to destroy
+---@param gui (FrameworkGui|number)? The gui to destroy
 function FrameworkGuiManager:destroy_gui(gui)
     if Is.Number(gui) then
-        gui = self:find_gui(gui --[[@as number?]]) --[[@as FrameworkGui?]]
+        gui = self:find_gui(gui --[[@as number?]])
     end
 
     if not gui then return end
@@ -119,9 +119,7 @@ function FrameworkGuiManager:destroy_gui(gui)
 
     local gui_id = gui.id
     state.guis[gui_id] = nil
-    if gui.root then
-        gui.root.destroy()
-    end
+    if gui.root then gui.root.destroy() end
 end
 
 ------------------------------------------------------------------------
