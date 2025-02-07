@@ -4,40 +4,22 @@
 -- can be loaded into scripts and data
 ------------------------------------------------------------------------
 
-local table = require('__stdlib__/stdlib/utils/table')
-
-local Constants = {}
+local table = require('stdlib.utils.table')
 
 --------------------------------------------------------------------------------
 -- main constants
 --------------------------------------------------------------------------------
 
--- debug mode
-Constants.debug_mode = 0
-
--- the current version that is the result of the latest migration
-Constants.current_version = 1
-
-Constants.prefix = 'hps:lti-'
-Constants.name = 'ltn-train-info'
-Constants.root = '__ltn-train-info__'
-Constants.gfx_location = Constants.root .. '/gfx/'
-
-Constants.divide_by_max = 20
-Constants.divide_by_min = 1
-
-Constants.signal_type = {
-    quantity = 1,
-    stack_size = 2,
-    one = 3,
+local Constants = {
+    CURRENT_VERSION = 1,
+    prefix = 'hps__lti-',
+    name = 'ltn-train-info',
+    root = '__ltn-train-info__',
+    order = 'c[combinators]-dl[ltn-train-info]',
+    config_tag_name = 'lti_config',
 }
 
-Constants.delivery_type = table.array_to_dictionary({'provide', 'request'})
-
-Constants.delivery_signals = {
-    [Constants.delivery_type.provide] = 'signal-P',
-    [Constants.delivery_type.request] = 'signal-R',
-}
+Constants.gfx_location = Constants.root .. '/graphics/'
 
 --------------------------------------------------------------------------------
 -- Framework intializer
@@ -82,7 +64,29 @@ end
 --------------------------------------------------------------------------------
 
 -- Base name
-Constants.lti_train_info = Constants:with_prefix(Constants.name)
+Constants.lti_train_info_name = Constants:with_prefix(Constants.name)
+
+--------------------------------------------------------------------------------
+-- constants and names
+--------------------------------------------------------------------------------
+
+Constants.divide_by_max = 20
+Constants.divide_by_min = 1
+
+Constants.signal_type = {
+    quantity = 1,
+    stack_size = 2,
+    one = 3,
+}
+
+Constants.delivery_type = table.array_to_dictionary({'provide', 'request'})
+
+Constants.delivery_signals = {
+    [Constants.delivery_type.provide] = 'signal-P',
+    [Constants.delivery_type.request] = 'signal-R',
+}
+
+
 Constants.lti_range = 3
 
 -- names of the supported "train" stops
@@ -93,6 +97,20 @@ Constants.lti_train_stops = table.array_to_dictionary(Constants.lti_train_stop_n
 -- localization
 --------------------------------------------------------------------------------
 
-Constants.lti_entity_name = 'entity-name.' .. Constants.lti_train_info
+Constants.lti_entity_name = 'entity-name.' .. Constants.lti_train_info_name
+
+--------------------------------------------------------------------------------
+-- settings
+--------------------------------------------------------------------------------
+
+Constants.settings_keys = {}
+
+Constants.settings_names = {}
+Constants.settings = {}
+
+for _, key in pairs(Constants.settings_keys) do
+    Constants.settings_names[key] = key
+    Constants.settings[key] = Constants:with_prefix(key)
+end
 
 return Constants

@@ -3,4 +3,4 @@
 ------------------------------------------------------------------------
 
 require('lib.init')
-require('framework.other-mods').data_updates()
+Framework.post_data_updates_stage()

@@ -9,22 +9,24 @@ local LogisticsTrainNetwork = {}
 
 ---@param event LTNDispatcherUpdatedEvent
 local function lti_dispatcher_updated(event)
-    This.lti:dispatcher_updated(event)
+    -- This.Lti:dispatcher_updated(event)
 end
 
 ---@param event LTNOnDeliveryCompleted
 local function lti_delivery_completed(event)
-    This.lti:delivery_completed(event)
+    -- This.Lti:delivery_completed(event)
 end
 
 ---@param event LTNOnDeliveryFailed
 local function lti_delivery_failed(event)
-    This.lti:delivery_failed(event)
+    -- This.Lti:delivery_failed(event)
 end
 
 
 LogisticsTrainNetwork.runtime = function()
-    local Event = require('__stdlib__/stdlib/event/event')
+    assert(script)
+
+    local Event = require('stdlib.event.event')
 
     local ltn_init = function()
         if not remote.interfaces['logistic-train-network'] then return end

@@ -2,17 +2,20 @@
 --- Initialize this mod's globals
 ----------------------------------------------------------------------------------------------------
 
----@type ModThis
+---@class lti_train_info.Mod
+---@field other_mods table<string, string>
+---@field Lti lti_train_info.Lti?
+---@field Gui lti_train_info.Gui?
 local This = {
-    other_mods = { 'LogisticTrainNetwork', 'PickerDollies' },
-    debug_mode = 0,
-
-    lti = require('scripts.train-info'),
-    gui = nil,
+    other_mods = {
+        LogisticTrainNetwork = 'ltn',
+        ['even-pickier-dollies'] = 'picker_dollies',
+    },
 }
 
 if (script) then
-    This.gui = require('scripts.gui') --[[@as ModGui ]]
+    This.Lti = require('scripts.train-info')
+    This.Gui = require('scripts.gui')
 end
 
 ----------------------------------------------------------------------------------------------------

@@ -8,4 +8,4 @@ local const = require('lib.constants')
 require('framework.init'):init(const.framework_init)
 
 -- mod code
-This = require("lib.this")
+This = require('lib.this')

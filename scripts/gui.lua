@@ -1,14 +1,15 @@
 ------------------------------------------------------------------------
 -- LTN Train Info GUI
 ------------------------------------------------------------------------
+assert(script)
 
-local Event = require('__stdlib__/stdlib/event/event')
-local Player = require('__stdlib__/stdlib/event/player')
-local table = require('__stdlib__/stdlib/utils/table')
-local string = require('__stdlib__/stdlib/utils/string')
+local Event = require('stdlib.event.event')
+local Player = require('stdlib.event.player')
+local table = require('stdlib.utils.table')
+local string = require('stdlib.utils.string')
 
 
-local Util = require('framework.util')
+local tools = require('framework.tools')
 
 local const = require('lib.constants')
 
@@ -25,8 +26,8 @@ local gui_updater
 -- UI definition
 ----------------------------------------------------------------------------------------------------
 
---- @param lti_entity TrainInfoData
---- @return FrameworkGuiElemDef ui
+---@param lti_entity TrainInfoData
+---@return FrameworkGuiElemDef ui
 local function get_ui(lti_entity)
     return {
         type = 'frame',
@@ -350,7 +351,7 @@ local function locate_config(event)
     local _, player_data = Player.get(event.player_index)
     if not (player_data and player_data.lti_gui) then return nil end
 
-    local lti_entity = This.lti:entity(player_data.lti_gui.entity_id)
+    local lti_entity = This.Lti:entity(player_data.lti_gui.entity_id)
     if not lti_entity then return nil end
 
     return lti_entity
@@ -360,7 +361,7 @@ end
 
 --- close the UI (button or shortcut key)
 ---
---- @param event EventData.on_gui_click|EventData.on_gui_opened
+---@param event EventData.on_gui_click|EventData.on_gui_opened
 onWindowClosed = function(event)
     local player, player_data = Player.get(event.player_index)
 
@@ -380,7 +381,7 @@ onWindowClosed = function(event)
     end
 end
 
---- @param event  EventData.on_gui_checked_state_changed
+---@param event  EventData.on_gui_checked_state_changed
 onToggleEnable = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -391,7 +392,7 @@ onToggleEnable = function(event)
     config.modified = true
 end
 
---- @param event  EventData.on_gui_checked_state_changed
+---@param event  EventData.on_gui_checked_state_changed
 onRadioButtonQuantity = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -402,7 +403,7 @@ onRadioButtonQuantity = function(event)
     config.modified = true
 end
 
---- @param event  EventData.on_gui_checked_state_changed
+---@param event  EventData.on_gui_checked_state_changed
 onRadioButtonStackSize = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -413,7 +414,7 @@ onRadioButtonStackSize = function(event)
     config.modified = true
 end
 
---- @param event  EventData.on_gui_checked_state_changed
+---@param event  EventData.on_gui_checked_state_changed
 onRadioButtonOne = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -424,7 +425,7 @@ onRadioButtonOne = function(event)
     config.modified = true
 end
 
---- @param event  EventData.on_gui_checked_state_changed
+---@param event  EventData.on_gui_checked_state_changed
 onToggleNegate = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -436,7 +437,7 @@ onToggleNegate = function(event)
 end
 
 
---- @param event  EventData.on_gui_checked_state_changed
+---@param event  EventData.on_gui_checked_state_changed
 onToggleVirtual = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -445,7 +446,7 @@ onToggleVirtual = function(event)
     lti_entity.config.modified = true
 end
 
---- @param event  EventData.on_gui_value_changed
+---@param event  EventData.on_gui_value_changed
 onDivideBySlider = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -458,7 +459,7 @@ onDivideBySlider = function(event)
     lti_entity.config.modified = true
 end
 
---- @param event  EventData.on_gui_text_changed
+---@param event  EventData.on_gui_text_changed
 onDivideByText = function(event)
     local lti_entity = locate_config(event)
     if not lti_entity then return end
@@ -505,10 +506,10 @@ update_gui_state = function(gui, lti_entity, signals)
         or defines.entity_status.disabled
 
     local lamp = gui:find_element('lamp')
-    lamp.sprite = Util.STATUS_SPRITES[entity_status]
+    lamp.sprite = tools.STATUS_SPRITES[entity_status]
 
     local status = gui:find_element('status')
-    status.caption = { Util.STATUS_NAMES[entity_status] }
+    status.caption = { tools.STATUS_NAMES[entity_status] }
 
     local connection_frame = gui:find_element('connection-frame')
     connection_frame.visible = lti_config.enabled
@@ -554,16 +555,16 @@ end
 
 ---@param lti_gui LtiGui
 gui_updater = function(ev, lti_gui)
-    local lti_entity = This.lti:entity(lti_gui.entity_id)
+    local lti_entity = This.Lti:entity(lti_gui.entity_id)
     if not lti_entity then
         Event.remove(-1, gui_updater, nil, lti_gui)
         return
     end
 
     if not (lti_gui.last_config and table.compare(lti_gui.last_config, lti_entity.config)) then
-        local signals = This.lti:update_delivery(lti_entity)
+        local signals = This.Lti:update_delivery(lti_entity)
         update_gui_state(lti_gui.gui, lti_entity, signals)
-        lti_gui.last_config = table.deepcopy(lti_entity.config)
+        lti_gui.last_config = util.copy(lti_entity.config)
     end
 end
 
@@ -571,7 +572,7 @@ end
 -- open gui handler
 ----------------------------------------------------------------------------------------------------
 
---- @param event EventData.on_gui_opened
+---@param event EventData.on_gui_opened
 local function onGuiOpened(event)
     local player, player_data = Player.get(event.player_index)
     if player.opened and player_data.lti_gui and player.opened == player_data.lti_gui.gui.root then
@@ -583,7 +584,7 @@ local function onGuiOpened(event)
 
     local entity = event and event.entity --[[@as LuaEntity]]
     local entity_id = entity.unit_number
-    local lti_entity = This.lti:entity(entity_id)
+    local lti_entity = This.Lti:entity(entity_id)
 
     if not lti_entity then
         log('Data missing for ' ..
@@ -614,8 +615,12 @@ end
 -- Event registration
 ----------------------------------------------------------------------------------------------------
 
-local lti_entity_filter = Util.create_event_entity_matcher('name', const.lti_train_info)
+local function register_events()
+    -- local lti_entity_filter = tools.create_event_entity_matcher('name', const.lti_train_info)
+    -- Event.on_event(defines.events.on_gui_opened, onGuiOpened, lti_entity_filter)
+end
 
-Event.on_event(defines.events.on_gui_opened, onGuiOpened, lti_entity_filter)
+Event.on_init(register_events)
+Event.on_load(register_events)
 
 return ModGui

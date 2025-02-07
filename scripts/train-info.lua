@@ -2,12 +2,13 @@
 ------------------------------------------------------------------------
 -- manage the train delivery state
 ------------------------------------------------------------------------
+assert(script)
 
-local Is = require('__stdlib__/stdlib/utils/is')
-local Position = require('__stdlib__/stdlib/area/position')
-local string = require('__stdlib__/stdlib/utils/string')
+local Is = require('stdlib.utils.is')
+local Position = require('stdlib.area.position')
+local string = require('stdlib.utils.string')
 
-local table = require('__stdlib__/stdlib/utils/table')
+local table = require('stdlib.utils.table')
 
 local const = require('lib.constants')
 
@@ -20,9 +21,9 @@ local Lti = {}
 
 --- Setup the global data structures
 function Lti:init()
-    if not global.lti_data then
+    if not storage.lti_data then
         ---@type ModLtiData
-        global.lti_data = {
+        storage.lti_data = {
             VERSION = const.current_version,
             lti = {},
             count = 0,
@@ -31,8 +32,8 @@ function Lti:init()
         }
     end
 
-    if not global.last_stop then
-        global.last_stop = {}
+    if not storage.last_stop then
+        storage.last_stop = {}
     end
 end
 
@@ -61,28 +62,28 @@ end
 
 ---@return LTNDelivery[] deliveries
 function Lti:deliveries()
-    return global.lti_data.deliveries
+    return storage.lti_data.deliveries
 end
 
 ---@param train_id integer
 ---@return LTNDelivery?
 function Lti:delivery(train_id)
-    return global.lti_data.deliveries[train_id]
+    return storage.lti_data.deliveries[train_id]
 end
 
 ---@param train_id integer
 ---@param delivery LTNDelivery
 function Lti:set_delivery(train_id, delivery)
-    if global.lti_data.deliveries[train_id] then
+    if storage.lti_data.deliveries[train_id] then
         Framework.logger:logf('[BUG] Overwriting existing delivery for train %d', train_id)
     end
 
-    global.lti_data.deliveries[train_id] = delivery
+    storage.lti_data.deliveries[train_id] = delivery
 end
 
 ---@param train_id integer
 function Lti:clear_delivery(train_id)
-    global.lti_data.deliveries[train_id] = nil
+    storage.lti_data.deliveries[train_id] = nil
 end
 
 ------------------------------------------------------------------------
@@ -92,9 +93,9 @@ end
 function Lti:add_stop_entity(stop_id, entity_id)
     if not entity_id then return end
 
-    local stops = global.lti_data.stops[stop_id] or {}
+    local stops = storage.lti_data.stops[stop_id] or {}
     stops[entity_id] = true
-    global.lti_data.stops[stop_id] = stops
+    storage.lti_data.stops[stop_id] = stops
 end
 
 ---@param stop_id integer
@@ -102,7 +103,7 @@ end
 function Lti:remove_stop_entity(stop_id, entity_id)
     if not entity_id then return end
 
-    local stops = global.lti_data.stops[stop_id]
+    local stops = storage.lti_data.stops[stop_id]
     if not stops then return end
     stops[entity_id] = nil
 end
@@ -110,13 +111,13 @@ end
 ---@param stop_id integer
 ---@return integer[] entity_ids
 function Lti:stop_entities(stop_id)
-    local stops = global.lti_data.stops[stop_id] or {}
+    local stops = storage.lti_data.stops[stop_id] or {}
     return stops
 end
 
 ---@param stop_id integer
 function Lti:clear_stop_entities(stop_id)
-    global.lti_data.stops[stop_id] = nil
+    storage.lti_data.stops[stop_id] = nil
 end
 
 ------------------------------------------------------------------------
@@ -124,7 +125,7 @@ end
 --- Returns data for all train info combinators.
 ---@return table<integer, TrainInfoData> entities
 function Lti:entities()
-    return global.lti_data.lti
+    return storage.lti_data.lti
 end
 
 --- Returns data for a given train info combinator.
@@ -132,7 +133,7 @@ end
 ---@return TrainInfoData? entity
 function Lti:entity(entity_id)
     if not entity_id then return nil end
-    return global.lti_data.lti[entity_id]
+    return storage.lti_data.lti[entity_id]
 end
 
 --- Sets a train info combinator entity
@@ -141,21 +142,21 @@ end
 function Lti:set_entity(entity_id, lti_entity)
     assert(lti_entity)
 
-    if (global.lti_data.lti[entity_id]) then
+    if (storage.lti_data.lti[entity_id]) then
         Framework.logger:logf('[BUG] Overwriting existing lti_entity for unit %d', entity_id)
     end
 
-    global.lti_data.lti[entity_id] = lti_entity
-    global.lti_data.count = global.lti_data.count + 1
+    storage.lti_data.lti[entity_id] = lti_entity
+    storage.lti_data.count = storage.lti_data.count + 1
 end
 
 ---@param entity_id integer The unit_number of the combinator
 function Lti:clear_entity(entity_id)
-    global.lti_data.lti[entity_id] = nil
-    global.lti_data.count = global.lti_data.count - 1
-    if global.lti_data.count < 0 then
-        global.lti_data.count = table_size(global.lti_data.lti)
-        Framework.logger:logf('Train Info count got negative (bug), size is now: %d', global.lti_data.count)
+    storage.lti_data.lti[entity_id] = nil
+    storage.lti_data.count = storage.lti_data.count - 1
+    if storage.lti_data.count < 0 then
+        storage.lti_data.count = table_size(storage.lti_data.lti)
+        Framework.logger:logf('Train Info count got negative (bug), size is now: %d', storage.lti_data.count)
     end
 end
 
@@ -166,18 +167,18 @@ end
 function Lti:set_last_stop(train_id, station_id)
     assert(station_id)
 
-    global.last_stop[train_id] = station_id
+    storage.last_stop[train_id] = station_id
 end
 
 ---@param train_id integer
 function Lti:clear_last_stop(train_id)
-    global.last_stop[train_id] = nil
+    storage.last_stop[train_id] = nil
 end
 
 ---@param train_id integer
 ---@return integer? station_id
 function Lti:last_stop(train_id)
-    return global.last_stop[train_id]
+    return storage.last_stop[train_id]
 end
 
 ------------------------------------------------------------------------
@@ -282,7 +283,7 @@ end
 function Lti.blueprint_callback(blueprint, idx, entity)
     if not Is.Valid(entity) then return end
 
-    local lti_entity = This.lti:entity(entity.unit_number)
+    local lti_entity = This.Lti:entity(entity.unit_number)
     if not lti_entity then return end
 
     blueprint.set_blueprint_entity_tag(idx, 'lti_config', lti_entity.config)

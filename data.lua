@@ -9,4 +9,5 @@ local const = require('lib.constants')
 require('prototypes.entities')
 require('prototypes.style')
 
-require('framework.other-mods').data()
+------------------------------------------------------------------------
+Framework.post_data_stage()

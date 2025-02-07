@@ -1,15 +1,18 @@
 require('lib.init')
 
-data:extend {
+local framework_settings = {
     {
         -- Debug mode (framework dependency)
-        setting_type = 'runtime-global',
+        type = "bool-setting",
         name = Framework.PREFIX .. 'debug-mode',
-        type = 'bool-setting',
+        order = "z",
+        setting_type = "runtime-global",
         default_value = false,
-        order = 'z'
     },
 }
 
+data:extend(framework_settings)
+
 --------------------------------------------------------------------------------
-require('framework.other-mods').settings()
+
+Framework.post_settings_stage()

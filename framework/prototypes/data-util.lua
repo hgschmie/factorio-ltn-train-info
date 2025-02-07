@@ -45,7 +45,7 @@ FrameworkDataUtil.dark_red_button_tileset = Framework.ROOT .. '/framework/graphi
 ---@param new_name string The new name of the entity
 ---@param make_invisible? boolean If true, make the entity invisble, e.g. for packed entities.
 ---@return data.EntityPrototype
-function FrameworkDataUtil.copy_prototype(prototype, new_name, make_invisible)
+function FrameworkDataUtil.copy_entity_prototype(prototype, new_name, make_invisible)
     if not prototype.type or not prototype.name then
         error('Invalid prototype: prototypes must have name and type properties.')
     end
@@ -101,6 +101,24 @@ function FrameworkDataUtil.copy_prototype(prototype, new_name, make_invisible)
 
     return p
 end
+
+---@param prototype data.Prototype
+---@param new_name string The new name of the entity
+---@return data.Prototype
+function FrameworkDataUtil.copy_prototype(prototype, new_name)
+    if not prototype.type or not prototype.name then
+        error('Invalid prototype: prototypes must have name and type properties.')
+    end
+
+    local p = util.copy(prototype) --[[ @as data.ItemPrototype ]]
+    p.name = new_name
+    if p.place_result then p.place_result = new_name end
+    ---@diagnostic disable: inject-field, undefined-field
+    if p.result then p.result = new_name end
+    ---@diagnostic enable: inject-field, undefined-field
+    return p
+end
+
 
 --- Copy prototype.icon/icons to a new fully defined icons array, optionally adding new icon layers.
 ---
