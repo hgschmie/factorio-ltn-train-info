@@ -17,7 +17,7 @@ The LTN Train Info Combinator (LTI for short) can be placed close to one or more
 
 Everything can be configured through the GUI.
 
-![image1](portal/img-m1.png) ![image1](portal/img-m2.png) ![image1](portal/img-m3.png)
+![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m1.png) ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m2.png) ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m3.png)
 
 - Fully supports copy/paste, blueprinting and cloning
 - Supports [Even Picker Dollies](https://mods.factorio.com/mod/even-pickier-dollies)
@@ -27,19 +27,19 @@ Everything can be configured through the GUI.
 
 Signal differences in standard operation between LTN train stop (green signals) and the LTN Train Info combinator (red signals):
 
-![image1](portal/img-1.png)
+![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-1.png)
 
 In this case, the train arrived with 3.9k concrete items and picked up two copper plates from an inserter. The actual request is 100 iron plates.
 
 When disabling the LTN config setting ("Providers output existing cargo"), the item signals for a provider are the same (virtual signals still differ between LTN train stop and the LTN Train Info combinator):
 
-![image2](portal/img-2.png)
+![image2](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-2.png)
 
 ## Requester operations
 
 Signal differences in standard operation between LTN train stop (green signals) and the LTN Train Info combinator (red signals):
 
-![image1](portal/img-3.png)
+![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-3.png)
 
 For a requester station, LTN will only ever output the expected cargo in the train after the unload operation is complete. The actual delivery information is only available through the LTN Train Info combinator.
 
