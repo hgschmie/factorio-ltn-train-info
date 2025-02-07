@@ -8,40 +8,38 @@ This is the default and it results in trains arriving at a provider that may sti
 
 The LTN Train Info Combinator (LTI for short) can be placed close to one or more train stops and provides the following signals to the Logistic Network:
 
-o- An signal for each item in a delivery. The signal can be the quantity requested or provided, the stack count or a binary "1" signal. Those signals are always the current delivery as scheduled by the LTN.
+- A signal for each item in a delivery. The signal can be the quantity requested or provided, the stack count or a binary "1" signal. Those signals are always the current delivery as scheduled by the LTN.
 
 - Each delivery signal can be negated (returned as a negative value)
-- Each delivery signal can be divided by a constant between 1 and 20, e.g. to split it evenly across multiple wagons (if you run trains with more than 20 wagons, let me know).
+- Each delivery signal can be divided by a constant between 1 and 32, e.g. to split it evenly across multiple wagons.
 - Virtual signals to denote whether the connected station is the requester or the provider of the delivery.
 - Signal enabling, negation and signal type (quantity, stack count or binary) can be configured separately for provider and requester operations.
 
 Everything can be configured through the GUI.
 
-![image1](doc/img-m1.png) ![image1](doc/img-m2.png) ![image1](doc/img-m3.png)
-
-
+![image1](portal/img-m1.png) ![image1](portal/img-m2.png) ![image1](portal/img-m3.png)
 
 - Fully supports copy/paste, blueprinting and cloning
-- Supports [Picker Dollies](https://mods.factorio.com/mod/PickerDollies)
+- Supports [Even Picker Dollies](https://mods.factorio.com/mod/even-pickier-dollies)
 - Can connect to multiple stations simultaneously, when multiple deliveries arrive at the same time, the last one "wins".
 
 ## Provider operations
 
 Signal differences in standard operation between LTN train stop (green signals) and the LTN Train Info combinator (red signals):
 
-![image1](doc/img-1.png)
+![image1](portal/img-1.png)
 
 In this case, the train arrived with 3.9k concrete items and picked up two copper plates from an inserter. The actual request is 100 iron plates.
 
 When disabling the LTN config setting ("Providers output existing cargo"), the item signals for a provider are the same (virtual signals still differ between LTN train stop and the LTN Train Info combinator):
 
-![image2](doc/img-2.png)
+![image2](portal/img-2.png)
 
 ## Requester operations
 
 Signal differences in standard operation between LTN train stop (green signals) and the LTN Train Info combinator (red signals):
 
-![image1](doc/img-3.png)
+![image1](portal/img-3.png)
 
 For a requester station, LTN will only ever output the expected cargo in the train after the unload operation is complete. The actual delivery information is only available through the LTN Train Info combinator.
 
@@ -51,8 +49,6 @@ For a requester station, LTN will only ever output the expected cargo in the tra
 - Virtual Signal 'P' - 1 if a connected station is the provider for the delivery
 - Virtual Signal 'R' - 1 if a connected station is the requester for the delivery
 - Virtual Signal 'D' - All item quantities and stack sizes are divided by this factor (1..20)
-
-
 
 ## Credits/Acknowledgements
 
