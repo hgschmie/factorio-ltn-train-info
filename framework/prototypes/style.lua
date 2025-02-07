@@ -4,6 +4,8 @@
 
 local data_util = require('framework.prototypes.data-util')
 
+if not data.raw['gui-style'] then return end
+
 local styles = data.raw['gui-style'].default
 
 local slot_tileset = Framework.ROOT .. '/framework/graphics/slots.png'
@@ -246,12 +248,29 @@ styles.framework_shallow_frame_in_shallow_frame = {
     },
 }
 
+-- similar to the subheader frame definition in e.g. the constant combinator
+-- matches its look and feel.
+styles.framework_subheader_frame = {
+    type = 'frame_style',
+    parent = 'subheader_frame',
+    top_margin = -8,
+    left_margin = -12,
+    right_margin = -12,
+    horizontally_stretchable = 'on',
+    vertically_stretchable = 'on',
+}
+
 -- IMAGE STYLES
 
 styles.framework_indicator = {
     type = 'image_style',
     size = 16,
     stretch_image_to_widget_size = true,
+}
+
+styles.framework_quality = {
+    type = 'image_style',
+    left_padding = 16,
 }
 
 -- LINE STYLES

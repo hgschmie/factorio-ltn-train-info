@@ -6,7 +6,7 @@
 --
 ------------------------------------------------------------------------
 
-local Is = require('__stdlib__/stdlib/utils/is')
+local Is = require('stdlib.utils.is')
 
 ----------------------------------------------------------------------------------------------------
 
@@ -23,9 +23,11 @@ local Is = require('__stdlib__/stdlib/utils/is')
 ---@field settings FrameworkSettings?
 ---@field logger FrameworkLogger?
 ---@field runtime FrameworkRuntime?
----@field gui_manager FrameworkGuiManager?
----@field ghost_manager FrameworkGhostManager?
----@field blueprint FrameworkBlueprintManager?
+---@field gui_manager framework.gui_manager?
+---@field ghost_manager framework.ghost_manager?
+---@field blueprint framework.blueprint.Manager?
+---@field tombstone framework.tombstone_manager?
+---@field other_mods framework.OtherModsManager
 ---@field remote_api table<string, function>?
 ---@field render FrameworkRender?
 Framework = {
@@ -58,10 +60,41 @@ Framework = {
 
     blueprint = nil,
 
+    tombstone = nil,
+
     remote_api = nil,
 
     render = nil,
 }
+
+--- called in runtime stage
+---@param config FrameworkConfig
+function Framework:init_runtime(config)
+    -- runtime stage
+    self.runtime = self.runtime or require('framework.runtime')
+
+    self.logger:init()
+
+    self.logger:log('================================================================================')
+    self.logger:log('==')
+    self.logger:logf("== Framework logfile for '%s' mod intialized ", Framework.NAME)     --(debug mode: %s)", Framework.NAME, tostring(self.debug_mode))
+    self.logger:log('==')
+    self.logger:logf('== Run ID: %d', Framework.RUN_ID)
+    self.logger:log('================================================================================')
+    self.logger:flush()
+
+    self.gui_manager = self.gui_manager or require('framework.gui_manager')
+    self.ghost_manager = self.ghost_manager or require('framework.ghost_manager')
+    self.blueprint = self.blueprint or require('framework.blueprint_manager')
+    self.tombstone = self.tombstone or require('framework.tombstone_manager')
+
+    self.render = self.render or require('framework.render')
+
+    if config.remote_name and not self.remote_api then
+        self.remote_api = {}
+        remote.add_interface(config.remote_name, self.remote_api)
+    end
+end
 
 --- Initialize the core framework.
 --- the code itself references the global Framework table.
@@ -81,33 +114,40 @@ function Framework:init(config)
     self.PREFIX = config.prefix
     self.ROOT = config.root
 
-    self.settings = require('framework.settings') --[[ @as FrameworkSettings ]]
-    self.logger = require('framework.logger') --[[ @as FrameworkLogger ]]
+    -- load only once per stage
+    self.settings = self.settings or require('framework.settings') --[[ @as FrameworkSettings ]]
+    self.logger = self.logger or require('framework.logger') --[[ @as FrameworkLogger ]]
+    self.other_mods = self.other_mods or require('framework.other-mods')
 
-    if (script) then
-        -- runtime stage
-        self.runtime = require('framework.runtime')
-
-        self.logger:init()
-
-        self.gui_manager = require('framework.gui_manager')
-        self.ghost_manager = require('framework.ghost_manager')
-        self.blueprint = require('framework.blueprint_manager')
-
-        self.render = require('framework.render')
-
-        if config.remote_name then
-            self.remote_api = {}
-            remote.add_interface(config.remote_name, self.remote_api)
-        end
-    elseif data.raw['gui-style'] then
-        -- prototype stage
+    if data and data.raw['gui-style'] then
+        -- data stage
         require('framework.prototype')
+    elseif script then
+        -- runtime stage
+        self:init_runtime(config --[[@as FrameworkConfig]])
     end
 
     return self
 end
 
 ---------------------------------------------------------------------------------------------------
+-- add meta methods
+---------------------------------------------------------------------------------------------------
+
+local game_stages = { 'settings', 'data', 'data_updates', 'data_final_fixes', 'runtime' }
+
+local Framework_mt = {}
+setmetatable(Framework, Framework_mt)
+
+local prototype = {}
+
+for _, game_stage in pairs(game_stages) do
+    prototype['post_' .. game_stage .. '_stage'] = function()
+        -- otherwise, it is an stage method, pass it to the submodules
+        Framework.other_mods[game_stage]() -- other-mods subsystem
+    end
+end
+
+Framework_mt.__index = prototype
 
 return Framework

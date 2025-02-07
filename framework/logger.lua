@@ -3,7 +3,7 @@
 -- Framework logger
 ------------------------------------------------------------------------
 
-local StdLibLogger = require('__stdlib__/stdlib/misc/logger')
+local StdLibLogger = require('stdlib.misc.logger')
 
 ----------------------------------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ if FrameworkLogger.debug_mode then
 end
 
 function FrameworkLogger:updateDebugSettings()
-    local new_debug_mode = Framework.settings:runtime().debug_mode --[[@as boolean]]
+    local new_debug_mode = Framework.settings:runtime_setting('debug_mode') --[[@as boolean]]
 
     if new_debug_mode ~= self.debug_mode then
         self:log('==')
@@ -59,49 +59,34 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
---- Brings up the actual file logging using the stdlib. This only works in runtime mode, otherwise logging
---- just goes to the regular logfile/output.
----
---- writes a <module-name>/framework.log logfile by default
-function FrameworkLogger:init()
-    assert(script, 'Logger can only be initalized in runtime stage')
+if script then
+    local Event = require('stdlib.event.event')
 
-    self.core_logger = StdLibLogger.new('framework', self.debug_mode, { force_append = true })
+    local function register_events()
+        Event.on_nth_tick(3600, function(ev)
+            Framework.logger:flush()
+        end)
 
-    self.flush = function() self.core_logger.write() end
-
-    self:log('================================================================================')
-    self:log('==')
-    self:logf("== Framework logfile for '%s' mod intialized ", Framework.NAME) --(debug mode: %s)", Framework.NAME, tostring(self.debug_mode))
-    self:log('==')
-
-    self:updateDebugSettings()
-
-    local Event = require('__stdlib__/stdlib/event/event')
-
-    -- The runtime storage is only available from an event. Schedule logging (and loading) for RUN_ID and GAME_ID
-    -- in a tick event, then remove the event handler again.
-    self.info = function()
-        Framework.RUN_ID = Framework.runtime:get_run_id()
-        Framework.GAME_ID = Framework.runtime:get_game_id()
-        Framework.logger:logf('== Game ID: %d, Run ID: %d', Framework.GAME_ID, Framework.RUN_ID)
-        Framework.logger:log('================================================================================')
-        Framework.logger:flush()
-
-        Event.remove(defines.events.on_tick, self.info)
-        self.info = nil
+        -- Runtime settings changed
+        Event.register(defines.events.on_runtime_mod_setting_changed, function()
+            Framework.logger:updateDebugSettings()
+        end)
     end
-    Event.register(defines.events.on_tick, self.info)
 
-    -- flush the log every 60 seconds
-    Event.on_nth_tick(3600, function(ev)
-        self:flush()
-    end)
+    --- Brings up the actual file logging using the stdlib. This only works in runtime mode, otherwise logging
+    --- just goes to the regular logfile/output.
+    ---
+    --- writes a <module-name>/framework.log logfile by default
+    function FrameworkLogger:init()
+        self.core_logger = StdLibLogger.new('framework', self.debug_mode, { force_append = true })
 
-    -- Runtime settings changed
-    Event.register(defines.events.on_runtime_mod_setting_changed, function()
+        self.flush = function() self.core_logger.write() end
+
         self:updateDebugSettings()
-    end)
+
+        Event.on_init(register_events)
+        Event.on_load(register_events)
+    end
 end
 
 return FrameworkLogger

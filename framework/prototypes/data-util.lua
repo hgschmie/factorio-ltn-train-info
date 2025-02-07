@@ -1,10 +1,31 @@
----@meta
 ----------------------------------------------------------------------------------------------------
 -- Data Utility - from flib
 ----------------------------------------------------------------------------------------------------
+assert(not script)
 
----@class FrameworkDataUtil
-local FrameworkDataUtil = {}
+local util = require('util')
+local collision_mask_util = require('collision-mask-util')
+local sprites = require('stdlib.data.modules.sprites')
+
+
+---@class framework.prototypes.data_util
+---@field EMPTY_LED_LIGHT_OFFSETS  Vector[]
+---@field EMPTY_ENTITY_FLAGS string[]
+local FrameworkDataUtil = {
+    EMPTY_LED_LIGHT_OFFSETS = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
+    EMPTY_ENTITY_FLAGS = {
+        'placeable-off-grid',
+        'not-repairable',
+        'not-on-map',
+        'not-deconstructable',
+        'not-blueprintable',
+        'hide-alt-info',
+        'not-flammable',
+        'not-upgradable',
+        'not-in-kill-statistics',
+        'not-in-made-in'
+    },
+}
 
 --- An empty image. This image is 8x8 to facilitate usage with GUI styles.
 FrameworkDataUtil.empty_image = Framework.ROOT .. '/framework/graphics/empty.png'
@@ -19,39 +40,64 @@ FrameworkDataUtil.planner_base_image = Framework.ROOT .. '/framework/graphics/pl
 FrameworkDataUtil.dark_red_button_tileset = Framework.ROOT .. '/framework/graphics/dark-red-button.png'
 
 --- Copy a prototype, assigning a new name and minable properties.
----@param prototype table
----@param new_name string string
----@param remove_icon? boolean
----@return table
-function FrameworkDataUtil.copy_prototype(prototype, new_name, remove_icon)
+
+---@param prototype data.EntityPrototype
+---@param new_name string The new name of the entity
+---@param make_invisible? boolean If true, make the entity invisble, e.g. for packed entities.
+---@return data.EntityPrototype
+function FrameworkDataUtil.copy_prototype(prototype, new_name, make_invisible)
     if not prototype.type or not prototype.name then
         error('Invalid prototype: prototypes must have name and type properties.')
-        return ---@diagnostic disable-line
     end
-    local p = table.deepcopy(prototype)
+
+    local p = util.copy(prototype) --[[ @as data.EntityPrototype ]]
     p.name = new_name
+
     if p.minable and p.minable.result then
+        assert(not p.minable.results)
         p.minable.result = new_name
     end
-    if p.place_result then
-        p.place_result = new_name
+
+    if not make_invisible then return p end
+
+    p.icon = nil
+    p.icon_size = nil
+    p.icons = nil
+
+    ---@diagnostic disable: inject-field, undefined-field
+    -- CombinatorPrototype
+    if p.sprites then p.sprites = util.empty_sprite() end
+    if p.activity_led_light_offsets then p.activity_led_light_offsets = FrameworkDataUtil.EMPTY_LED_LIGHT_OFFSETS end
+    if p.activity_led_sprites then p.activity_led_sprites = util.empty_sprite() end
+    if p.draw_circuit_wires then p.draw_circuit_wires = false end
+
+    -- ConstantCombinatorPrototype
+    if p.circuit_wire_connection_points then p.circuit_wire_connection_points = sprites.empty_connection_points(4) end
+    if p.circuit_wire_max_distance then p.circuit_wire_max_distance = default_circuit_wire_max_distance end
+    if p.draw_copper_wires then p.draw_copper_wires = false end
+
+    if p.energy_source then
+        if p.energy_source.render_no_network_icon then p.energy_source.render_no_network_icon = false end
+        if p.energy_source.render_no_power_icon then p.energy_source.render_no_power_icon = false end
     end
-    if p.result then
-        p.result = new_name
-    end
-    if p.results then
-        for _, result in pairs(p.results) do
-            if result.name == prototype.name then
-                result.name = new_name
-            end
-        end
-    end
-    if remove_icon then
-        p.icon = nil
-        p.icon_size = nil
-        p.icon_mipmaps = nil
-        p.icons = nil
-    end
+
+    -- EntityWithHealthPrototype
+    if p.max_health then p.max_health = 1 end
+
+    ---@diagnostic enable: inject-field, undefined-field
+
+    p.collision_box = nil
+    p.collision_mask = collision_mask_util.new_mask()
+    p.selection_box = nil
+    p.flags = FrameworkDataUtil.EMPTY_ENTITY_FLAGS
+
+    p.allow_copy_paste = false
+    p.hidden = true
+    p.hidden_in_factoriopedia = true
+    p.minable = nil
+    p.selection_box = nil
+    p.selectable_in_game = false
+    p.selection_priority = 1
 
     return p
 end
@@ -78,7 +124,6 @@ function FrameworkDataUtil.create_icons(prototype, new_layers)
             icons[#icons + 1] = {
                 icon = v.icon,
                 icon_size = v.icon_size or prototype.icon_size,
-                icon_mipmaps = v.icon_mipmaps or prototype.icon_mipmaps or 0,
                 tint = v.tint,
                 scale = v.scale,
                 shift = v.shift,
@@ -95,7 +140,6 @@ function FrameworkDataUtil.create_icons(prototype, new_layers)
             {
                 icon = prototype.icon,
                 icon_size = prototype.icon_size,
-                icon_mipmaps = prototype.icon_mipmaps,
                 tint = { r = 1, g = 1, b = 1, a = 1 },
             },
         }
@@ -158,17 +202,15 @@ end
 ---@param position? MapPosition
 ---@param filename? string
 ---@param size? Vector
----@param mipmap_count? number
 ---@param mods? table
 ---@return FrameworkSpriteSpecification
-function FrameworkDataUtil.build_sprite(name, position, filename, size, mipmap_count, mods)
+function FrameworkDataUtil.build_sprite(name, position, filename, size, mods)
     local def = {
         type = 'sprite',
         name = name,
         filename = filename,
         position = position,
         size = size,
-        mipmap_count = mipmap_count,
         flags = { 'icon' },
     }
     if mods then

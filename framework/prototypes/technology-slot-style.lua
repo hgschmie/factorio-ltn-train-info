@@ -2,7 +2,8 @@
 -- technology slot styles supplied by the framework - from flib
 ----------------------------------------------------------------------------------------------------
 
-local styles = data.raw['gui-style']['default']
+if not data.raw['gui-style'] then return end
+local styles = data.raw['gui-style'].default
 
 ---@param name string
 ---@param y number

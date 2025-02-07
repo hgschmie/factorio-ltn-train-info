@@ -3,8 +3,8 @@
 -- access to the framework provided runtime storage - ported from flib
 ----------------------------------------------------------------------------------------------------
 
-local Player = require('__stdlib__/stdlib/event/player')
-local table = require('__stdlib__/stdlib/utils/table')
+local Player = require('stdlib.event.player')
+local table = require('stdlib.utils.table')
 
 --- Main class governing the runtime.
 -- Runtime exists during gameplay.
@@ -43,17 +43,8 @@ local function get_id(self, name, initial_function)
     return self[name]
 end
 
---- Get game id, creating it if necessary.
---- Unique(-ish) ID for the current save, so that we can have one persistent log file per savegame.
---- Must be called from an event (e.g. on_load or on_init)
----@return integer game_id
-function FrameworkRuntime:get_game_id()
-    return get_id(self, 'game_id', function() return math.random(100, 999) end)
-end
-
 --- Get (generate if necessary) run ID. run id increments for each call.
 --- Unique(-ish) ID for the current save, so that we can have one persistent log file per savegame.
---- Must be called from an event (e.g. on_load or on_init)
 ---@return integer run_id
 function FrameworkRuntime:get_run_id()
     local run_id = get_id(self, 'run_id')
