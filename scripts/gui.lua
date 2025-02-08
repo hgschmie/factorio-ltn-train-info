@@ -32,7 +32,8 @@ local function get_gui_event_definition()
     return {
         events = {
             onWindowClosed = Gui.onWindowClosed,
-            onToggleEnable = Gui.onToggleEnable,
+            onSwitchEnabled = Gui.onSwitchEnabled,
+            onToggleSignalEnabled = Gui.onToggleSignalEnabled,
             onRadioButtonQuantity = Gui.onRadioButtonQuantity,
             onRadioButtonStackSize = Gui.onRadioButtonStackSize,
             onRadioButtonOne = Gui.onRadioButtonOne,
@@ -92,7 +93,7 @@ function Gui.getUi(gui)
             {  -- Body
                 type = 'frame',
                 style = 'entity_frame',
-                style_mods = { width = 424, },
+                style_mods = { width = 424, }, -- fix width of the window to match the signal bottom
                 children = {
                     {
                         type = 'flow',
@@ -152,6 +153,19 @@ function Gui.getUi(gui)
                                     },
                                 },
                             },
+                            {
+                                type = 'frame',
+                                style = 'deep_frame_in_shallow_frame',
+                                name = 'preview_frame',
+                                children = {
+                                    {
+                                        type = 'entity-preview',
+                                        name = 'preview',
+                                        style = 'wide_entity_button',
+                                        elem_mods = { entity = lti_data.main },
+                                    },
+                                },
+                            },
                             { -- connection to train stop(s)
                                 type = 'flow',
                                 style = 'framework_indicator_flow',
@@ -159,17 +173,18 @@ function Gui.getUi(gui)
                                 children = {
                                     {
                                         type = 'label',
-                                        style = 'label',
+                                        style = 'semibold_label',
                                         name = 'connection-label',
-                                    },
-                                    {
-                                        type = 'empty-widget',
-                                        style_mods = { horizontally_stretchable = true },
+                                        caption = { const:locale('train-stop-connection'), },
                                     },
                                     {
                                         type = 'label',
                                         style = 'label',
                                         name = 'connection',
+                                    },
+                                    {
+                                        type = 'empty-widget',
+                                        style_mods = { horizontally_stretchable = true },
                                     },
                                 },
                             },
@@ -179,21 +194,39 @@ function Gui.getUi(gui)
                             {
                                 type = 'label',
                                 style = 'semibold_label',
-                                caption = { const:locale('provide') },
+                                caption = { 'gui-constant.output' },
                             },
-                            { -- provide settings
+                            {
+                                type = 'switch',
+                                name = 'on-off',
+                                right_label_caption = { 'gui-constant.on' },
+                                left_label_caption = { 'gui-constant.off' },
+                                handler = { [defines.events.on_gui_switch_state_changed] = gui_events.onSwitchEnabled },
+                            },
+                            {
+                                type = 'label',
+                                style = 'semibold_label',
+                                style_mods = {
+                                    top_padding = 8,                   -- pad a bit to create visual space between the on-off switch and the label
+                                },
+                                caption = { const:locale('provide') }, -- tables can't have captions
+                            },
+                            {                                          -- provide settings
                                 type = 'table',
                                 column_count = 3,
+                                style_mods = {
+                                    top_margin = -8,         -- pull the table a bit closer to the label above
+                                    horizontal_spacing = 24, -- space the elements in the table out
+                                },
                                 children = {
                                     {
                                         type = 'checkbox',
-                                        name = 'delivery-provide',
-                                        elem_tags = { config = const.delivery_type.provide },
                                         caption = { '', { const:locale('enabled') }, ' [img=info]' },
                                         tooltip = { const:locale('enabled-description') },
-                                        handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleEnable },
+                                        name = 'delivery-provide',
+                                        elem_tags = { config = const.delivery_type.provide },
+                                        handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleSignalEnabled },
                                         state = false,
-                                        text_padding = 0,
                                     },
                                     {
                                         type = 'flow',
@@ -229,18 +262,14 @@ function Gui.getUi(gui)
                                     },
                                     {
                                         type = 'checkbox',
+                                        caption = { '', { const:locale('negate') }, ' [img=info]' },
+                                        tooltip = { const:locale('negate-description') },
                                         name = 'negate-provide',
                                         elem_tags = { config = const.delivery_type.provide },
                                         handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleNegate },
                                         state = false,
-                                        caption = { '', { const:locale('negate') }, ' [img=info]' },
-                                        tooltip = { const:locale('negate-description') },
-                                        text_padding = 0,
                                     },
                                 },
-                            },
-                            {
-                                type = 'line',
                             },
                             {
                                 type = 'label',
@@ -250,16 +279,19 @@ function Gui.getUi(gui)
                             { -- request settings
                                 type = 'table',
                                 column_count = 3,
+                                style_mods = {
+                                    top_margin = -8,         -- pull the table a bit closer to the label above
+                                    horizontal_spacing = 24, -- space the elements in the table out
+                                },
                                 children = {
                                     {
                                         type = 'checkbox',
-                                        name = 'delivery-request',
-                                        elem_tags = { config = const.delivery_type.request },
                                         caption = { '', { const:locale('enabled') }, ' [img=info]' },
                                         tooltip = { const:locale('enabled-description') },
-                                        handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleEnable },
+                                        name = 'delivery-request',
+                                        elem_tags = { config = const.delivery_type.request },
+                                        handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleSignalEnabled },
                                         state = false,
-                                        text_padding = 0,
                                     },
                                     {
                                         type = 'flow',
@@ -295,18 +327,14 @@ function Gui.getUi(gui)
                                     },
                                     {
                                         type = 'checkbox',
+                                        caption = { '', { const:locale('negate') }, ' [img=info]' },
+                                        tooltip = { const:locale('negate-description') },
                                         name = 'negate-request',
                                         elem_tags = { config = const.delivery_type.request },
                                         handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleNegate },
                                         state = false,
-                                        caption = { '', { const:locale('negate') }, ' [img=info]' },
-                                        tooltip = { const:locale('negate-description') },
-                                        text_padding = 0,
                                     },
                                 },
-                            },
-                            {
-                                type = 'line',
                             },
                             {
                                 type = 'label',
@@ -324,6 +352,10 @@ function Gui.getUi(gui)
                             { -- divider
                                 type = 'flow',
                                 direction = 'horizontal',
+                                style_mods = {
+                                    horizontal_spacing = 16,   -- space the label, slider and text box out a bit
+                                    vertical_align = 'center', -- align all subelements
+                                },
                                 children = {
                                     {
                                         type = 'label',
@@ -334,6 +366,10 @@ function Gui.getUi(gui)
                                     {
                                         type = 'slider',
                                         name = 'divide_by_slider',
+                                        style = 'slider',
+                                        style_mods = {
+                                            maximal_width = 100, -- limit slider width to match look of the UI
+                                        },
                                         minimum_value = const.divide_by_min,
                                         maximum_value = const.divide_by_max,
                                         handler = { [defines.events.on_gui_value_changed] = gui_events.onDivideBySlider, }
@@ -341,6 +377,10 @@ function Gui.getUi(gui)
                                     {
                                         type = 'textfield',
                                         name = 'divide_by_text',
+                                        style = 'slider_value_textfield',
+                                        style_mods = {
+                                            maximal_width = 40, -- match the very_short_number_textfield
+                                        },
                                         numeric = true,
                                         allow_negative = false,
                                         allow_decimal = true,
@@ -353,9 +393,6 @@ function Gui.getUi(gui)
                                         style_mods = { horizontally_stretchable = true },
                                     },
                                 },
-                            },
-                            {
-                                type = 'line',
                             },
                             {
                                 type = 'label',
@@ -400,14 +437,31 @@ end
 --- close the UI (button or shortcut key)
 ---
 ---@param event EventData.on_gui_click|EventData.on_gui_opened
----@param gui framework.gui
-function Gui.onWindowClosed(event, gui)
+function Gui.onWindowClosed(event)
     Framework.gui_manager:destroy_gui(event.player_index)
+end
+
+local on_off_values = {
+    left = false,
+    right = true,
+}
+
+local values_on_off = table.invert(on_off_values)
+
+--- Enable / Disable switch
+---
+---@param event EventData.on_gui_switch_state_changed
+---@param gui framework.gui
+function Gui.onSwitchEnabled(event, gui)
+    local lti_data = This.Lti:getLtiData(gui.entity_id)
+    if not lti_data then return end
+
+    lti_data.config.enabled = on_off_values[event.element.switch_state]
 end
 
 ---@param event  EventData.on_gui_checked_state_changed
 ---@param gui framework.gui
-function Gui.onToggleEnable(event, gui)
+function Gui.onToggleSignalEnabled(event, gui)
     local lti_data = This.Lti:getLtiData(gui.entity_id)
     if not lti_data then return end
 
@@ -608,12 +662,9 @@ local function refresh_gui(gui, lti_data)
     local connection_frame = gui:find_element('connection-frame')
     connection_frame.visible = lti_config.enabled
 
-    local connection_label = gui:find_element('connection-label')
-    local connection_name = #lti_data.stop_ids > 1 and 'connection-info-p' or 'connection-info-s'
-    connection_label.caption = { const:locale(connection_name) }
-
+    local connection_caption = #lti_data.stop_ids > 0 and string.join(', ', lti_data.stop_ids) or { 'gui-control-behavior.not-connected' }
     local connection = gui:find_element('connection')
-    connection.caption = string.join(', ', lti_data.stop_ids)
+    connection.caption = connection_caption
 
     -- render output signals
     local output_signals = gui:find_element('signal-view')
