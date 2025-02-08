@@ -70,22 +70,26 @@ Constants.lti_train_info_name = Constants:with_prefix(Constants.name)
 -- constants and names
 --------------------------------------------------------------------------------
 
-Constants.divide_by_max = 20
 Constants.divide_by_min = 1
+Constants.divide_by_max = 31 -- maximum length of a LTN train
 
+---@enum lti_train_info.DeliveryType
+Constants.delivery_type = {
+    provide = 'provide',
+    request = 'request'
+}
+
+---@enum lti_train_info.SignalType
 Constants.signal_type = {
     quantity = 1,
     stack_size = 2,
     one = 3,
 }
 
-Constants.delivery_type = table.array_to_dictionary({'provide', 'request'})
-
 Constants.delivery_signals = {
     [Constants.delivery_type.provide] = 'signal-P',
     [Constants.delivery_type.request] = 'signal-R',
 }
-
 
 Constants.lti_range = 3
 

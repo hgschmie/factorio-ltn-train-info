@@ -11,33 +11,33 @@
 --- scripts/train-info
 ----------------------------------------------------------------------------------------------------
 
----@class ModLtiData
+---@class lti_train_info.Storage
 ---@field VERSION integer
 ---@field count integer
 ---@field deliveries table<integer, LTNDelivery>
----@field lti table<integer, TrainInfoData>
+---@field lti table<integer, lti_train_info.Data>
 ---@field stops table<integer, table<integer, boolean>>
 
----@class TrainInfoData
+---@class lti_train_info.Data
 ---@field main LuaEntity
----@field config TrainInfoConfig
+---@field config lti_train_info.Config
 ---@field stop_ids integer[]
----@field current_delivery TrainInfoDelivery?
+---@field current_delivery lti_train_info.Delivery?
 
----@class TrainInfoDelivery
----@field delivery_type string
+---@class lti_train_info.Delivery
+---@field delivery_type lti_train_info.DeliveryType
 ---@field shipment LTNShipment
 ---@field train_id integer
 
----@class TrainInfoDeliveryConfig
+---@class lti_train_info.DeliveryConfig
 ---@field enabled boolean
----@field signal_type integer
+---@field signal_type lti_train_info.SignalType
 ---@field negate boolean
 
----@class TrainInfoConfig
+---@class lti_train_info.Config
 ---@field enabled boolean
----@field provide TrainInfoDeliveryConfig
----@field request TrainInfoDeliveryConfig
+---@field provide lti_train_info.DeliveryConfig
+---@field request lti_train_info.DeliveryConfig
 ---@field virtual boolean
 ---@field divide_by integer
 ---@field modified boolean?

@@ -9,17 +9,17 @@ local LogisticsTrainNetwork = {}
 
 ---@param event LTNDispatcherUpdatedEvent
 local function lti_dispatcher_updated(event)
-    -- This.Lti:dispatcher_updated(event)
+    This.Lti:dispatcherUpdated(event)
 end
 
 ---@param event LTNOnDeliveryCompleted
 local function lti_delivery_completed(event)
-    -- This.Lti:delivery_completed(event)
+    This.Lti:deliveryCompleted(event)
 end
 
 ---@param event LTNOnDeliveryFailed
 local function lti_delivery_failed(event)
-    -- This.Lti:delivery_failed(event)
+    This.Lti:deliveryFailed(event)
 end
 
 

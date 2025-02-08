@@ -19,7 +19,7 @@ local PickerDolliesSupport = {}
 ---@param event epd.Event
 local function picker_dollies_moved(event)
     if not Is.Valid(event.moved_entity) then return end
-    if event.moved_entity.name ~= const.lti_train_info then return end
+    if event.moved_entity.name ~= const.lti_train_info_name then return end
     This.Lti:move(event.moved_entity)
 end
 
