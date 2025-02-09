@@ -6,22 +6,22 @@ It has its quirks, though, none more visible than the signal output from the LTN
 
 This is the default and it results in trains arriving at a provider that may still contain freight or having picked up items from an inserter to report that cargo (This behavior can be changed by unchecking the 'Providers output existing cargo" per-map LTN setting).
 
-The LTN Train Info Combinator (LTI for short) can be placed close to one or more train stops and provides the following signals to the Logistic Network:
+An LTI (LTN Train Info) combinator can be placed close to one or more train stops and provides signals for LTN deliveries:
 
-- A signal for each item in a delivery. The signal can be the quantity requested or provided, the stack count or a binary "1" signal. Those signals are always the current delivery as scheduled by the LTN.
+- A signal for each item in a delivery. The signal can be the quantity requested or provided, the stack count (for items) or a static '1' signal. Those signals are always the current delivery as scheduled by the LTN.
 
 - Each delivery signal can be negated (returned as a negative value)
-- Each delivery signal can be divided by a constant between 1 and 32, e.g. to split it evenly across multiple wagons.
-- Virtual signals to denote whether the connected station is the requester or the provider of the delivery.
-- Signal enabling, negation and signal type (quantity, stack count or binary) can be configured separately for provider and requester operations.
+- Each delivery signal can be divided by a constant between 1 and 31, e.g. to split it evenly across multiple wagons.
+- Additional signals to denote whether the connected stop is the requester or the provider of the delivery, the train id and the connected stop id that is involved in the delivery.
+- Signal enabling, negation and signal type (quantity, stack count or static) can be configured separately for provider and requester operations.
 
 Everything can be configured through the GUI.
 
 ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m1.png) ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m2.png) ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m3.png)
 
-- Fully supports copy/paste, blueprinting and cloning
+- Fully supports copy/paste, blueprinting, undo/redo and cloning
 - Supports [Even Picker Dollies](https://mods.factorio.com/mod/even-pickier-dollies)
-- Can connect to multiple stations simultaneously, when multiple deliveries arrive at the same time, the last one "wins".
+- Can connect to multiple stops simultaneously, when multiple deliveries arrive at the same time, the last one "wins".
 
 ## Provider operations
 
@@ -41,14 +41,15 @@ Signal differences in standard operation between LTN train stop (green signals) 
 
 ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-3.png)
 
-For a requester station, LTN will only ever output the expected cargo in the train after the unload operation is complete. The actual delivery information is only available through the LTN Train Info combinator.
+For a requesting stop, LTN will only ever output the expected cargo in the train after the unload operation is complete. The actual delivery information is only available through the LTN Train Info combinator.
 
 ## Signal reference
 
+- Virtual Signal 'S' - Stop ID that provided the information
 - Virtual Signal 'T' - Train ID for the train that runs the current delivery
-- Virtual Signal 'P' - 1 if a connected station is the provider for the delivery
-- Virtual Signal 'R' - 1 if a connected station is the requester for the delivery
-- Virtual Signal 'D' - All item quantities and stack sizes are divided by this factor (1..20)
+- Virtual Signal 'P' - 1 if a connected stop is the provider for the delivery
+- Virtual Signal 'R' - 1 if a connected stop is the requester for the delivery
+- Virtual Signal 'D' - All item quantities and stack sizes are divided by this factor (1..31)
 
 ## Credits/Acknowledgements
 

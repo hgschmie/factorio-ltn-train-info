@@ -392,10 +392,8 @@ function Lti:updateLtiState(lti_data, current_delivery)
             local station = self:getLastStop(train_id)
             if station then table.insert(filters, create_filter('signal-S', station.unit_number)) end
 
-            if delivery_cfg.signal_type ~= const.signal_type.one then
-                -- divisor
-                table.insert(filters, create_filter('signal-D', lti_config.divide_by))
-            end
+            -- divisor
+            table.insert(filters, create_filter('signal-D', delivery_cfg.signal_type == const.signal_type.one and 1 or lti_config.divide_by))
         end
     end
 
