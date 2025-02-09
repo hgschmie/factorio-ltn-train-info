@@ -15,3 +15,7 @@ if storage.lti_data.stops then
     storage.lti_data.stops = nil
     storage.lti_data.stop_to_ltis = {}
 end
+
+for _, lti_data in pairs(This.Lti:allLtiData()) do
+    lti_data.connected_stops = lti_data.connected_stops or {}
+end
