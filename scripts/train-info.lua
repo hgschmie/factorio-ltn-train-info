@@ -41,7 +41,7 @@ end
 ---@return lti_train_info.Config config
 local function get_new_config()
     return {
-        enabled = false,
+        enabled = true,
         provide = {
             enabled = true,
             signal_type = const.signal_type.quantity,
@@ -310,8 +310,6 @@ function Lti:updateStatus(entity)
 
     lti_data.stop_ids = stop_ids
 
-    lti_data.config.enabled = (#lti_data.stop_ids > 0) and true or false
-
     self:updateDelivery(lti_data)
 end
 
@@ -376,7 +374,7 @@ function Lti:updateDelivery(lti_data, current_delivery)
 
                 count = count * (delivery_cfg.negate and -1 or 1)
 
-                if count > 0 then
+                if count ~= 0 then
                     table.insert(filters, {
                         value = {
                             type = fields[1],
@@ -387,21 +385,28 @@ function Lti:updateDelivery(lti_data, current_delivery)
                     })
                 end
             end
+        end
 
-            -- add virtual signals
-            if lti_config.virtual then
-                -- deliver or provide
-                table.insert(filters, create_filter(const.delivery_signals[current_delivery.delivery_type]))
-                -- train id
-                table.insert(filters, create_filter('signal-T', current_delivery.train_id))
+        -- add virtual signals
+        if lti_config.virtual then
+            -- deliver or provide
+            table.insert(filters, create_filter(const.delivery_signals[current_delivery.delivery_type]))
+            -- train id
+            local train_id = current_delivery.train_id
+            table.insert(filters, create_filter('signal-T', train_id))
 
-                if delivery_cfg.signal_type ~= const.signal_type.one then
-                    -- divisor
-                    table.insert(filters, create_filter('signal-D', lti_config.divide_by))
-                end
+            local station_id = self:getLastStop(train_id)
+            if station_id then
+                table.insert(filters, create_filter('signal-S', station_id))
+            end
+
+            if delivery_cfg.signal_type ~= const.signal_type.one then
+                -- divisor
+                table.insert(filters, create_filter('signal-D', lti_config.divide_by))
             end
         end
     end
+
     control.sections[1].filters = filters
 
     return filters

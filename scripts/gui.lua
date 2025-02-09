@@ -404,7 +404,6 @@ function Gui.getUi(gui)
                                 style = 'deep_slots_scroll_pane',
                                 direction = 'vertical',
                                 name = 'signal-view-pane',
-                                visible = true,
                                 vertical_scroll_policy = 'auto-and-reserve-space',
                                 horizontal_scroll_policy = 'never',
                                 style_mods = {
@@ -609,15 +608,19 @@ local function update_gui_delivery(gui, type, cfg)
 
     local quantity = gui:find_element('signal-type-quantity-' .. type)
     quantity.state = cfg.signal_type == const.signal_type.quantity
+    quantity.enabled = cfg.enabled
 
     local stacksize = gui:find_element('signal-type-stacksize-' .. type)
     stacksize.state = cfg.signal_type == const.signal_type.stack_size
+    stacksize.enabled = cfg.enabled
 
     local one = gui:find_element('signal-type-one-' .. type)
     one.state = cfg.signal_type == const.signal_type.one
+    one.enabled = cfg.enabled
 
     local negate = gui:find_element('negate-' .. type)
     negate.state = cfg.negate
+    negate.enabled = cfg.enabled
 end
 
 
@@ -630,6 +633,10 @@ end
 local function update_gui(gui, lti_data)
     local config = lti_data.config
 
+    local enabled = lti_data.config.enabled
+    local on_off = gui:find_element('on-off')
+    on_off.switch_state = values_on_off[enabled]
+
     -- deal with provide and request
     update_gui_delivery(gui, 'provide', config.provide)
     update_gui_delivery(gui, 'request', config.request)
@@ -637,10 +644,15 @@ local function update_gui(gui, lti_data)
     local virtual = gui:find_element('virtual')
     virtual.state = config.virtual
 
+    local divide_enabled = config.provide.enabled or config.request.enabled
+
     local divide_by_slider = gui:find_element('divide_by_slider')
     divide_by_slider.slider_value = config.divide_by
+    divide_by_slider.enabled = divide_enabled
+
     local divide_by_text = gui:find_element('divide_by_text')
     divide_by_text.text = tostring(config.divide_by)
+    divide_by_text.enabled = divide_enabled
 end
 
 ---@param gui framework.gui
@@ -649,19 +661,27 @@ end
 local function refresh_gui(gui, lti_data)
     local lti_config = lti_data.config
 
+    ---@type defines.entity_status?
+    local entity_status
+
     -- status LED
-    local entity_status = lti_config.enabled and defines.entity_status.working or defines.entity_status.disabled
+    if lti_config.enabled then
+        if lti_data.main.status ~= defines.entity_status.working then
+            entity_status = lti_data.main.status or defines.entity_status.broken
+        elseif #lti_data.stop_ids > 0 then
+            entity_status = defines.entity_status.working
+        end
+    else
+        entity_status = defines.entity_status.disabled
+    end
 
     local lamp = gui:find_element('status-lamp')
-    lamp.sprite = tools.STATUS_SPRITES[entity_status]
+    lamp.sprite = tools.STATUS_SPRITES[entity_status] or tools.STATUS_LEDS.RED
 
     local status = gui:find_element('status-label')
-    status.caption = { tools.STATUS_NAMES[entity_status] }
+    status.caption = entity_status and { tools.STATUS_NAMES[entity_status] } or { const:locale('not-connected') }
 
     -- train stop connections
-    local connection_frame = gui:find_element('connection-frame')
-    connection_frame.visible = lti_config.enabled
-
     local connection_caption = #lti_data.stop_ids > 0 and string.join(', ', lti_data.stop_ids) or { 'gui-control-behavior.not-connected' }
     local connection = gui:find_element('connection')
     connection.caption = connection_caption
@@ -770,6 +790,7 @@ function Gui.guiUpdater(gui)
 
     if refresh_config or refresh_state then
         update_gui(gui, lti_data)
+        This.Lti:updateDelivery(lti_data, lti_data.current_delivery)
     end
 
     if refresh_config then
