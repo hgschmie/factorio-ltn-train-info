@@ -103,22 +103,7 @@ local function on_entity_settings_pasted(event)
     if not (src_entity and dst_entity) then return end
 
     dst_entity.config = util.copy(src_entity.config)
-    This.Lti:updateStatus(dst_entity.main)
-end
-
---------------------------------------------------------------------------------
--- Configuration changes (runtime and startup)
---------------------------------------------------------------------------------
-
----@param changed ConfigurationChangedData?
-local function on_configuration_changed(changed)
-    This.Lti:init()
-
-    for _, force in pairs(game.forces) do
-        if force.technologies['logistic-train-network'].researched then
-            force.recipes[const.lti_train_info_name].enabled = true
-        end
-    end
+    This.Lti:updateLtiState(dst_entity, dst_entity.current_delivery)
 end
 
 --------------------------------------------------------------------------------
@@ -133,7 +118,9 @@ local function serialize_config(entity)
     local lti_data = This.Lti:getLtiData(entity.unit_number)
     if not lti_data then return end
 
-    return lti_data.config
+    return {
+        [const.config_tag_name] = lti_data.config,
+    }
 end
 
 --------------------------------------------------------------------------------
@@ -153,18 +140,50 @@ local function on_train_changed_state(event)
     end
 end
 
+--------------------------------------------------------------------------------
+-- Configuration changes (startup)
+--------------------------------------------------------------------------------
+
+---@param changed ConfigurationChangedData?
+local function on_configuration_changed(changed)
+    This.Lti:init()
+
+    -- (re-) enable technology
+    for _, force in pairs(game.forces) do
+        if force.technologies['logistic-train-network'].researched then
+            force.recipes[const.lti_name].enabled = true
+        end
+    end
+
+    local destroy_list = {}
+
+    -- reset and rescan
+    storage.lti_data.stop_to_ltis = {}
+    for lti_id, lti_data in pairs(This.Lti:allLtiData()) do
+        if not (lti_data.main and lti_data.main.valid) then
+            table.insert(destroy_list, lti_id)
+        else
+            This.Lti:scanForStops(lti_data)
+        end
+    end
+
+    for _, lti_id in pairs(destroy_list) do
+        This.Lti:destroy(lti_id)
+    end
+end
+
 
 --------------------------------------------------------------------------------
 -- Event registration
 --------------------------------------------------------------------------------
 
 local function register_events()
-    local lti_entity_filter = Matchers:matchEventEntityName(const.lti_train_info_name)
+    local lti_entity_filter = Matchers:matchEventEntityName(const.lti_name)
 
     -- entity creation/deletion
     Event.register(Matchers.CREATION_EVENTS, on_entity_created, lti_entity_filter)
     Event.register(Matchers.DELETION_EVENTS, on_entity_deleted, lti_entity_filter)
-    Framework.ghost_manager:registerForName(const.lti_train_info_name)
+    Framework.ghost_manager:registerForName(const.lti_name)
 
     -- Framework.ghost_manager.register_for_ghost_attributes('ghost_type', 'train-stop') -- WHY?
 
@@ -175,10 +194,10 @@ local function register_events()
     Event.register(defines.events.on_object_destroyed, on_entity_destroyed)
 
     -- Manage blueprint configuration setting
-    Framework.blueprint:registerCallback(const.lti_train_info_name, serialize_config)
+    Framework.blueprint:registerCallback(const.lti_name, serialize_config)
 
     -- manage tombstones for undo/redo and dead entities
-    Framework.tombstone:registerCallback(const.lti_train_info_name, {
+    Framework.tombstone:registerCallback(const.lti_name, {
         create_tombstone = serialize_config,
         apply_tombstone = Framework.ghost_manager.mapTombstoneToGhostTags,
     })
@@ -202,7 +221,7 @@ end
 --------------------------------------------------------------------------------
 
 local function on_init()
-    --     This.Lti:init()
+    This.Lti:init()
     register_events()
 end
 

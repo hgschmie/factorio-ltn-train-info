@@ -1,0 +1,11 @@
+{
+    "item": [
+        [ "hps:lti-ltn-train-info", "hps__lti-ltn-train-info" ]
+    ],
+    "recipe": [
+        [ "hps:lti-ltn-train-info", "hps__lti-ltn-train-info" ]
+    ],
+    "entity": [
+        [ "hps:lti-ltn-train-info", "hps__lti-ltn-train-info" ]
+    ]
+}

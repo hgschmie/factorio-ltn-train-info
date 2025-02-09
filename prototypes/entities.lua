@@ -9,7 +9,7 @@ local data_util = require('framework.prototypes.data-util')
 local const = require('lib.constants')
 
 local lti = data_util.copy_entity_prototype(data.raw['constant-combinator']['constant-combinator'],
-    const.lti_train_info_name) --[[@as data.ConstantCombinatorPrototype ]]
+    const.lti_name) --[[@as data.ConstantCombinatorPrototype ]]
 
 -- ConstantCombinatorPrototype
 ---@diagnostic disable-next-line: undefined-global
@@ -35,7 +35,7 @@ lti.sprites = make_4way_animation_from_spritesheet {
 
     -- EntityPrototype
 lti.icon = const:png('icon/ltn-train-info')
-lti.minable = { mining_time = 0.1, result = const.lti_train_info_name }
+lti.minable = { mining_time = 0.1, result = const.lti_name }
 
 lti.radius_visualisation_specification = {
     priority = "extra-high-no-scale",
@@ -52,17 +52,17 @@ data:extend { lti }
 
 ------------------------------------------------------------------------
 
-local lti_item = data_util.copy_prototype(data.raw.item['constant-combinator'], const.lti_train_info_name) --[[@as data.ItemPrototype]]
+local lti_item = data_util.copy_prototype(data.raw.item['constant-combinator'], const.lti_name) --[[@as data.ItemPrototype]]
 
 lti_item.icon = const:png('icon/ltn-train-info')
 lti_item.icon_size = 64
 lti_item.icons = nil
 lti_item.order = const.order
 
-local lti_recipe = data_util.copy_prototype(data.raw.recipe['constant-combinator'], const.lti_train_info_name) --[[@as data.RecipePrototype]]
+local lti_recipe = data_util.copy_prototype(data.raw.recipe['constant-combinator'], const.lti_name) --[[@as data.RecipePrototype]]
 lti_recipe.order = lti_item.order
-lti_recipe.results[1].name = const.lti_train_info_name
+lti_recipe.results[1].name = const.lti_name
 
 data:extend { lti_item, lti_recipe }
 
-table.insert(data.raw['technology']['logistic-train-network'].effects, { type = 'unlock-recipe', recipe = const.lti_train_info_name })
+table.insert(data.raw['technology']['logistic-train-network'].effects, { type = 'unlock-recipe', recipe = const.lti_name })

@@ -2,10 +2,10 @@
 --- Initialize this mod's globals
 ----------------------------------------------------------------------------------------------------
 
----@class lti_train_info.Mod
+---@class lti.Mod
 ---@field other_mods table<string, string>
----@field Lti lti_train_info.Lti?
----@field Gui lti_train_info.Gui?
+---@field Lti lti.Lti?
+---@field Gui lti.Gui?
 local This = {
     other_mods = {
         LogisticTrainNetwork = 'ltn',

@@ -15,7 +15,7 @@ local signal_converter = require('framework.signal_converter')
 
 local const = require('lib.constants')
 
----@class ltn_train_info.Gui
+---@class lti.Gui
 ---@field NAME string
 local Gui = {
     NAME = 'combinator-gui',
@@ -70,7 +70,7 @@ function Gui.getUi(gui)
                     {
                         type = 'label',
                         style = 'frame_title',
-                        caption = { 'entity-name.' .. const.lti_train_info_name },
+                        caption = { 'entity-name.' .. const.lti_name },
                         drag_target = 'gui_root',
                         ignored_by_interaction = true,
                     },
@@ -558,7 +558,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 ---@param gui_element LuaGuiElement?
----@param lti_data lti_train_info.Data?
+---@param lti_data lti.Data?
 local function render_output_signals(gui_element, lti_data)
     if not lti_data then return end
 
@@ -601,7 +601,7 @@ end
 
 ---@param gui framework.gui
 ---@param type string
----@param cfg lti_train_info.DeliveryConfig
+---@param cfg lti.DeliveryConfig
 local function update_gui_delivery(gui, type, cfg)
     local delivery = gui:find_element('delivery-' .. type)
     delivery.state = cfg.enabled
@@ -629,7 +629,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 ---@param gui framework.gui
----@param lti_data lti_train_info.Data
+---@param lti_data lti.Data
 local function update_gui(gui, lti_data)
     local config = lti_data.config
 
@@ -656,7 +656,7 @@ local function update_gui(gui, lti_data)
 end
 
 ---@param gui framework.gui
----@param lti_data lti_train_info.Data
+---@param lti_data lti.Data
 ---@return table<defines.wire_connector_id, boolean> connection_state
 local function refresh_gui(gui, lti_data)
     local lti_config = lti_data.config
@@ -668,7 +668,7 @@ local function refresh_gui(gui, lti_data)
     if lti_config.enabled then
         if lti_data.main.status ~= defines.entity_status.working then
             entity_status = lti_data.main.status or defines.entity_status.broken
-        elseif #lti_data.stop_ids > 0 then
+        elseif table_size(lti_data.connected_stops) > 0 then
             entity_status = defines.entity_status.working
         end
     else
@@ -682,7 +682,7 @@ local function refresh_gui(gui, lti_data)
     status.caption = entity_status and { tools.STATUS_NAMES[entity_status] } or { const:locale('not-connected') }
 
     -- train stop connections
-    local connection_caption = #lti_data.stop_ids > 0 and string.join(', ', lti_data.stop_ids) or { 'gui-control-behavior.not-connected' }
+    local connection_caption = table_size(lti_data.connected_stops) > 0 and string.join(', ', table.keys(lti_data.connected_stops, true)) or { 'gui-control-behavior.not-connected' }
     local connection = gui:find_element('connection')
     connection.caption = connection_caption
 
@@ -742,8 +742,8 @@ function Gui.onGuiOpened(event)
         return
     end
 
-    ---@class lti_train_info.GuiContext
-    ---@field last_config lti_train_info.Config?
+    ---@class lti.GuiContext
+    ---@field last_config lti.Config?
     ---@field last_connection_state table<defines.wire_connector_id, boolean>?
     local gui_state = {
         last_config = nil,
@@ -779,7 +779,7 @@ function Gui.guiUpdater(gui)
     local lti_data = This.Lti:getLtiData(gui.entity_id)
     if not lti_data then return false end
 
-    ---@type lti_train_info.GuiContext
+    ---@type lti.GuiContext
     local context = gui.context
 
     -- always update wire state and preview
@@ -790,7 +790,7 @@ function Gui.guiUpdater(gui)
 
     if refresh_config or refresh_state then
         update_gui(gui, lti_data)
-        This.Lti:updateDelivery(lti_data, lti_data.current_delivery)
+        This.Lti:updateLtiState(lti_data, lti_data.current_delivery)
     end
 
     if refresh_config then
@@ -811,8 +811,8 @@ end
 local function init_gui()
     Framework.gui_manager:register_gui_type(Gui.NAME, get_gui_event_definition())
 
-    local match_main_entity = Matchers:matchEventEntityName(const.lti_train_info_name)
-    local match_ghost_main_entity = Matchers:matchEventEntityGhostName(const.lti_train_info_name)
+    local match_main_entity = Matchers:matchEventEntityName(const.lti_name)
+    local match_ghost_main_entity = Matchers:matchEventEntityGhostName(const.lti_name)
 
     -- Gui updates / sync inserters
     Event.on_event(defines.events.on_gui_opened, Gui.onGuiOpened, match_main_entity)

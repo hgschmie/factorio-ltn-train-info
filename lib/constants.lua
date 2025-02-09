@@ -64,7 +64,7 @@ end
 --------------------------------------------------------------------------------
 
 -- Base name
-Constants.lti_train_info_name = Constants:with_prefix(Constants.name)
+Constants.lti_name = Constants:with_prefix(Constants.name)
 
 --------------------------------------------------------------------------------
 -- constants and names
@@ -73,13 +73,13 @@ Constants.lti_train_info_name = Constants:with_prefix(Constants.name)
 Constants.divide_by_min = 1
 Constants.divide_by_max = 31 -- maximum length of a LTN train
 
----@enum lti_train_info.DeliveryType
+---@enum lti.DeliveryType
 Constants.delivery_type = {
     provide = 'provide',
     request = 'request'
 }
 
----@enum lti_train_info.SignalType
+---@enum lti.SignalType
 Constants.signal_type = {
     quantity = 1,
     stack_size = 2,
@@ -96,12 +96,6 @@ Constants.lti_range = 3
 -- names of the supported "train" stops
 Constants.lti_train_stop_names = { 'logistic-train-stop', 'ltn-port', }
 Constants.lti_train_stops = table.array_to_dictionary(Constants.lti_train_stop_names)
-
---------------------------------------------------------------------------------
--- localization
---------------------------------------------------------------------------------
-
-Constants.lti_entity_name = 'entity-name.' .. Constants.lti_train_info_name
 
 --------------------------------------------------------------------------------
 -- settings

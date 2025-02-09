@@ -11,36 +11,37 @@
 --- scripts/train-info
 ----------------------------------------------------------------------------------------------------
 
----@class lti_train_info.Storage
+---@class lti.Storage
 ---@field VERSION integer
 ---@field count integer
 ---@field deliveries table<integer, LTNDelivery>
----@field lti table<integer, lti_train_info.Data>
----@field stops table<integer, table<integer, boolean>>
+---@field lti table<integer, lti.Data>
+---@field stop_to_ltis table<number, LuaEntity>
+---@field train_to_last_stop table<integer, LuaEntity>
 
----@class lti_train_info.Data
+
+---@class lti.Data
 ---@field main LuaEntity
----@field config lti_train_info.Config
----@field stop_ids integer[]
----@field current_delivery lti_train_info.Delivery?
+---@field config lti.Config
+---@field connected_stops table<number, LuaEntity>
+---@field current_delivery lti.Delivery?
 
----@class lti_train_info.Delivery
----@field delivery_type lti_train_info.DeliveryType
+---@class lti.Delivery
+---@field delivery_type lti.DeliveryType
 ---@field shipment LTNShipment
 ---@field train_id integer
 
----@class lti_train_info.DeliveryConfig
+---@class lti.DeliveryConfig
 ---@field enabled boolean
----@field signal_type lti_train_info.SignalType
+---@field signal_type lti.SignalType
 ---@field negate boolean
 
----@class lti_train_info.Config
+---@class lti.Config
 ---@field enabled boolean
----@field provide lti_train_info.DeliveryConfig
----@field request lti_train_info.DeliveryConfig
+---@field provide lti.DeliveryConfig
+---@field request lti.DeliveryConfig
 ---@field virtual boolean
 ---@field divide_by integer
----@field modified boolean?
 
 ----------------------------------------------------------------------------------------------------
 --- LTN Stuff

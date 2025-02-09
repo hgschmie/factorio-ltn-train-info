@@ -86,7 +86,7 @@ function FrameworkBlueprintManager:createEntityMap(entity_mapping, context)
 
                 local key = tools:createEntityKeyFromEntity(mapped_entity)
                 assert(key)
-                
+
                 if entity_map[key] then
                     Framework.logger:logf('Duplicate entity found at (%d/%d): %s', mapped_entity.position.x, mapped_entity.position.y, mapped_entity.name)
                 else
@@ -132,7 +132,7 @@ local function on_player_setup_blueprint(event)
     else
         -- Player is editing the blueprint, no access for us yet.
         -- onPlayerConfiguredBlueprint picks this up and stores it.
-        player_data.current_blueprint =  {
+        player_data.current_blueprint = {
             entity_map = entity_map,
             context = context,
         }
