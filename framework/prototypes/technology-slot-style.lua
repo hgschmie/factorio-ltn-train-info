@@ -1,9 +1,13 @@
 ----------------------------------------------------------------------------------------------------
 -- technology slot styles supplied by the framework - from flib
 ----------------------------------------------------------------------------------------------------
+assert(data and data.raw)
 
 if not data.raw['gui-style'] then return end
 local styles = data.raw['gui-style'].default
+
+-- global in data stage
+assert(default_shadow) ---@diagnostic disable-line: undefined-global
 
 ---@param name string
 ---@param y number
@@ -18,7 +22,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 0, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         hovered_graphical_set = {
             base = {
@@ -26,7 +30,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 144, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         clicked_graphical_set = {
             base = {
@@ -34,7 +38,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 144, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         selected_graphical_set = {
             base = {
@@ -42,7 +46,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 288, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         selected_hovered_graphical_set = {
             base = {
@@ -50,7 +54,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 432, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         selected_clicked_graphical_set = {
             base = {
@@ -58,7 +62,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 432, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         padding = 0,
         size = { 72, 100 },
@@ -73,7 +77,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 576, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         hovered_graphical_set = {
             base = {
@@ -81,7 +85,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 720, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         clicked_graphical_set = {
             base = {
@@ -89,7 +93,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 720, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         selected_graphical_set = {
             base = {
@@ -97,7 +101,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 864, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         selected_hovered_graphical_set = {
             base = {
@@ -105,7 +109,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 1008, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         selected_clicked_graphical_set = {
             base = {
@@ -113,7 +117,7 @@ local function build_technology_slot(name, y, level_color, level_range_color)
                 position = { 1008, y },
                 size = { 144, 200 },
             },
-            shadow = default_shadow,
+            shadow = default_shadow, ---@diagnostic disable-line: undefined-global
         },
         padding = 0,
         size = { 72, 100 },
