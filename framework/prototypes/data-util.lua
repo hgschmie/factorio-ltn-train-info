@@ -60,10 +60,6 @@ function FrameworkDataUtil.copy_entity_prototype(prototype, new_name, make_invis
 
     if not make_invisible then return p end
 
-    p.icon = nil
-    p.icon_size = nil
-    p.icons = nil
-
     ---@diagnostic disable: inject-field, undefined-field
     -- CombinatorPrototype
     if p.sprites then p.sprites = util.empty_sprite() end
@@ -105,7 +101,7 @@ end
 ---@param prototype data.Prototype
 ---@param new_name string The new name of the entity
 ---@return data.Prototype
-function FrameworkDataUtil.copy_prototype(prototype, new_name)
+function FrameworkDataUtil.copy_other_prototype(prototype, new_name)
     if not prototype.type or not prototype.name then
         error('Invalid prototype: prototypes must have name and type properties.')
     end

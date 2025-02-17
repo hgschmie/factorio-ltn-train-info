@@ -1,4 +1,3 @@
----@meta
 ------------------------------------------------------------------------
 -- Manages tombstone (configuration data after an entity has been removed)
 --
