@@ -20,34 +20,17 @@ local function on_entity_created(event)
     local entity = event and event.entity
     if not entity then return end
 
-    -- register entity for destruction
-    script.register_on_object_destroyed(entity)
-
-    local player_index = event.player_index
     local tags = event.tags
 
     local entity_ghost = Framework.ghost_manager:findGhostForEntity(entity)
     if entity_ghost then
-        player_index = player_index or entity_ghost.player_index
+        Framework.ghost_manager:deleteGhost(entity.unit_number)
         tags = tags or entity_ghost.tags
     end
 
-    local config = tags and tags[const.config_tag_name]
+    local config = tags and tags[const.config_tag_name] --[[@as lti.Config ]]
 
     This.Lti:create(entity, config)
-end
-
----@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_space_platform_mined_entity | EventData.script_raised_destroy
-local function on_entity_deleted(event)
-    local entity = event and event.entity
-    if not entity then return end
-
-    This.Lti:destroy(entity.unit_number)
-end
-
----@param event EventData.on_object_destroyed
-local function on_entity_destroyed(event)
-    This.Lti:destroy(event.useful_id)
 end
 
 ---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.on_space_platform_built_entity | EventData.script_raised_revive | EventData.script_raised_built
@@ -60,6 +43,16 @@ local function on_train_stop_created(event)
     This.Lti:addTrainStop(entity)
 end
 
+---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_space_platform_mined_entity | EventData.script_raised_destroy
+local function on_entity_deleted(event)
+    local entity = event and event.entity
+    if not (entity and entity.valid) then return end
+    assert(entity.unit_number)
+
+    if This.Lti:destroy(entity.unit_number) then
+        Framework.gui_manager:destroy_gui_by_entity_id(entity.unit_number)
+    end
+end
 
 ---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_space_platform_mined_entity | EventData.script_raised_destroy
 local function on_train_stop_deleted(event)
@@ -70,13 +63,23 @@ local function on_train_stop_deleted(event)
 end
 
 --------------------------------------------------------------------------------
+-- Entity destruction
+--------------------------------------------------------------------------------
+
+---@param event EventData.on_object_destroyed
+local function on_object_destroyed(event)
+    if This.Lti:destroy(event.useful_id) then
+        Framework.gui_manager:destroy_gui_by_entity_id(event.useful_id)
+    end
+end
+
+--------------------------------------------------------------------------------
 -- Entity cloning
 --------------------------------------------------------------------------------
 
 ---@param event EventData.on_entity_cloned
 local function on_entity_cloned(event)
-    if not (event and event.source and event.source.valid) then return end
-    if not (event.destination and event.destination.valid) then return end
+    if not (event and event.source and event.source.valid and event.destination and event.destination.valid) then return end
 
     local src_entity = This.Lti:getLtiData(event.source.unit_number)
     if not src_entity then return end
@@ -90,12 +93,10 @@ end
 
 ---@param event EventData.on_entity_settings_pasted
 local function on_entity_settings_pasted(event)
-    if not (event and event.source and event.source.valid) then return end
-    if not (event.destination and event.destination.valid) then return end
+    if not (event and event.source and event.source.valid and event.destination and event.destination.valid) then return end
 
     local player = Player.get(event.player_index)
-    if not (player and player.valid) then return end
-    if not (player.force == event.source.force and player.force == event.destination.force) then return end
+    if not (player and player.valid and player.force == event.source.force and player.force == event.destination.force) then return end
 
     local src_entity = This.Lti:getLtiData(event.source.unit_number)
     local dst_entity = This.Lti:getLtiData(event.destination.unit_number)
@@ -105,6 +106,32 @@ local function on_entity_settings_pasted(event)
     dst_entity.config = util.copy(src_entity.config)
     This.Lti:updateLtiState(dst_entity, dst_entity.current_delivery)
 end
+
+--------------------------------------------------------------------------------
+-- Configuration changes (startup)
+--------------------------------------------------------------------------------
+
+local function on_configuration_changed()
+    This.Lti:init()
+
+    -- (re-) enable technology
+    for _, force in pairs(game.forces) do
+        if force.technologies['logistic-train-network'].researched then
+            force.recipes[const.lti_name].enabled = true
+        end
+    end
+
+    -- reset and rescan
+    storage.lti_data.stop_to_ltis = {}
+    for lti_id, lti_data in pairs(This.Lti:allLtiData()) do
+        if not (lti_data.main and lti_data.main.valid) then
+            This.Lti:destroy(lti_id)
+        else
+            This.Lti:scanForStops(lti_data)
+        end
+    end
+end
+
 
 --------------------------------------------------------------------------------
 -- serialize config (for blueprint and tombstone)
@@ -141,59 +168,26 @@ local function on_train_changed_state(event)
 end
 
 --------------------------------------------------------------------------------
--- Configuration changes (startup)
---------------------------------------------------------------------------------
-
----@param changed ConfigurationChangedData?
-local function on_configuration_changed(changed)
-    This.Lti:init()
-
-    -- (re-) enable technology
-    for _, force in pairs(game.forces) do
-        if force.technologies['logistic-train-network'].researched then
-            force.recipes[const.lti_name].enabled = true
-        end
-    end
-
-    local destroy_list = {}
-
-    -- reset and rescan
-    storage.lti_data.stop_to_ltis = {}
-    for lti_id, lti_data in pairs(This.Lti:allLtiData()) do
-        if not (lti_data.main and lti_data.main.valid) then
-            table.insert(destroy_list, lti_id)
-        else
-            This.Lti:scanForStops(lti_data)
-        end
-    end
-
-    for _, lti_id in pairs(destroy_list) do
-        This.Lti:destroy(lti_id)
-    end
-end
-
-
---------------------------------------------------------------------------------
--- Event registration
+-- event registration and management
 --------------------------------------------------------------------------------
 
 local function register_events()
     local lti_entity_filter = Matchers:matchEventEntityName(const.lti_name)
 
-    -- entity creation/deletion
+    -- entity create / delete
     Event.register(Matchers.CREATION_EVENTS, on_entity_created, lti_entity_filter)
     Event.register(Matchers.DELETION_EVENTS, on_entity_deleted, lti_entity_filter)
+
+    -- manage ghost building (robot building)
     Framework.ghost_manager:registerForName(const.lti_name)
 
-    -- Framework.ghost_manager.register_for_ghost_attributes('ghost_type', 'train-stop') -- WHY?
+    -- entity destroy (can't filter on that)
+    Event.register(defines.events.on_object_destroyed, on_object_destroyed)
 
-    -- Configuration changes (runtime and startup)
+    -- Configuration changes (startup)
     Event.on_configuration_changed(on_configuration_changed)
 
-    -- entity destroy
-    Event.register(defines.events.on_object_destroyed, on_entity_destroyed)
-
-    -- Manage blueprint configuration setting
+    -- manage blueprinting and copy/paste
     Framework.blueprint:registerCallback(const.lti_name, serialize_config)
 
     -- manage tombstones for undo/redo and dead entities
@@ -217,7 +211,7 @@ local function register_events()
 end
 
 --------------------------------------------------------------------------------
--- Event registration
+-- mod init/load code
 --------------------------------------------------------------------------------
 
 local function on_init()

@@ -1,4 +1,3 @@
----@meta
 ------------------------------------------------------------------------
 -- manage the train delivery state
 ------------------------------------------------------------------------
@@ -210,7 +209,6 @@ function Lti:create(main, config)
     local lti_data = {
         main = main,
         config = config or get_new_config(),
-        stop_ids = {},
         connected_stops = {},
     }
 
@@ -222,15 +220,20 @@ function Lti:create(main, config)
 end
 
 ---@param lti_id integer
+---@return boolean True if an entity was deleted
 function Lti:destroy(lti_id)
     local lti_data = self:getLtiData(lti_id)
-    if not lti_data then return end
+    if not lti_data then return false end
 
     self:clearLtiData(lti_id)
 
-    for stop_id in pairs(lti_data.connected_stops) do
-        self:removeLtiFromStop(stop_id, lti_id)
+    if lti_data.connected_stops then
+        for stop_id in pairs(lti_data.connected_stops) do
+            self:removeLtiFromStop(stop_id, lti_id)
+        end
     end
+
+    return true
 end
 
 ------------------------------------------------------------------------
@@ -280,9 +283,12 @@ function Lti:scanForStops(lti_data, ignore_stop_id)
 
     local lti_entity = lti_data.main
     local lti_id = lti_entity.unit_number
-    local remove_list = table.keys(lti_data.connected_stops)
-    for _, stop_id in pairs(remove_list) do
-        self:removeLtiFromStop(stop_id, lti_id)
+
+    if lti_data.connected_stops then
+        local remove_list = table.keys(lti_data.connected_stops)
+        for _, stop_id in pairs(remove_list) do
+            self:removeLtiFromStop(stop_id, lti_id)
+        end
     end
 
     local pos = Position.new(lti_entity.position)
