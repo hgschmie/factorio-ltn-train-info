@@ -40,10 +40,9 @@ local function can_access_blueprint(player)
 end
 
 ---@param blueprint LuaItemStack
----@param surface_index number
 ---@param entity_map framework.blueprint.EntityMap
 ---@param context framework.blueprint.Context
-function FrameworkBlueprintManager:augmentBlueprint(blueprint, surface_index, entity_map, context)
+function FrameworkBlueprintManager:augmentBlueprint(blueprint, entity_map, context)
     if not entity_map or (table_size(entity_map) < 1) then return end
     if not (blueprint and blueprint.is_blueprint_setup()) then return end
 
@@ -55,7 +54,7 @@ function FrameworkBlueprintManager:augmentBlueprint(blueprint, surface_index, en
     -- have changed as the player can manipulate the blueprint.
 
     for idx, entity in pairs(blueprint_entities) do
-        local key = tools:createEntityKeyFromBlueprintEntity(entity, surface_index)
+        local key = tools:createEntityKeyFromBlueprintEntity(entity) -- override surface index to 0
         if entity_map[key] then
             local callback = self.callbacks[entity.name]
             if callback then
@@ -70,27 +69,27 @@ function FrameworkBlueprintManager:augmentBlueprint(blueprint, surface_index, en
     end
 end
 
----@param entity_mapping table<integer, LuaEntity>
+---@param entities LuaEntity[]
 ---@param context framework.blueprint.Context
 ---@return framework.blueprint.EntityMap entity_map
-function FrameworkBlueprintManager:createEntityMap(entity_mapping, context)
+function FrameworkBlueprintManager:createEntityMap(entities, context)
+    if not entities then return {} end
+
     local entity_map = {}
-    if entity_mapping then
-        for idx, mapped_entity in pairs(entity_mapping) do
-            if self.callbacks[mapped_entity.name] then -- there is a callback for this entity
-                local map_callback = self.map_callbacks[mapped_entity.name]
-                if map_callback then
-                    map_callback(mapped_entity, idx, context)
-                end
+    for idx, entity in pairs(entities) do
+        if self.callbacks[entity.name] then -- there is a callback for this entity
+            local map_callback = self.map_callbacks[entity.name]
+            if map_callback then
+                map_callback(entity, idx, context)
+            end
 
-                local key = tools:createEntityKeyFromEntity(mapped_entity)
-                assert(key)
+            local key = tools:createEntityKeyFromEntity(entity, 0) -- override surface index to 0
+            assert(key)
 
-                if entity_map[key] then
-                    Framework.logger:logf('Duplicate entity found at (%d/%d): %s', mapped_entity.position.x, mapped_entity.position.y, mapped_entity.name)
-                else
-                    entity_map[key] = mapped_entity
-                end
+            if entity_map[key] then
+                Framework.logger:logf('Duplicate entity found at %s: %s', entity.gps_tag, entity.name)
+            else
+                entity_map[key] = entity
             end
         end
     end
@@ -107,16 +106,15 @@ local function on_player_setup_blueprint(event)
     local player, player_data = Player.get(event.player_index)
     if not (player or player_data) then return end
 
-    local self = Framework.blueprint
-    assert(self)
+    local self = assert(Framework.blueprint)
 
-    local blueprinted_entities = event.mapping.get()
+    local selected_entities = event.mapping.get()
     -- for large blueprints, the event mapping might come up empty
     -- which seems to be a limitation of the game. Fall back to an
     -- area scan
-    if table_size(blueprinted_entities) < 1 then
+    if table_size(selected_entities) < 1 then
         if not event.area then return end
-        blueprinted_entities = player.surface.find_entities_filtered {
+        selected_entities = player.surface.find_entities_filtered {
             area = event.area,
             force = player.force,
             name = table.keys(self.callbacks)
@@ -124,14 +122,16 @@ local function on_player_setup_blueprint(event)
     end
 
     local context = {}
-    local entity_map = self:createEntityMap(blueprinted_entities, context)
+    local entity_map = self:createEntityMap(selected_entities, context)
 
-    if can_access_blueprint(player) then
-        self:augmentBlueprint(player.cursor_stack, player.surface_index, entity_map, context)
+    local blueprint_item_stack = event.stack or (can_access_blueprint(player) and player.cursor_stack)
+
+    if blueprint_item_stack then
+        self:augmentBlueprint(blueprint_item_stack, entity_map, context)
     else
         -- Player is editing the blueprint, no access for us yet.
         -- onPlayerConfiguredBlueprint picks this up and stores it.
-        player_data.current_blueprint = {
+        player_data.current_blueprint =  {
             entity_map = entity_map,
             context = context,
         }
@@ -143,13 +143,13 @@ local function on_player_configured_blueprint(event)
     local player, player_data = Player.get(event.player_index)
     if not (player or player_data) then return end
 
-    local self = Framework.blueprint
-    assert(self)
+    local self = assert(Framework.blueprint)
 
     local current_blueprint = player_data.current_blueprint
 
     if current_blueprint and can_access_blueprint(player) then
-        self:augmentBlueprint(player.cursor_stack, player.surface_index, current_blueprint.entity_map, current_blueprint.context)
+        -- could not augment at setup, augment now
+        self:augmentBlueprint(player.cursor_stack, current_blueprint.entity_map, current_blueprint.context)
     end
 
     player_data.current_blueprint = nil

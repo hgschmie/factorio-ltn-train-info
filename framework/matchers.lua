@@ -26,6 +26,8 @@ local Matchers = {
     NAME_EXTRACTOR = function(entity) return entity and entity.name end,
     ---@type framework.event_matcher.ExtractFunction
     GHOST_NAME_EXTRACTOR = function(entity) return entity and entity.type == 'entity-ghost' and entity.ghost_name end,
+    ---@type framework.event_matcher.ExtractFunction
+    TYPE_EXTRACTOR = function(entity) return entity and entity.type end,
 
     CREATION_EVENTS = {
         defines.events.on_built_entity,

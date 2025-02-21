@@ -79,15 +79,16 @@ end
 ---@param surface_index number?
 ---@return framework.tools.EntityKey
 function Tools:createEntityKeyFromBlueprintEntity(blueprint_entity, surface_index)
-    return self:createEntityKey(blueprint_entity.position, surface_index, blueprint_entity.name)
+    return self:createEntityKey(blueprint_entity.position, surface_index or 0, blueprint_entity.name)
 end
 
 ---@param entity LuaEntity
+---@param surface_index number?
 ---@return framework.tools.EntityKey?
-function Tools:createEntityKeyFromEntity(entity)
+function Tools:createEntityKeyFromEntity(entity, surface_index)
     local name = self:getName(entity)
     if not name then return nil end
-    return self:createEntityKey(entity.position, entity.surface_index, name)
+    return self:createEntityKey(entity.position, surface_index and surface_index or entity.surface_index, name)
 end
 
 return Tools
