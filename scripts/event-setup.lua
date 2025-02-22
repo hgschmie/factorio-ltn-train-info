@@ -24,7 +24,6 @@ local function on_entity_created(event)
 
     local entity_ghost = Framework.ghost_manager:findGhostForEntity(entity)
     if entity_ghost then
-        Framework.ghost_manager:deleteGhost(entity.unit_number)
         tags = tags or entity_ghost.tags
     end
 

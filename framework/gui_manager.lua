@@ -53,15 +53,15 @@ local FrameworkGuiManager = {
 
 ---@return framework.gui_manager.state state Manages GUI state
 function FrameworkGuiManager:state()
-    local storage = Framework.runtime:storage()
+    local state = Framework.runtime:storage()
 
     ---@class framework.gui_manager.state
     ---@field guis table<number, framework.gui> All registered and known guis for this manager.
-    storage.gui_manager = storage.gui_manager or {
+    state.gui_manager = state.gui_manager or {
         guis = {},
     }
 
-    return storage.gui_manager
+    return state.gui_manager
 end
 
 ------------------------------------------------------------------------

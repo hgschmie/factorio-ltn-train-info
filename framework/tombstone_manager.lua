@@ -45,14 +45,14 @@ local FrameworkTombstoneManager = {
 
 ---@return framework.tombstone.State state Manages undo/redo state
 function FrameworkTombstoneManager:state()
-    local storage = Framework.runtime:storage()
+    local state = Framework.runtime:storage()
 
     ---@type framework.tombstone.State
-    storage.tombstone_manager = storage.tombstone_manager or {
+    state.tombstone_manager = state.tombstone_manager or {
         tombstones = {},
     }
 
-    return storage.tombstone_manager
+    return state.tombstone_manager
 end
 
 ------------------------------------------------------------------------

@@ -7,12 +7,14 @@
 --- ghost_manager.lua
 ----------------------------------------------------------------------------------------------------
 
+--@field name string
+--@field position MapPosition
+--@field surface_index number
+--@field direction defines.direction
+
 ---@class framework.ghost_manager.AttachedEntity
+---@field entity LuaEntity
 ---@field key string
----@field name string
----@field surface_index number
----@field position MapPosition
----@field direction defines.direction
 ---@field tags Tags?
 ---@field player_index integer
 ---@field tick integer
