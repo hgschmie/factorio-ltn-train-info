@@ -592,6 +592,7 @@ local function render_output_signals(gui_element, lti_data)
                     type = 'sprite',
                     style = 'framework_quality',
                     sprite = 'quality/' .. filter.value.quality,
+                    resize_to_sprite = false,
                     enabled = true,
                 }
             end

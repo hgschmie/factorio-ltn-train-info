@@ -271,6 +271,7 @@ styles.framework_indicator = {
 styles.framework_quality = {
     type = 'image_style',
     left_padding = 16,
+    size = { 32, 16, },
 }
 
 -- LINE STYLES

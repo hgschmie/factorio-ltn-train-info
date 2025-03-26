@@ -118,7 +118,7 @@ end
 -- event callbacks
 --------------------------------------------------------------------------------
 
----@param event EventData.on_built_entity | EventData.on_robot_built_entity EventData.on_space_platform_built_entity | EventData.script_raised_revive | EventData.script_raised_built
+---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.on_space_platform_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 local function on_ghost_entity_created(event)
     local entity = event and event.entity
     if not Is.Valid(entity) then return end
