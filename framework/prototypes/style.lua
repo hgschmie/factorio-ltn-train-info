@@ -268,12 +268,6 @@ styles.framework_indicator = {
     stretch_image_to_widget_size = true,
 }
 
-styles.framework_quality = {
-    type = 'image_style',
-    left_padding = 16,
-    size = { 32, 16, },
-}
-
 -- LINE STYLES
 
 styles.framework_subheader_horizontal_line = {

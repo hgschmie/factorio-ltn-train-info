@@ -582,20 +582,12 @@ local function render_output_signals(gui_element, lti_data)
                 type = 'sprite-button',
                 style = 'compact_slot',
                 number = filter.min,
+                quality = filter.value.quality,
                 sprite = signal_converter:logistic_filter_to_sprite_name(filter),
                 tooltip = signal_converter:logistic_filter_to_prototype(filter).localised_name,
                 elem_tooltip = signal_converter:logistic_filter_to_elem_id(filter),
                 enabled = true,
             }
-            if filter.value.quality and filter.value.quality ~= 'normal' then
-                button.add {
-                    type = 'sprite',
-                    style = 'framework_quality',
-                    sprite = 'quality/' .. filter.value.quality,
-                    resize_to_sprite = false,
-                    enabled = true,
-                }
-            end
         end
     end
 end

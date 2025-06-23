@@ -1,9 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.0.3
+Version: 1.1.0
 Date: ????
-  Bugfixes:
-    - Fix oversized quality icons on non-native displays
   Changes:
+    - Use native quality rendering
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2025-02-22
