@@ -14,11 +14,14 @@ local TICK_INTERVAL = 61 -- run all 61 ticks
 local ATTACHED_GHOST_LINGER_TIME = 600
 
 ---@alias framework.ghost_manager.RefreshCallback fun(entity: framework.ghost_manager.AttachedEntity, all_entities: framework.ghost_manager.AttachedEntity[]): framework.ghost_manager.AttachedEntity[]
+---@alias framework.ghost_manager.GhostCallback fun(entity: framework.ghost_manager.AttachedEntity)
 
 ---@class framework.ghost_manager
 ---@field refresh_callbacks framework.ghost_manager.RefreshCallback[]
+---@field ghost_callback framework.ghost_manager.GhostCallback?
 local FrameworkGhostManager = {
     refresh_callbacks = {},
+    ghost_callback = nil,
 }
 
 ---@return framework.ghost_manager.State state Manages ghost state
@@ -41,7 +44,7 @@ function FrameworkGhostManager:registerGhost(entity, player_index)
 
     local state = self:state()
 
-    state.ghost_entities[entity.unit_number] = {
+    local attached_entity = {
         entity = entity,
         key = tools:createEntityKeyFromEntity(entity),
         tags = entity.tags,
@@ -49,6 +52,12 @@ function FrameworkGhostManager:registerGhost(entity, player_index)
         -- allow 10 seconds of lingering time until a refresh must have happened
         tick = game.tick + ATTACHED_GHOST_LINGER_TIME,
     }
+
+    if self.ghost_callback then
+        self.ghost_callback(attached_entity)
+    end
+
+    state.ghost_entities[entity.unit_number] = attached_entity
 end
 
 ---@param unit_number integer
@@ -200,21 +209,21 @@ end
 --- replaced but the others are not, they will be removed when the linger period expires.
 ---
 ---@param names string|string[] One or more names to match to the ghost_name field.
----@param callback? framework.ghost_manager.RefreshCallback Optional callback to refresh entities
-function FrameworkGhostManager:registerForName(names, callback)
+---@param refresh_callback framework.ghost_manager.RefreshCallback? Optional callback to refresh entities
+function FrameworkGhostManager:registerForName(names, refresh_callback)
     assert(names)
     local event_matcher = Matchers:matchEventEntityGhostName(names)
     Event.register(Matchers.CREATION_EVENTS, on_ghost_entity_created, event_matcher)
     Event.register(defines.events.on_post_entity_died, on_post_entity_died)
 
     -- if a callback was provided, register callback and turn on the ticker
-    if callback then
+    if refresh_callback then
         if type(names) ~= 'table' then names = { names } end
 
         Event.register_if(table_size(self.refresh_callbacks) == 0, -TICK_INTERVAL, tick)
 
         for _, name in pairs(names) do
-            self.refresh_callbacks[name] = callback
+            self.refresh_callbacks[name] = refresh_callback
         end
     end
 end
@@ -225,6 +234,15 @@ function FrameworkGhostManager:registerForAttribute(attribute, values)
     local event_matcher = Matchers:matchEventEntityAsGhost(attribute, values)
     Event.register(Matchers.CREATION_EVENTS, on_ghost_entity_created, event_matcher)
     Event.register(defines.events.on_post_entity_died, on_post_entity_died)
+end
+
+--- Registers a callback with the ghost manager. Every ghost that is registered by the game
+--- with the ghost manager will be passed through this callback. This allows a mod to modify
+--- the information provided by the ghost. Any field in the AttachedEntity can be modified.
+--- When modifying the tags, they need to be explicitly written back to the ghost entity.
+---@param ghost_callback framework.ghost_manager.GhostCallback
+function FrameworkGhostManager:addGhostCallback(ghost_callback)
+    self.ghost_callback = ghost_callback
 end
 
 --- Can be called by the tombstone manager. Will pass in all the information necessary to find

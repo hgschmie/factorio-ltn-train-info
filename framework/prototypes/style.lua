@@ -46,7 +46,7 @@ local function gen_slot_button(x, y, default_offset, glow)
         hovered_graphical_set = {
             base = { border = 4, position = { x + 80, y }, size = 80, filename = slot_tileset },
             shadow = _ENV.offset_by_2_rounded_corners_glow(_ENV.default_dirt_color),
-            glow = _ENV.offset_by_2_rounded_corners_glow(glow),
+            glow = _ENV.offset_by_2_rounded_corners_glow(_ENV.default_glow_color),
         },
         clicked_graphical_set = {
             base = { border = 4, position = { x + 160, y }, size = 80, filename = slot_tileset },
@@ -68,19 +68,19 @@ local function gen_standalone_slot_button(x, y, default_offset)
         clicked_vertical_offset = 0,
         default_graphical_set = {
             base = { border = 4, position = { x + default_offset, y }, size = 80, filename = slot_tileset },
-            shadow = _ENV.offset_by_4_rounded_corners_subpanel_inset,
+            shadow = _ENV.offset_by_4_rounded_corners_shallow_inset,
         },
         hovered_graphical_set = {
             base = { border = 4, position = { x + 80, y }, size = 80, filename = slot_tileset },
-            shadow = _ENV.offset_by_4_rounded_corners_subpanel_inset,
+            shadow = _ENV.offset_by_4_rounded_corners_shallow_inset,
         },
         clicked_graphical_set = {
             base = { border = 4, position = { x + 160, y }, size = 80, filename = slot_tileset },
-            shadow = _ENV.offset_by_4_rounded_corners_subpanel_inset,
+            shadow = _ENV.offset_by_4_rounded_corners_shallow_inset,
         },
         disabled_graphical_set = { -- identical to default graphical set
             base = { border = 4, position = { x + default_offset, y }, size = 80, filename = slot_tileset },
-            shadow = _ENV.offset_by_4_rounded_corners_subpanel_inset,
+            shadow = _ENV.offset_by_4_rounded_corners_shallow_inset,
         },
     }
 end
@@ -201,6 +201,7 @@ styles.framework_horizontal_pusher = {
     horizontally_stretchable = 'on',
 }
 
+-- see https://man.sr.ht/~raiguard/factorio-gui-style-guide/
 styles.framework_titlebar_drag_handle = {
     type = 'empty_widget_style',
     parent = 'draggable_space',
@@ -328,6 +329,13 @@ styles.framework_shallow_scroll_pane = {
 }
 
 -- TABBED PANE STYLES
+
+-- used by train-tracker
+styles.framework_tabbed_pane_parent = {
+    type = 'frame_style',
+    parent = 'inside_deep_frame',
+    top_padding = 12,
+}
 
 styles.framework_tabbed_pane_with_no_padding = {
     type = 'tabbed_pane_style',

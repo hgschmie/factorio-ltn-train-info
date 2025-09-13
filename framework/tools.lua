@@ -4,9 +4,6 @@
 
 local util = require('util')
 
-local Is = require('stdlib.utils.is')
-local table = require('stdlib.utils.table')
-
 
 ---@class FrameworkTools
 ---@field STATUS_TABLE table<defines.entity_status, string>

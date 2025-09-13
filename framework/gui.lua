@@ -28,7 +28,7 @@ require('stdlib.utils.string')
 ---@field style_mods table<string, any>? Post-creation modifications to make to the element's style.
 ---@field elem_mods table<string, any>? Post-creation modifications to make to the element itself.
 ---@field drag_target string? Set the element's drag target to the element whose name matches this string. The drag target must be present in the UI component tree before assigning it.
----@field handler table<defines.events, string> Handlers to assign to this element.
+---@field handler table<defines.events, string>? Handlers to assign to this element.
 ---@field children framework.gui.element_definition[]? Children to add to this element.
 ---@field tab framework.gui.element_definition? To add a tab, specify `tab` and `content` and leave all other fields unset.
 ---@field content framework.gui.element_definition? To add a tab, specify `tab` and `content` and leave all other fields unset.
@@ -38,7 +38,8 @@ require('stdlib.utils.string')
 ---@field prefix string
 ---@field gui_events framework.gui_events All known events for this GUI.
 ---@field context framework.gui.context? Context element
----@field entity_id number The entity for which a gui is created
+---@field entity_id number? The entity for which a gui is created
+---@field player_index number
 
 ---@class framework.gui
 ---@field type string The GUI type for dispatching events.
@@ -48,7 +49,8 @@ require('stdlib.utils.string')
 ---@field ui_elements table<string, LuaGuiElement> All known elements in the UI.
 ---@field root LuaGuiElement? Root element of the tree.
 ---@field event_handlers table<defines.events, table<string, string>> -- map from the event to the handler name. The handler can not be stored here because it is not serializable
----@field entity_id number The entity for which the Gui has been opened
+---@field entity_id number? The entity for which the Gui has been opened
+---@field player_index number
 ---@field context framework.gui.context
 local FrameworkGui = {
     count = 0,
@@ -229,7 +231,7 @@ function FrameworkGui:add_child_elements(parent, children, existing_elements)
         elseif child.tab and child.content then
             gui_element = self:add_tab(parent, child)
         else
-            assert(false, 'Invalid element: ' .. serpent(child))
+            error('Invalid element: ' .. serpent.line(child))
         end
         root = root or gui_element
     end
@@ -250,6 +252,7 @@ function FrameworkGui.create(map)
         prefix = map.prefix,
         gui_events = map.gui_events,
         entity_id = map.entity_id,
+        player_index = map.player_index,
         context = map.context,
         ui_elements = {},
         root = nil,

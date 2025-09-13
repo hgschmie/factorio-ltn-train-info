@@ -281,4 +281,13 @@ function String.exponent_number(str)
     return 0
 end
 
+---@param str string? A string
+---@return string str A string with all special lua pattern matching values escaped.
+function String.pattern_escape(str)
+    if not str then return '' end
+    if type(str) ~= 'string' then return tostring(str) end
+    local result = str:gsub('([%^%$%(%)%%%.%[%]%*%+%-%?])','%%%1')
+    return result
+end
+
 return String

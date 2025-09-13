@@ -56,7 +56,7 @@ function SignalConverter:signal_to_elem_id(signal)
 
     if signal_type == 'virtual' then
         result.type = 'signal'
-        result.signal_type = signal_type ---@diagnostic disable-line: inject-field
+        result.signal_type = signal_type
     elseif signal.signal.quality then
         if self.supports_quality[result.type] then result.type = self.supports_quality[result.type] end
         result.quality = signal.signal.quality

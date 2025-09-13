@@ -22,26 +22,26 @@ local FrameworkSettings = {
 local settings_table = {
     startup = {
         values = nil,
-        definitions = {},
+        definitions = { debug_mode = { key = Framework.PREFIX .. 'debug-mode', value = false } },
         load_value = function(name) return settings.startup[name] end,
         get_values = function(self) return self.values end,
         init_values = function(self)
             self.values = {}
             return self.values
-            end,
+        end,
         clear = function(self) self.values = nil end,
     },
 
     runtime = {
         values = nil,
-        definitions = { debug_mode = { key = Framework.PREFIX .. 'debug-mode', value = false } },
+        definitions = {},
         load_value = function(name) return settings.global[name] end,
         store_value = function(name, value) settings.global[name] = { value = value } end,
         get_values = function(self) return self.values end,
         init_values = function(self)
             self.values = {}
             return self.values
-            end,
+        end,
         clear = function(self) self.values = nil end,
     },
 

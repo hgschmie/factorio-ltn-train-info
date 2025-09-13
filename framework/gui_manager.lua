@@ -33,7 +33,7 @@ local GUI_UPDATE_TICK_INTERVAL = 11
 ---@field ui_tree_provider fun(context: framework.gui): framework.gui.element_definitions
 ---@field existing_elements table<string, LuaGuiElement>? Optional set of existing GUI elements.
 ---@field context framework.gui.context? Context element
----@field entity_id number The entity for which a gui is created
+---@field entity_id number? The entity for which a gui is created
 
 ---@class framework.gui_manager.event_definition
 ---@field events table<string, framework.gui.element_handler>
@@ -87,14 +87,25 @@ function FrameworkGuiManager:dispatch(event)
 
     local event_handler_map = gui.event_handlers[event.name]
     assert(event_handler_map)
+
     local handler_id = event_handler_map[elem.name]
-
-    if not handler_id then return false end
-    local event_handler = gui_type.events[handler_id]
-
-    if not event_handler then return false end
-    event_handler(event, gui)
-    return true
+    if handler_id then
+        -- per-element registered handler
+        local event_handler = gui_type.events[handler_id]
+        if not event_handler then return false end
+        event_handler(event, gui)
+        return true
+    elseif type(elem.tags.handler) == 'table' then
+        -- tag defined handler table.
+        -- use per-element registered handler
+        -- workaround for https://forums.factorio.com/viewtopic.php?t=130401
+        handler_id = elem.tags.handler[event.name] or elem.tags.handler[tostring(event.name)]
+        local event_handler = gui_type.events[handler_id]
+        if not event_handler then return false end
+        event_handler(event, gui)
+        return true
+    end
+    return false
 end
 
 ------------------------------------------------------------------------
@@ -134,13 +145,13 @@ end
 ------------------------------------------------------------------------
 
 --- Registers a GUI type with the event table and callback with the GUI manager.
----@param type string
+---@param gui_type string
 ---@param event_definition framework.gui_manager.event_definition
-function FrameworkGuiManager:register_gui_type(type, event_definition)
-    assert(type)
+function FrameworkGuiManager:register_gui_type(gui_type, event_definition)
+    assert(gui_type)
     assert(event_definition.events, 'events is unset!')
 
-    self.known_gui_types[type] = event_definition
+    self.known_gui_types[gui_type] = event_definition
 end
 
 --- Creates a new GUI instance.
@@ -161,13 +172,13 @@ function FrameworkGuiManager:create_gui(map)
 
     -- must be set
     assert(map.parent)
-    assert(map.entity_id)
 
     local gui = FrameworkGui.create {
         type = type,
         prefix = self.GUI_PREFIX,
         gui_events = table.array_to_dictionary(table.keys(gui_type.events)),
         entity_id = map.entity_id,
+        player_index = map.player_index,
         context = map.context or {},
     }
 

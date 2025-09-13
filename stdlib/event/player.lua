@@ -19,7 +19,7 @@ local merge_additional_data = require('stdlib.event.modules.merge_data')
 local assert, type = assert, type
 local inspect = _ENV.inspect
 
--- Return new default player object consiting of index, name, force
+-- Return new default player object consisting of index, name, force
 local function new(player_index)
     local pdata = {
         index = player_index,
@@ -52,7 +52,7 @@ function Player.get(player)
     return player, Player.pdata(player.index)
 end
 
---- Get the players saved data table. Creates it if it doesn't exsist.
+--- Get the players saved data table. Creates it if it doesn't exist.
 -- @tparam number index The player index to get data for
 -- @treturn table the player's storage data
 function Player.pdata(index)

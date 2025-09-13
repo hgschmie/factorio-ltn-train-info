@@ -26,6 +26,7 @@ local Is = require('stdlib.utils.is')
 ---@field ghost_manager framework.ghost_manager?
 ---@field blueprint framework.blueprint.Manager?
 ---@field tombstone framework.tombstone_manager?
+---@field translation_manager framework.translation.Manager?
 ---@field other_mods framework.OtherModsManager
 ---@field remote_api table<string, function>?
 ---@field render FrameworkRender?
@@ -59,6 +60,8 @@ Framework = {
 
     blueprint = nil,
 
+    translation_manager = nil,
+
     tombstone = nil,
 
     remote_api = nil,
@@ -85,6 +88,7 @@ function Framework:init_runtime(config)
     self.gui_manager = self.gui_manager or require('framework.gui_manager')
     self.ghost_manager = self.ghost_manager or require('framework.ghost_manager')
     self.blueprint = self.blueprint or require('framework.blueprint_manager')
+    self.translation_manager = self.translation_manager or require('framework.translation_manager')
     self.tombstone = self.tombstone or require('framework.tombstone_manager')
 
     self.render = self.render or require('framework.render')
