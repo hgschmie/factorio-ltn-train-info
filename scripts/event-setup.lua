@@ -187,7 +187,7 @@ local function register_events()
     Event.on_configuration_changed(on_configuration_changed)
 
     -- manage blueprinting and copy/paste
-    Framework.blueprint:registerCallback(const.lti_name, serialize_config)
+    Framework.blueprint:registerCallbackForNames(const.lti_name, serialize_config)
 
     -- manage tombstones for undo/redo and dead entities
     Framework.tombstone:registerCallback(const.lti_name, {
