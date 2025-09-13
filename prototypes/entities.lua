@@ -12,7 +12,7 @@ local const = require('lib.constants')
 
 local lti_combinator_update = {
     ---@diagnostic disable-next-line: undefined-global
-    sprites = make_4way_animation_from_spritesheet {
+    sprites = meld.overwrite(make_4way_animation_from_spritesheet {
         layers = {
             {
                 scale = 0.5,
@@ -30,7 +30,7 @@ local lti_combinator_update = {
                 draw_as_shadow = true
             }
         },
-    },
+    }),
     icon = const:png('icon/ltn-train-info'),
     minable = { mining_time = 0.1, result = const.lti_name },
     radius_visualisation_specification = {
