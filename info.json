@@ -1,6 +1,6 @@
 {
   "name": "ltn-train-info",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "title": "LTN Train Information combinator",
   "description": "Provides LTN delivery signals to the logistic network",
   "author": "hgschmie",
