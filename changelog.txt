@@ -1,8 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: ????
+  Changes:
+    - move debug setting to startup
   Bugfixes:
     - fix bad tint for the combinator entity
+    - handle blueprint updates correctly when the blueprint is in the player library
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 2025-06-23
