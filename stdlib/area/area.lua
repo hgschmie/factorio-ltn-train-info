@@ -7,6 +7,8 @@
 local Area = { __class = 'Area', __index = require('stdlib.core') }
 setmetatable(Area, Area)
 
+package.loaded['__' .. script.mod_name .. '__/' .. (...):gsub('%.', '/') .. '.lua'] = Area
+
 local Position = require('stdlib.area.position')
 
 local math = require('stdlib.utils.math')

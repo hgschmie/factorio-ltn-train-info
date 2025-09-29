@@ -7,6 +7,9 @@
 local Position = { __class = 'Position', __index = require('stdlib.core') }
 setmetatable(Position, Position)
 
+package.loaded['__' .. script.mod_name .. '__/' .. (...):gsub('%.', '/') .. '.lua'] = Position
+
+local Area = require('stdlib.area.area')
 local Direction = require('stdlib.area.direction')
 local Orientation = require('stdlib.area.orientation')
 
@@ -19,7 +22,6 @@ local deg, acos, max, min, is_number = math.deg, math.acos, math.max, math.min, 
 local split = string.split
 local directions = defines.direction
 
-local AREA_PATH = 'stdlib.area.area'
 local EPSILON = 1.19e-07
 
 local metatable
@@ -595,17 +597,6 @@ local function find_package(package_name)
     return nil
 end
 
--- Hackish function, Factorio lua doesn't allow require inside functions because...
-local function load_area(area)
-    local Area = find_package(AREA_PATH)
-    if not Area then
-        local log = log or function(_msg_)
-        end
-        log('WARNING: Area for Position not found in package.loaded')
-    end
-    return Area and Area.load(area) or area
-end
-
 --- Expands a position to a square area.
 -- @tparam Concepts.Position pos the position to expand into an area
 -- @tparam number radius half of the side length of the area
@@ -616,7 +607,7 @@ function Position.expand_to_area(pos, radius)
     local left_top = { x = pos.x - radius, y = pos.y - radius }
     local right_bottom = { x = pos.x + radius, y = pos.y + radius }
 
-    return load_area { left_top = left_top, right_bottom = right_bottom }
+    return Area { left_top = left_top, right_bottom = right_bottom }
 end
 
 --- Expands a position into an area by setting pos to left_top.
@@ -631,7 +622,7 @@ function Position.to_area(pos, width, height)
     local left_top = { x = pos.x, y = pos.y }
     local right_bottom = { x = pos.x + width, y = pos.y + height }
 
-    return load_area { left_top = left_top, right_bottom = right_bottom }
+    return Area { left_top = left_top, right_bottom = right_bottom }
 end
 
 --- Converts a tile position to the @{Concepts.BoundingBox|area} of the tile it is in.
@@ -642,7 +633,7 @@ function Position.to_tile_area(pos)
     local left_top = { x = x, y = y }
     local right_bottom = { x = x + 1, y = y + 1 }
 
-    return load_area { left_top = left_top, right_bottom = right_bottom }
+    return Area { left_top = left_top, right_bottom = right_bottom }
 end
 
 --- Get the chunk area the specified position is in.
@@ -652,7 +643,7 @@ function Position.to_chunk_area(pos)
     local left_top = { x = floor(pos.x / 32) * 32, y = floor(pos.y / 32) * 32 }
     local right_bottom = { x = left_top.x + 32, y = left_top.y + 32 }
 
-    return load_area { left_top = left_top, right_bottom = right_bottom }
+    return Area { left_top = left_top, right_bottom = right_bottom }
 end
 
 --- Get the chunk area for the specified chunk position.
@@ -661,7 +652,7 @@ end
 function Position.chunk_position_to_chunk_area(pos)
     local left_top = { x = pos.x * 32, y = pos.y * 32 }
     local right_bottom = { left_top.x + 32, left_top.y + 32 }
-    return load_area { left_top = left_top, right_bottom = right_bottom }
+    return Area { left_top = left_top, right_bottom = right_bottom }
 end
 
 --- Position Functions
