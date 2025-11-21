@@ -69,12 +69,12 @@
 ---@field shipment LTNShipment
 
 ---@class LTNTrain
----@field capacity integer,
----@field fluid_capacity integer,
----@field force LuaForce,
----@field surface LuaSurface,
----@field depot_priority integer,
----@field network_id integer,
+---@field capacity integer
+---@field fluid_capacity integer
+---@field force LuaForce
+---@field surface LuaSurface
+---@field depot_priority integer
+---@field network_id integer
 ---@field train LuaTrain
 
 ---@class LTNDispatcherUpdatedEvent
@@ -86,12 +86,12 @@
 ---@field available_trains table<integer, LTNTrain>
 
 ---@class LTNOnDeliveryCompleted
----@field train_id integer,
----@field train LuaTrain,
+---@field train_id integer
+---@field train LuaTrain
 ---@field shipment LTNShipment
 
 ---@class LTNOnDeliveryFailed
----@field train_id integer,
+---@field train_id integer
 ---@field shipment LTNShipment
 
 ---@class LTNOnDeliveryReassigned
