@@ -11,6 +11,8 @@ local Matchers = require('framework.matchers')
 
 local const = require('lib.constants')
 
+local TICK_RATE = 37
+
 --------------------------------------------------------------------------------
 -- entity create / delete
 --------------------------------------------------------------------------------
@@ -167,6 +169,41 @@ local function on_train_changed_state(event)
 end
 
 --------------------------------------------------------------------------------
+-- ticker to prune lost cargo
+--------------------------------------------------------------------------------
+
+---@return lti.Ticker
+local function get_ticker()
+    storage.ticker = storage.ticker or {}
+    return storage.ticker
+end
+
+local function onTick()
+    local ticker = get_ticker()
+
+    local deliveries = This.Lti:deliveries()
+    local process_count = math.ceil((table_size(deliveries) * TICK_RATE) / 60)
+    local index = ticker.last_tick_index
+
+    -- if the delivery that the index points to has been removed in the meantime, reset the index
+    if index and not deliveries[index] then index = nil end
+
+    if process_count > 0 then
+        repeat
+            index = next(deliveries, index)
+            if index and not game.train_manager.get_train_by_id(index) then
+                This.Lti:clearDelivery(index)
+                process_count = process_count - 1
+            end
+        until process_count == 0 or not index
+    else
+        index = nil
+    end
+
+    ticker.last_tick_index = index
+end
+
+--------------------------------------------------------------------------------
 -- event registration and management
 --------------------------------------------------------------------------------
 
@@ -207,6 +244,9 @@ local function register_events()
     local train_stop_filter = Matchers:matchEventEntity('type', 'train-stop')
     Event.register(Matchers.CREATION_EVENTS, on_train_stop_created, train_stop_filter)
     Event.register(Matchers.DELETION_EVENTS, on_train_stop_deleted, train_stop_filter)
+
+    -- Ticker
+    Event.on_nth_tick(TICK_RATE, onTick)
 end
 
 --------------------------------------------------------------------------------

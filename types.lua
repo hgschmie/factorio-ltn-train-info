@@ -19,6 +19,8 @@
 ---@field stop_to_ltis table<number, LuaEntity>
 ---@field train_to_last_stop table<integer, LuaEntity>
 
+---@class lti.Ticker
+---@field last_tick_index integer?
 
 ---@class lti.Data
 ---@field main LuaEntity
