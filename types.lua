@@ -91,3 +91,8 @@
 ---@class LTNOnDeliveryFailed
 ---@field train_id integer,
 ---@field shipment LTNShipment
+
+---@class LTNOnDeliveryReassigned
+---@field old_train_id integer
+---@field new_train_id integer
+---@field shipment LTNShipment

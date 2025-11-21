@@ -446,6 +446,17 @@ function Lti:deliveryFailed(event)
     self:clearDelivery(event.train_id)
 end
 
+---@param event LTNOnDeliveryReassigned
+function Lti:deliveryReassigned(event)
+    assert(event)
+
+    local delivery = self:getDelivery(event.old_train_id)
+    -- the train might be empty / not doing a delivery
+    if not delivery then return end
+    self:addDelivery(event.new_train_id, delivery)
+    self:clearDelivery(event.old_train_id)
+end
+
 ---@param train LuaTrain
 function Lti:trainArrived(train)
     local stop = train.station
