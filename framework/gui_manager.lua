@@ -161,12 +161,10 @@ function FrameworkGuiManager:create_gui(map)
     assert(map)
 
     assert(map.type)
-    local type = map.type
-
     assert(map.player_index)
     local player_index = map.player_index
 
-    local gui_type = self.known_gui_types[type]
+    local gui_type = self.known_gui_types[map.type]
 
     assert(gui_type, 'No Gui definition for "' .. map.type .. '" registered!')
 
@@ -174,7 +172,7 @@ function FrameworkGuiManager:create_gui(map)
     assert(map.parent)
 
     local gui = FrameworkGui.create {
-        type = type,
+        type = map.type,
         prefix = self.GUI_PREFIX,
         gui_events = table.array_to_dictionary(table.keys(gui_type.events)),
         entity_id = map.entity_id,
