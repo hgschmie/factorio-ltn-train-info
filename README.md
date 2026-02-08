@@ -19,6 +19,8 @@ Everything can be configured through the GUI.
 
 ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m1.png) ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m2.png) ![image1](https://github.com/hgschmie/factorio-ltn-train-info/raw/main/portal/img-m3.png)
 
+(Note that the images still show show the old entity graphics. The actual mod has uniquely designed entity)
+
 - Fully supports copy/paste, blueprinting, undo/redo and cloning
 - Supports [Even Picker Dollies](https://mods.factorio.com/mod/even-pickier-dollies)
 - Can connect to multiple stops simultaneously, when multiple deliveries arrive at the same time, the last one "wins".
@@ -57,3 +59,6 @@ For a requesting stop, LTN will only ever output the expected cargo in the train
 - `justarandomgeek` - FMTK. 'nuff said. While I prefer the Jetbrains tools, this made VSCode bearable
 - `raiguard` - some of the framework code was either lifted or inspired by [flib](https://mods.factorio.com/mod/flib).
 - `modo.lv` - I flat out stole the basic structure using a global called `this` from the stack combinator mod.
+
+This mod contains code and/or graphics that was either created or assisted by AI. If you are violently opposed to using AI for anything,
+feel free to not install it.

@@ -17,20 +17,92 @@ local lti_combinator_update = {
             {
                 scale = 0.5,
                 filename = const:png('entity/ltn-train-info'),
-                width = 114,
-                height = 102,
-                shift = util.by_pixel(0, 5)
+                width = 128,
+                height = 128,
+                shift = util.by_pixel(7, -2)
             },
             {
                 scale = 0.5,
-                filename = '__base__/graphics/entity/combinator/constant-combinator-shadow.png',
-                width = 98,
-                height = 66,
-                shift = util.by_pixel(8.5, 5.5),
+                filename = const:png('entity/ltn-train-info-shadow'),
+                width = 128,
+                height = 128,
+                shift = util.by_pixel(7, -2),
                 draw_as_shadow = true
             }
         },
     }),
+    circuit_wire_connection_points = {
+        {
+            shadow = {
+                red = util.by_pixel(-1, 0),
+                green = util.by_pixel(9, 0.5),
+            },
+            wire = {
+                red = util.by_pixel(-11, -9),
+                green = util.by_pixel(2, -7.5),
+            }
+        },
+        {
+            shadow = {
+                red = util.by_pixel(34, 15.5),
+                green = util.by_pixel(34, 6.5),
+            },
+            wire = {
+                red = util.by_pixel(9, -7),
+                green = util.by_pixel(9.75, -17),
+            }
+        },
+        {
+            shadow = {
+                red = util.by_pixel(35, 0.5),
+                green = util.by_pixel(5.0, -15),
+            },
+            wire = {
+                red = util.by_pixel(10.5, -21.5),
+                green = util.by_pixel(-3.5, -23),
+            }
+        },
+        {
+            shadow = {
+                red = util.by_pixel(0, -15.25),
+                green = util.by_pixel(-4, -5.5),
+            },
+            wire = {
+                red = util.by_pixel(-9.5, -23),
+                green = util.by_pixel(-12, -12.5),
+            }
+        }
+    },
+    activity_led_sprites = {
+        north = util.draw_as_glow {
+            scale = 0.5,
+            filename = const:png('misc/red-activity-led'),
+            width = 14,
+            height = 16,
+            shift = util.by_pixel(9.5, -14)
+        },
+        east = util.draw_as_glow {
+            scale = 0.5,
+            filename = const:png('misc/red-activity-led'),
+            width = 14,
+            height = 16,
+            shift = util.by_pixel(-10, -14.5)
+        },
+        south = util.draw_as_glow {
+            scale = 0.5,
+            filename = const:png('misc/red-activity-led'),
+            width = 14,
+            height = 16,
+            shift = util.by_pixel(-10.5, -1)
+        },
+        west = util.draw_as_glow {
+            scale = 0.5,
+            filename = const:png('misc/red-activity-led'),
+            width = 14,
+            height = 16,
+            shift = util.by_pixel(8.5, -0.5)
+        }
+    },
     icon = const:png('icon/ltn-train-info'),
     minable = { mining_time = 0.1, result = const.lti_name },
     radius_visualisation_specification = {
