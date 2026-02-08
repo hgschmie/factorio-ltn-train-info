@@ -21,6 +21,7 @@
 
 ---@class lti.Ticker
 ---@field last_tick_index integer?
+---@field last_tick integer?
 
 ---@class lti.Data
 ---@field main LuaEntity

@@ -1,11 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.0
 Date: ????
-  Changes:
+  Features:
     - New entity graphics. No more recolored constant combinator.
       Spent some time with meshy.ai, blender and claude and created a new entity for the
       LTN combinator even though I can neither do 3D graphics design nor have any clue how
       blender actually works. I, for one, welcome our new AI overlords.
+  Changes:
+    - smooth background ticker job to do less work per tick
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
 Date: 2025-11-20

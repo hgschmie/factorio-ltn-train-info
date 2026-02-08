@@ -11,8 +11,6 @@ local Matchers = require('framework.matchers')
 
 local const = require('lib.constants')
 
-local TICK_RATE = 37
-
 --------------------------------------------------------------------------------
 -- entity create / delete
 --------------------------------------------------------------------------------
@@ -175,14 +173,22 @@ end
 ---@return lti.Ticker
 local function get_ticker()
     storage.ticker = storage.ticker or {}
+    storage.ticker.last_tick = storage.ticker.last_tick or game.tick
     return storage.ticker
 end
 
 local function onTick()
     local ticker = get_ticker()
+    local interval = 60
 
     local deliveries = This.Lti:deliveries()
-    local process_count = math.ceil((table_size(deliveries) * TICK_RATE) / 60)
+    local count = table_size(deliveries)
+    if count == 0 then return end
+
+    local ticks_per_entity = math.max(1, math.floor(interval / count)) -- at least one
+    if ticker.last_tick + ticks_per_entity > game.tick then return end
+
+    local process_count = math.ceil(count / interval)
     local index = ticker.last_tick_index
 
     -- if the delivery that the index points to has been removed in the meantime, reset the index
@@ -193,14 +199,15 @@ local function onTick()
             index = next(deliveries, index)
             if index and not game.train_manager.get_train_by_id(index) then
                 This.Lti:clearDelivery(index)
-                process_count = process_count - 1
             end
+            process_count = process_count - 1
         until process_count == 0 or not index
     else
         index = nil
     end
 
     ticker.last_tick_index = index
+    ticker.last_tick = game.tick
 end
 
 --------------------------------------------------------------------------------
@@ -246,7 +253,7 @@ local function register_events()
     Event.register(Matchers.DELETION_EVENTS, on_train_stop_deleted, train_stop_filter)
 
     -- Ticker
-    Event.on_nth_tick(TICK_RATE, onTick)
+    Event.register(defines.events.on_tick, onTick)
 end
 
 --------------------------------------------------------------------------------
