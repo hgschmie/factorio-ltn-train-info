@@ -436,8 +436,9 @@ end
 --- close the UI (button or shortcut key)
 ---
 ---@param event EventData.on_gui_click|EventData.on_gui_opened
-function Gui.onWindowClosed(event)
-    Framework.gui_manager:destroy_gui(event.player_index)
+---@param gui framework.gui
+function Gui.onWindowClosed(event, gui)
+    Framework.gui_manager:destroyGui(event.player_index, gui.type)
 end
 
 local on_off_values = {
@@ -716,9 +717,6 @@ function Gui.onGuiOpened(event)
     local player = Player.get(event.player_index)
     if not player then return end
 
-    -- close an eventually open gui
-    Framework.gui_manager:destroy_gui(event.player_index)
-
     local entity = event and event.entity --[[@as LuaEntity]]
     if not entity then
         player.opened = nil
@@ -743,7 +741,7 @@ function Gui.onGuiOpened(event)
         last_connection_state = nil,
     }
 
-    local gui = Framework.gui_manager:create_gui {
+    local gui = Framework.gui_manager:createGui {
         type = Gui.NAME,
         player_index = event.player_index,
         parent = player.gui.screen,
@@ -802,7 +800,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 local function init_gui()
-    Framework.gui_manager:register_gui_type(Gui.NAME, get_gui_event_definition())
+    Framework.gui_manager:registerGuiType(Gui.NAME, get_gui_event_definition())
 
     local match_main_entity = Matchers:matchEventEntityName(const.lti_name)
     local match_ghost_main_entity = Matchers:matchEventEntityGhostName(const.lti_name)
