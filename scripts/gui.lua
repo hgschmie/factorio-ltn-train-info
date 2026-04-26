@@ -598,22 +598,22 @@ end
 ---@param type string
 ---@param cfg lti.DeliveryConfig
 local function update_gui_delivery(gui, type, cfg)
-    local delivery = gui:find_element('delivery-' .. type)
+    local delivery = gui:findElement('delivery-' .. type)
     delivery.state = cfg.enabled
 
-    local quantity = gui:find_element('signal-type-quantity-' .. type)
+    local quantity = gui:findElement('signal-type-quantity-' .. type)
     quantity.state = cfg.signal_type == const.signal_type.quantity
     quantity.enabled = cfg.enabled
 
-    local stacksize = gui:find_element('signal-type-stacksize-' .. type)
+    local stacksize = gui:findElement('signal-type-stacksize-' .. type)
     stacksize.state = cfg.signal_type == const.signal_type.stack_size
     stacksize.enabled = cfg.enabled
 
-    local one = gui:find_element('signal-type-one-' .. type)
+    local one = gui:findElement('signal-type-one-' .. type)
     one.state = cfg.signal_type == const.signal_type.one
     one.enabled = cfg.enabled
 
-    local negate = gui:find_element('negate-' .. type)
+    local negate = gui:findElement('negate-' .. type)
     negate.state = cfg.negate
     negate.enabled = cfg.enabled
 end
@@ -629,23 +629,23 @@ local function update_gui(gui, lti_data)
     local config = lti_data.config
 
     local enabled = lti_data.config.enabled
-    local on_off = gui:find_element('on-off')
+    local on_off = gui:findElement('on-off')
     on_off.switch_state = values_on_off[enabled]
 
     -- deal with provide and request
     update_gui_delivery(gui, 'provide', config.provide)
     update_gui_delivery(gui, 'request', config.request)
 
-    local virtual = gui:find_element('virtual')
+    local virtual = gui:findElement('virtual')
     virtual.state = config.virtual
 
     local divide_enabled = config.provide.enabled or config.request.enabled
 
-    local divide_by_slider = gui:find_element('divide_by_slider')
+    local divide_by_slider = gui:findElement('divide_by_slider')
     divide_by_slider.slider_value = config.divide_by
     divide_by_slider.enabled = divide_enabled
 
-    local divide_by_text = gui:find_element('divide_by_text')
+    local divide_by_text = gui:findElement('divide_by_text')
     divide_by_text.text = tostring(config.divide_by)
     divide_by_text.enabled = divide_enabled
 end
@@ -670,23 +670,23 @@ local function refresh_gui(gui, lti_data)
         entity_status = defines.entity_status.disabled
     end
 
-    local lamp = gui:find_element('status-lamp')
+    local lamp = gui:findElement('status-lamp')
     lamp.sprite = tools.STATUS_SPRITES[entity_status] or tools.STATUS_LEDS.RED
 
-    local status = gui:find_element('status-label')
+    local status = gui:findElement('status-label')
     status.caption = entity_status and { tools.STATUS_NAMES[entity_status] } or { const:locale('not-connected') }
 
     -- train stop connections
     local connection_caption = table_size(lti_data.connected_stops) > 0 and string.join(', ', table.keys(lti_data.connected_stops, true)) or { 'gui-control-behavior.not-connected' }
-    local connection = gui:find_element('connection')
+    local connection = gui:findElement('connection')
     connection.caption = connection_caption
 
     -- render output signals
-    local output_signals = gui:find_element('signal-view')
+    local output_signals = gui:findElement('signal-view')
     render_output_signals(output_signals, lti_data)
 
     -- wire connections
-    local connections = gui:find_element('connections')
+    local connections = gui:findElement('connections')
     connections.caption = { 'gui-control-behavior.not-connected' }
 
     local connection_state = {}
@@ -694,7 +694,7 @@ local function refresh_gui(gui, lti_data)
         local connector_id = defines.wire_connector_id['circuit_' .. color]
         local wire_connector = lti_data.main.get_wire_connector(connector_id, false)
 
-        local wire_connection = gui:find_element('connection-' .. color)
+        local wire_connection = gui:findElement('connection-' .. color)
         if wire_connector and wire_connector.connection_count > 0 then
             connection_state[connector_id] = true
             connections.caption = { 'gui-control-behavior.connected-to-network' }

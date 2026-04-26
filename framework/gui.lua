@@ -3,7 +3,8 @@
 ------------------------------------------------------------------------
 assert(script)
 
-local Is = require('stdlib.utils.is')
+local util = require('util')
+
 local table = require('stdlib.utils.table')
 
 require('stdlib.utils.string')
@@ -81,7 +82,7 @@ end
 ------------------------------------------------------------------------
 
 ---@return string gui_name
-function FrameworkGui:generate_name()
+function FrameworkGui:generateName()
     self.count = self.count + 1
     return tostring(self.count)
 end
@@ -89,7 +90,7 @@ end
 --- Adds the internal prefix to the given name unless it is already prefixed.
 ---@param name string
 ---@return string prefixed name
-function FrameworkGui:generate_gui_name(name)
+function FrameworkGui:generateGuiName(name)
     if name.sub(1, #self.prefix) == self.prefix then
         return name
     else
@@ -100,7 +101,7 @@ end
 --- Registers all defined handlers after a LuaGuiElement has been created.
 ---@param gui_element LuaGuiElement
 ---@param extras framework.gui.element_extras
-function FrameworkGui:register_handlers(gui_element, extras)
+function FrameworkGui:registerHandlers(gui_element, extras)
     if not extras.handler then return end
 
     local handlers = extras.handler
@@ -129,7 +130,7 @@ local extra_fields = {
 ---@param parent LuaGuiElement The parent element that this child will be attached to.
 ---@param child framework.gui.element_definition A gui element definition. May have additional children.
 ---@return LuaGuiElement gui_element The new gui element
-function FrameworkGui:create_child_element(parent, child)
+function FrameworkGui:createChildElement(parent, child)
     ---@type framework.gui.element_extras
     local extras = {}
 
@@ -138,7 +139,7 @@ function FrameworkGui:create_child_element(parent, child)
         child[key] = nil
     end
 
-    child.name = self:generate_gui_name(child.name or self:generate_name())
+    child.name = self:generateGuiName(child.name or self:generateName())
     assert(not self.ui_elements[child.name], "A UI element named '" .. child.name .. "' was already defined!")
 
     local gui_element = parent.add(child)
@@ -174,7 +175,7 @@ function FrameworkGui:create_child_element(parent, child)
     end
 
     if extras.drag_target then
-        local drag_name = self:generate_gui_name(extras.drag_target)
+        local drag_name = self:generateGuiName(extras.drag_target)
         local target = self.ui_elements[drag_name]
         assert(target, "Drag target '" .. extras.drag_target .. "' not found.")
 
@@ -182,11 +183,11 @@ function FrameworkGui:create_child_element(parent, child)
     end
 
     if extras.handler then
-        self:register_handlers(gui_element, extras)
+        self:registerHandlers(gui_element, extras)
     end
 
     if extras.children then
-        self:add_child_elements(gui_element, extras.children)
+        self:addChildElements(gui_element, extras.children)
     end
 
     return gui_element
@@ -196,9 +197,9 @@ end
 ---@param parent LuaGuiElement
 ---@param child framework.gui.element_definition The elements that are added to the tab.
 ---@return LuaGuiElement gui_element The content of the tab.
-function FrameworkGui:add_tab(parent, child)
-    local tab = self:create_child_element(parent, child.tab)
-    local gui_element = self:create_child_element(parent, child.content)
+function FrameworkGui:addTab(parent, child)
+    local tab = self:createChildElement(parent, child.tab)
+    local gui_element = self:createChildElement(parent, child.content)
     parent.add_tab(tab, gui_element)
 
     return gui_element
@@ -210,16 +211,16 @@ end
 ---@param parent LuaGuiElement
 ---@param children framework.gui.element_definitions The element definition, or an array of element definitions.
 ---@param existing_elements table<string, LuaGuiElement>? Optional set of existing GUI elements.
-function FrameworkGui:add_child_elements(parent, children, existing_elements)
-    assert(Is.Valid(parent), 'Parent element is missing or invalid')
+function FrameworkGui:addChildElements(parent, children, existing_elements)
+    assert(parent and parent.valid, 'Parent element is missing or invalid')
     assert(children, 'new_elements can not be empty')
 
     if existing_elements then
         -- validate and move existing elements into the internal ui_elements array
         for _, element in pairs(existing_elements) do
-            assert(Is.Valid(element))
+            assert(element and element.valid)
             assert(element.name, 'Can not add an external element without name: ' .. serpent.line(element))
-            local gui_name = self:generate_gui_name(element.name)
+            local gui_name = self:generateGuiName(element.name)
 
             assert(not self.ui_elements[gui_name], "A UI element named '" .. gui_name .. "' was already defined!")
             self.ui_elements[gui_name] = element
@@ -235,9 +236,9 @@ function FrameworkGui:add_child_elements(parent, children, existing_elements)
 
         local gui_element
         if child.type then
-            gui_element = self:create_child_element(parent, child)
+            gui_element = self:createChildElement(parent, child)
         elseif child.tab and child.content then
-            gui_element = self:add_tab(parent, child)
+            gui_element = self:addTab(parent, child)
         else
             error('Invalid element: ' .. serpent.line(child))
         end
@@ -276,8 +277,8 @@ end
 --- Finds a registered element in this Gui by name.
 ---@param name string
 ---@return LuaGuiElement? gui_element A registered gui element or nil.
-function FrameworkGui:find_element(name)
-    local ui_name = self:generate_gui_name(name)
+function FrameworkGui:findElement(name)
+    local ui_name = self:generateGuiName(name)
     return self.ui_elements[ui_name]
 end
 
@@ -286,11 +287,27 @@ end
 --- Removes all children from an UI element
 ---@param name string The name of the UI element
 ---@return LuaGuiElement? ui_element The GUI element without children or nil.
-function FrameworkGui:remove_children(name)
-    local ui_element = self:find_element(name)
+function FrameworkGui:removeChildren(name)
+    local ui_element = self:findElement(name)
+    return self:removeChildrenAndHandlers(ui_element)
+end
 
+---@param ui_element LuaGuiElement?
+---@return LuaGuiElement? ui_element The GUI element without children or nil.
+function FrameworkGui:removeChildrenAndHandlers(ui_element)
     if ui_element then
         local child_names = util.copy(ui_element.children_names)
+        if #child_names > 0 then
+            for _, child_name in pairs(child_names) do
+                if self.ui_elements[child_name] then
+                    self:removeChildrenAndHandlers(self.ui_elements[child_name])
+                end
+                for _, event_handlers in pairs(self.event_handlers) do
+                    if event_handlers then event_handlers[child_name] = nil end
+                end
+            end
+        end
+
         ui_element.clear()
         table.remove_keys(self.ui_elements, child_names)
     end
@@ -302,10 +319,10 @@ end
 ---@param name string The name of the UI element.
 ---@param children framework.gui.element_definitions
 ---@return LuaGuiElement? ui_element The GUI element with new children or nil.
-function FrameworkGui:replace_children(name, children)
-    local parent = self:remove_children(name)
+function FrameworkGui:replaceChildren(name, children)
+    local parent = self:removeChildren(name)
     if parent then
-        self:add_child_elements(parent, children)
+        self:addChildElements(parent, children)
     end
 
     return parent

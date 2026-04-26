@@ -3,8 +3,6 @@
 ------------------------------------------------------------------------
 assert(script)
 
-local util = require('util')
-
 local Event = require('stdlib.event.event')
 local Player = require('stdlib.event.player')
 local table = require('stdlib.utils.table')
@@ -335,7 +333,7 @@ function FrameworkGuiManager:createGui(map)
         self:destroyGuiByPlayer(player_index)
     end
 
-    local root = gui:add_child_elements(map.parent, ui_tree, map.existing_elements)
+    local root = gui:addChildElements(map.parent, ui_tree, map.existing_elements)
     gui.root = root
 
     self:addGui(player_index, gui)
