@@ -86,6 +86,7 @@ function Gui.getUi(gui)
                         hovered_sprite = 'utility/close_black',
                         clicked_sprite = 'utility/close_black',
                         mouse_button_filter = { 'left' },
+                        tooltip = { 'gui.close-instruction' },
                         handler = { [defines.events.on_gui_click] = gui_events.onWindowClosed },
                     },
                 },
