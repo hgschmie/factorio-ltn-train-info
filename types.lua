@@ -12,7 +12,6 @@
 ----------------------------------------------------------------------------------------------------
 
 ---@class lti.Storage
----@field VERSION integer
 ---@field count integer
 ---@field deliveries table<integer, LTNDelivery>
 ---@field lti table<integer, lti.Data>

@@ -567,12 +567,9 @@ local function render_output_signals(gui_element, lti_data)
     assert(gui_element)
     gui_element.clear()
 
-    local output = lti_data.main.get_control_behavior() --[[@as LuaConstantCombinatorControlBehavior ]]
-    assert(output)
-
-    assert(output.sections_count == 1)
-    local section = output.sections[1]
-    assert(section.type == defines.logistic_section_type.manual)
+    local output = assert(lti_data.main.get_control_behavior()) --[[@as LuaConstantCombinatorControlBehavior ]]
+    if output.sections_count == 0 then output.add_section() end
+    local section = assert(output.sections[1])
 
     local filters = section.filters
 

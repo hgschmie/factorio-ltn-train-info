@@ -23,7 +23,6 @@ function Lti:init()
     if not storage.lti_data then
         ---@type lti.Storage
         storage.lti_data = {
-            VERSION = const.current_version,
             lti = {},
             count = 0,
             deliveries = {},
@@ -79,6 +78,19 @@ end
 
 ---@param train_id integer
 function Lti:clearDelivery(train_id)
+    local delivery = storage.lti_data.deliveries[train_id]
+
+    if delivery then
+        for _, stop_id in pairs { delivery.from_id, delivery.to_id } do
+            for lti_id in pairs(self:getLtisForStop(stop_id)) do
+                local lti_data = self:getLtiData(lti_id)
+                if lti_data and lti_data.current_delivery and lti_data.current_delivery.train_id == train_id then
+                    self:updateLtiState(lti_data, nil)
+                end
+            end
+        end
+    end
+
     storage.lti_data.deliveries[train_id] = nil
 end
 
@@ -87,8 +99,7 @@ end
 ---@param stop_id integer
 ---@return table<integer, LuaEntity> ltis
 function Lti:getLtisForStop(stop_id)
-    storage.lti_data.stop_to_ltis[stop_id] = storage.lti_data.stop_to_ltis[stop_id] or {}
-    return storage.lti_data.stop_to_ltis[stop_id]
+    return storage.lti_data.stop_to_ltis[stop_id] or {}
 end
 
 ---@param stop_id integer
@@ -101,8 +112,8 @@ end
 function Lti:addLtiToStop(stop_id, lti_entity)
     if not (lti_entity and lti_entity.valid) then return end
 
-    local ltis = self:getLtisForStop(stop_id)
-    ltis[lti_entity.unit_number] = lti_entity
+    storage.lti_data.stop_to_ltis[stop_id] = storage.lti_data.stop_to_ltis[stop_id] or {}
+    storage.lti_data.stop_to_ltis[stop_id][lti_entity.unit_number] = lti_entity
 end
 
 ---@param stop_id integer

@@ -11,7 +11,6 @@ local table = require('stdlib.utils.table')
 --------------------------------------------------------------------------------
 
 local Constants = {
-    CURRENT_VERSION = 1,
     prefix = 'hps__lti-',
     name = 'ltn-train-info',
     root = '__ltn-train-info__',

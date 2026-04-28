@@ -3,6 +3,8 @@ Version: 1.3.1
 Date: ????
   Changes:
     - ignore source graphics for the mod distribution
+    - address corner case when train gets destroyed while LTI shows the delivery status
+    - some minor correctness fixes
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.0
 Date: 2026-02-08
