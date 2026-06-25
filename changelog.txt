@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.3.1
+Version: 2.0.0
 Date: ????
   Changes:
+    - Update to Factorio 2.1
     - ignore source graphics for the mod distribution
     - address corner case when train gets destroyed while LTI shows the delivery status
     - some minor correctness fixes
