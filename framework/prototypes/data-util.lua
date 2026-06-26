@@ -1,7 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 -- Data Utility - from flib
 ----------------------------------------------------------------------------------------------------
-assert(not script)
+assert(data and data.raw)
+assert(Framework)
 
 local util = require('util')
 local collision_mask_util = require('collision-mask-util')

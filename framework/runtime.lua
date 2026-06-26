@@ -1,6 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 -- access to the framework provided runtime storage - ported from flib
 ----------------------------------------------------------------------------------------------------
+assert(script)
+assert(Framework)
 
 local Player = require('stdlib.event.player')
 

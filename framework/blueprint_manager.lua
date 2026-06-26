@@ -2,6 +2,7 @@
 -- Manage blueprint related state
 ------------------------------------------------------------------------
 assert(script)
+assert(Framework)
 
 local Event = require('stdlib.event.event')
 local Is = require('stdlib.utils.is')

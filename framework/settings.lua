@@ -5,6 +5,7 @@
 local table = require('stdlib.utils.table')
 
 ----------------------------------------------------------------------------------------------------
+assert(Framework)
 
 ---@enum FrameworkSettings.name
 local setting_types = {

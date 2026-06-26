@@ -2,6 +2,7 @@
 -- Manage GUIs and GUI state -- loosely inspired by flib
 ------------------------------------------------------------------------
 assert(script)
+assert(Framework)
 
 local Event = require('stdlib.event.event')
 local Player = require('stdlib.event.player')

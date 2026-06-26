@@ -2,6 +2,7 @@
 -- technology slot styles supplied by the framework - from flib
 ----------------------------------------------------------------------------------------------------
 assert(data and data.raw)
+assert(Framework)
 
 if not data.raw['gui-style'] then return end
 local styles = data.raw['gui-style'].default

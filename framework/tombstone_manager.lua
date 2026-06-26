@@ -8,6 +8,7 @@
 --   - entities dying
 ------------------------------------------------------------------------
 assert(script)
+assert(Framework)
 
 local Is = require('stdlib.utils.is')
 local Event = require('stdlib.event.event')

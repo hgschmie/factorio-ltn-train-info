@@ -1,6 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 -- styles supplied by the framework - from flib
 ----------------------------------------------------------------------------------------------------
+assert(data and data.raw)
+assert(Framework)
 
 local data_util = require('framework.prototypes.data-util')
 
