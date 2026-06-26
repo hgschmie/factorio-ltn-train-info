@@ -193,7 +193,7 @@ if script then
     local Event = require('stdlib.event.event')
 
     local function flush()
-        Framework.settings:flush()
+        FrameworkSettings:flush()
     end
 
     local function register_events()

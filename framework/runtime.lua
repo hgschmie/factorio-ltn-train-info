@@ -3,7 +3,6 @@
 ----------------------------------------------------------------------------------------------------
 
 local Player = require('stdlib.event.player')
-local table = require('stdlib.utils.table')
 
 --- Main class governing the runtime.
 -- Runtime exists during gameplay.

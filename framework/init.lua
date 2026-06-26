@@ -30,7 +30,7 @@ local Is = require('stdlib.utils.is')
 ---@field other_mods framework.OtherModsManager
 ---@field remote_api table<string, function>?
 ---@field render FrameworkRender?
-Framework = {
+local FrameworkInit = {
     --- The non-localised prefix (textual ID) of this mod.
     -- Must be set as the earliest possible time, as virtually all other framework parts use this.
     PREFIX = 'unknown-module-',
@@ -71,7 +71,7 @@ Framework = {
 
 --- called in runtime stage
 ---@param config FrameworkConfig
-function Framework:init_runtime(config)
+function FrameworkInit:init_runtime(config)
     -- runtime stage
     self.runtime = self.runtime or require('framework.runtime')
 
@@ -79,9 +79,9 @@ function Framework:init_runtime(config)
 
     self.logger:log('================================================================================')
     self.logger:log('==')
-    self.logger:logf("== Framework logfile for '%s' mod intialized ", Framework.NAME)     --(debug mode: %s)", Framework.NAME, tostring(self.debug_mode))
+    self.logger:logf("== Framework logfile for '%s' mod intialized ", FrameworkInit.NAME)     --(debug mode: %s)", FrameworkInit.NAME, tostring(self.debug_mode))
     self.logger:log('==')
-    self.logger:logf('== Run ID: %d', Framework.RUN_ID)
+    self.logger:logf('== Run ID: %d', FrameworkInit.RUN_ID)
     self.logger:log('================================================================================')
     self.logger:flush()
 
@@ -102,7 +102,7 @@ end
 --- Initialize the core framework.
 --- the code itself references the global Framework table.
 ---@param config FrameworkConfig|function():FrameworkConfig config provider
-function Framework:init(config)
+function FrameworkInit:init(config)
     assert(Is.Function(config) or Is.Table(config), 'configuration must either be a table or a function that provides a table')
     if Is.Function(config) then
         config = config()
@@ -140,17 +140,19 @@ end
 local game_stages = { 'settings', 'data', 'data_updates', 'data_final_fixes', 'runtime' }
 
 local Framework_mt = {}
-setmetatable(Framework, Framework_mt)
+setmetatable(FrameworkInit, Framework_mt)
 
 local prototype = {}
 
 for _, game_stage in pairs(game_stages) do
     prototype['post_' .. game_stage .. '_stage'] = function()
         -- otherwise, it is an stage method, pass it to the submodules
-        Framework.other_mods[game_stage]() -- other-mods subsystem
+        FrameworkInit.other_mods[game_stage]() -- other-mods subsystem
     end
 end
 
 Framework_mt.__index = prototype
 
-return Framework
+Framework = FrameworkInit
+
+return FrameworkInit
