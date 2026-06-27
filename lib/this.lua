@@ -7,9 +7,9 @@
 ---@field Lti lti.Lti?
 ---@field Gui lti.Gui?
 local This = {
-    other_mods = {
-        LogisticTrainNetwork = 'ltn',
-        ['even-pickier-dollies'] = 'picker_dollies',
+    remote_apis = {
+        ['PickerDollies'] = 'picker-dollies',
+        ['logistic-train-network'] = 'ltn',
     },
 }
 

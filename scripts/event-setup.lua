@@ -236,7 +236,7 @@ local function register_events()
     Framework.blueprint:registerCallbackForNames(const.lti_name, serialize_config)
 
     -- manage tombstones for undo/redo and dead entities
-    Framework.tombstone:registerCallback(const.lti_name, {
+    Framework.Tombstone:registerCallback(const.lti_name, {
         create_tombstone = serialize_config,
         apply_tombstone = Framework.ghost_manager.mapTombstoneToGhostTags,
     })

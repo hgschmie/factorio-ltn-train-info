@@ -2,11 +2,9 @@
 -- Picker Dollies (https://mods.factorio.com/mod/PickerDollies) support
 --------------------------------------------------------------------------------
 
-local Is = require('stdlib.utils.is')
+local Event = require('stdlib.event.event')
 
 local const = require('lib.constants')
-
-local PickerDolliesSupport = {}
 
 ---@class epd.Event: EventData
 ---@field player_index uint                 Player index
@@ -18,26 +16,22 @@ local PickerDolliesSupport = {}
 
 ---@param event epd.Event
 local function picker_dollies_moved(event)
-    if not Is.Valid(event.moved_entity) then return end
-    if event.moved_entity.name ~= const.lti_name then return end
-    This.Lti:move(event.moved_entity)
+    local moved_entity = event.moved_entity
+    if not (moved_entity and moved_entity.valid) then return end
+
+    if moved_entity.name ~= const.lti_name then return end
+    This.Lti:move(moved_entity)
 end
 
-PickerDolliesSupport.runtime = function()
-    assert(script)
-
-    local Event = require('stdlib.event.event')
-
-    local picker_dollies_init = function()
-        if not remote.interfaces['PickerDollies'] then return end
-
-        assert(remote.interfaces['PickerDollies']['dolly_moved_entity_id'], 'Picker Dollies present but no dolly_moved_entity_id interface!')
-
+local function picker_dollies_init()
+    if remote.interfaces['PickerDollies']['dolly_moved_entity_id'] then
         Event.on_event(remote.call('PickerDollies', 'dolly_moved_entity_id'), picker_dollies_moved)
     end
-
-    Event.on_init(picker_dollies_init)
-    Event.on_load(picker_dollies_init)
 end
 
-return PickerDolliesSupport
+local PickerDollies = {
+    on_init = picker_dollies_init,
+    on_load = picker_dollies_init,
+}
+
+return PickerDollies
