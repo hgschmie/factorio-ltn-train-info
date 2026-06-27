@@ -35,7 +35,7 @@
 ---@field prefix string A prefix for all game registered elements
 ---@field root string The module root name
 ---@field log_tag string? A custom logger tag
----@field remote_name string? The name for the remote interface. If defined, the mod will have a remote interface.
+---@field exported_api_name string? The name for the remote interface. If defined, the mod will expose an API for other mods to call.
 
 ----------------------------------------------------------------------------------------------------
 --- settings.lua

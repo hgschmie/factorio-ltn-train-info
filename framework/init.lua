@@ -16,7 +16,6 @@ local Is = require('stdlib.utils.is')
 ---@class FrameworkRoot
 ---@field PREFIX string
 ---@field NAME string
----@field STORAGE string
 ---@field GAME_ID integer,
 ---@field RUN_ID integer,
 ---@field settings FrameworkSettings?
@@ -25,10 +24,11 @@ local Is = require('stdlib.utils.is')
 ---@field gui_manager framework.gui_manager?
 ---@field ghost_manager framework.ghost_manager?
 ---@field blueprint framework.blueprint.Manager?
----@field tombstone framework.tombstone_manager?
+---@field Tombstone ff2.TombstoneManager?
 ---@field translation_manager framework.translation.Manager?
 ---@field other_mods framework.OtherModsManager
----@field remote_api table<string, function>?
+---@field RemoteApis ff2.RemoteApisManager?
+---@field ExportedApis table<string, function>?
 ---@field render FrameworkRender?
 local FrameworkInit = {
     --- The non-localised prefix (textual ID) of this mod.
@@ -40,9 +40,6 @@ local FrameworkInit = {
 
     --- Root location
     ROOT = '__unknown__',
-
-    --- Name of the field in `global` to store framework persistent runtime data.
-    STORAGE = 'framework',
 
     GAME_ID = -1,
 
@@ -62,9 +59,11 @@ local FrameworkInit = {
 
     translation_manager = nil,
 
-    tombstone = nil,
+    Tombstone = nil,
 
-    remote_api = nil,
+    ExportedApis = nil,
+
+    RemoteApis = nil,
 
     render = nil,
 }
@@ -89,13 +88,13 @@ function FrameworkInit:init_runtime(config)
     self.ghost_manager = self.ghost_manager or require('framework.ghost_manager')
     self.blueprint = self.blueprint or require('framework.blueprint_manager')
     self.translation_manager = self.translation_manager or require('framework.translation_manager')
-    self.tombstone = self.tombstone or require('framework.tombstone_manager')
+    self.Tombstone = self.Tombstone or require('framework.tombstone_manager')
 
     self.render = self.render or require('framework.render')
 
-    if config.remote_name and not self.remote_api then
-        self.remote_api = {}
-        remote.add_interface(config.remote_name, self.remote_api)
+    if config.exported_api_name and not self.ExportedApis then
+        self.ExportedApis = {}
+        remote.add_interface(config.exported_api_name, self.ExportedApis)
     end
 end
 
@@ -118,9 +117,10 @@ function FrameworkInit:init(config)
     self.ROOT = config.root
 
     -- load only once per stage
-    self.settings = self.settings or require('framework.settings') --[[ @as FrameworkSettings ]]
-    self.logger = self.logger or require('framework.logger') --[[ @as FrameworkLogger ]]
+    self.settings = self.settings or require('framework.settings') --[[@as FrameworkSettings ]]
+    self.logger = self.logger or require('framework.logger') --[[@as FrameworkLogger ]]
     self.other_mods = self.other_mods or require('framework.other-mods')
+    self.RemoteApis = self.RemoteApis or require('framework.remote-apis')
 
     if data and data.raw['gui-style'] then
         -- data stage
@@ -129,6 +129,9 @@ function FrameworkInit:init(config)
         -- runtime stage
         self:init_runtime(config --[[@as FrameworkConfig]])
     end
+
+    -- flush possible settings pulled in by framework init code
+    self.settings:flush()
 
     return self
 end
@@ -148,6 +151,7 @@ for _, game_stage in pairs(game_stages) do
     prototype['post_' .. game_stage .. '_stage'] = function()
         -- otherwise, it is an stage method, pass it to the submodules
         FrameworkInit.other_mods[game_stage]() -- other-mods subsystem
+        FrameworkInit.RemoteApis[game_stage]() -- remote-apis subsystem
     end
 end
 

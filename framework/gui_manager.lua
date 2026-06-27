@@ -33,7 +33,7 @@ local GUI_UPDATE_TICK_INTERVAL = 11
 ---@field player_index integer      Player Index
 ---@field type string GUI type
 ---@field parent LuaGuiElement      Parent to associate with
----@field ui_tree_provider fun(context: framework.gui): framework.gui.element_definitions
+---@field ui_tree_provider fun(context: framework.gui): framework.gui.element_definitions?
 ---@field existing_elements table<string, LuaGuiElement>? Optional set of existing GUI elements.
 ---@field context framework.gui.context? Context element
 ---@field entity_id integer? The entity for which a gui is created
@@ -324,7 +324,7 @@ function FrameworkGuiManager:createGui(map)
 
     local ui_tree = map.ui_tree_provider(gui)
     -- do not change to table_size, '#' returning 0 is the whole point of the check...
-    assert(type(ui_tree) == 'table' and #ui_tree == 0, 'The UI tree must have a single root!')
+    assert(not ui_tree or (type(ui_tree) == 'table' and #ui_tree == 0), 'The UI tree must have a single root!')
 
     if map.retain_open_guis then
         -- only close the window we just opened
@@ -334,8 +334,7 @@ function FrameworkGuiManager:createGui(map)
         self:destroyGuiByPlayer(player_index)
     end
 
-    local root = gui:addChildElements(map.parent, ui_tree, map.existing_elements)
-    gui.root = root
+    gui.root = gui:addChildElements(map.parent, ui_tree, map.existing_elements)
 
     self:addGui(player_index, gui)
 
@@ -363,6 +362,25 @@ function FrameworkGuiManager:destroyGuiByEntityId(entity_id)
     for _, gui in pairs(destroy_list) do
         self:destroyGui(gui.player_index, gui.type)
     end
+end
+
+--- Find all GUIs that match this entity id
+---@param entity_id integer?
+---@return framework.gui[]
+function FrameworkGuiManager:findGuisByEntityId(entity_id)
+    local result = {}
+
+    if not entity_id then return result end
+
+    for _, player in pairs(game.players) do
+        for _, gui in pairs(self:findAllGuis(player.index)) do
+            if gui and gui.entity_id == entity_id then
+                table.insert(result, gui)
+            end
+        end
+    end
+
+    return result
 end
 
 ------------------------------------------------------------------------
@@ -458,6 +476,7 @@ end
 local function register_events()
     -- register all gui events with the framework
     for name, id in pairs(defines.events) do
+        ---@diagnostic disable-next-line: undefined-field
         if name:starts_with('on_gui_') then
             Event.on_event(id, function(ev)
                 Framework.gui_manager:dispatch(ev --[[@as framework.gui.event_data]])
@@ -467,6 +486,7 @@ local function register_events()
 
     -- register all hotkey events for this mod from the framework
     for name in pairs(prototypes.custom_input) do
+        ---@diagnostic disable-next-line: undefined-field
         if name:starts_with(Framework.PREFIX) then
             Event.on_event(name, onCustomInputEvent)
         end

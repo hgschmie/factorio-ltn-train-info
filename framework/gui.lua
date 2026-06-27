@@ -72,6 +72,7 @@ local event_handler_template = {
 
 -- predefine arrays for all supported events
 for name, id in pairs(defines.events) do
+    ---@diagnostic disable-next-line: undefined-field
     if name:starts_with('on_gui_') then
         event_handler_template[id] = {}
     end
@@ -209,11 +210,11 @@ end
 
 --- Add a new child or children to the given GUI element.
 ---@param parent LuaGuiElement
----@param children framework.gui.element_definitions The element definition, or an array of element definitions.
+---@param children framework.gui.element_definitions? The element definition, or an array of element definitions.
 ---@param existing_elements table<string, LuaGuiElement>? Optional set of existing GUI elements.
+---@return LuaGuiElement? root The root for the child elements
 function FrameworkGui:addChildElements(parent, children, existing_elements)
     assert(parent and parent.valid, 'Parent element is missing or invalid')
-    assert(children, 'new_elements can not be empty')
 
     if existing_elements then
         -- validate and move existing elements into the internal ui_elements array
@@ -227,6 +228,8 @@ function FrameworkGui:addChildElements(parent, children, existing_elements)
         end
     end
 
+    if not children then return nil end
+
     -- If a single def was passed, wrap it in an array
     children = #children > 0 and children or { children } --[[@as table<string, framework.gui.element_definition>]]
 
@@ -239,7 +242,7 @@ function FrameworkGui:addChildElements(parent, children, existing_elements)
             gui_element = self:createChildElement(parent, child)
         elseif child.tab and child.content then
             gui_element = self:addTab(parent, child)
-        else
+        elseif table_size(child) > 0 then
             error('Invalid element: ' .. serpent.line(child))
         end
         root = root or gui_element

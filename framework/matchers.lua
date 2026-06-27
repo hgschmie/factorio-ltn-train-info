@@ -12,6 +12,9 @@ local table = require('stdlib.utils.table')
 --- A function that extract a given attribute or value from an entity. Returns a value or nil.
 ---@alias framework.event_matcher.ExtractFunction fun(entity:LuaEntity?, context: any?): any?
 
+--- A function that extract a given attribute or value from an event. Returns a value or nil.
+---@alias framework.event_matcher.ExtractEventFunction fun(ev: EventData?, context: any?): any?
+
 --- A function that matches an arbitrary event and returns true or false.
 ---@alias framework.event_matcher.MatchEventFunction fun(ev: EventData, context: any?): boolean
 
@@ -54,7 +57,29 @@ local Matchers = {
 --------------------------------------------------------------------------------
 
 
---- Creates a matcher function.
+--- Creates a matcher function for an event.
+---
+---@param values string|string[] One or more values to match.
+---@param extract_function framework.event_matcher.MatchEventFunction
+---@param invert boolean? - Invert the matching condition. `false` if omitted.
+---@return framework.event_matcher.MatchEventFunction
+function Matchers:createEventMatcherFunction(values, extract_function, invert)
+    assert(values)
+    if type(values) ~= 'table' then values = { values } end
+
+    invert = invert or false
+
+    local value_map = table.array_to_dictionary(values, true)
+
+    return function(event, context)
+        if not event then return false end -- invalid is always not a match
+        local match = value_map[extract_function(event, context)] or false
+
+        return (match and not invert) or (not match and invert) -- discrete XOR ...
+    end
+end
+
+--- Creates a matcher function for an entity.
 ---
 ---@param values string|string[] One or more values to match.
 ---@param extract_function framework.event_matcher.ExtractFunction
@@ -159,6 +184,16 @@ end
 function Matchers:matchEventEntityByAttribute(extract_function, values, invert)
     local matcher_function = self:createMatcherFunction(values, extract_function, invert)
     return self:createEventEntityMatcher(matcher_function)
+end
+
+--- Returns an event entity matching function for an arbitrary attribute extractor.
+---
+---@param extract_function framework.event_matcher.ExtractEventFunction Function called for any entity, needs to return a value or nil
+---@param values string|string[] One or more values to match by the function return value.
+---@param invert boolean? If true, invert the match.
+---@return framework.event_matcher.MatchEventFunction
+function Matchers:matchEventByAttribute(extract_function, values, invert)
+    return self:createEventMatcherFunction(values, extract_function, invert)
 end
 
 return Matchers
