@@ -3,11 +3,13 @@
 --------------------------------------------------------------------------------
 assert(script)
 
+local util = require('util')
+
 local Event = require('stdlib.event.event')
 local Player = require('stdlib.event.player')
-local table = require('stdlib.utils.table')
 
 local Matchers = require('framework.matchers')
+local Ticker = require('framework.ticker')
 
 local const = require('lib.constants')
 
@@ -15,19 +17,32 @@ local const = require('lib.constants')
 -- entity create / delete
 --------------------------------------------------------------------------------
 
+---@param tags Tags?
+---@return lti.Config? config
+local function deserialize_config(tags)
+    if not (tags and tags[const.config_tag_name]) then return nil end
+    return tags[const.config_tag_name]
+end
+
+
 ---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.on_space_platform_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 local function on_entity_created(event)
     local entity = event and event.entity
-    if not entity then return end
+    if not (entity and entity.valid) then return end
 
+    ---@type Tags?
     local tags = event.tags
 
-    local entity_ghost = Framework.ghost_manager:findGhostForEntity(entity)
+    local config = nil
+
+    local entity_ghost = Framework.Ghost:findGhostForEntity(entity)
     if entity_ghost then
         tags = tags or entity_ghost.tags
     end
 
-    local config = tags and tags[const.config_tag_name] --[[@as lti.Config ]]
+    if tags then
+        config = deserialize_config(tags)
+    end
 
     This.Lti:create(entity, config)
 end
@@ -170,44 +185,44 @@ end
 -- ticker to prune lost cargo
 --------------------------------------------------------------------------------
 
----@return lti.Ticker
-local function get_ticker()
-    storage.ticker = storage.ticker or {}
-    storage.ticker.last_tick = storage.ticker.last_tick or game.tick
-    return storage.ticker
+---@param keys ff2.ticker.TickerContext
+---@param values ff2.ticker.TickerContext
+---@return any
+local function ticker_unit_of_work(keys, values)
+    local delivery = keys.delivery
+    if game.train_manager.get_train_by_id(delivery) then
+        This.Lti:clearDelivery(delivery)
+    end
 end
 
-local function onTick()
-    local ticker = get_ticker()
-    local interval = 60
+local function on_tick()
+    local ticker_info = Ticker.getTicker('ticker')
+    local tick_interval = 60
 
     local deliveries = This.Lti:deliveries()
-    local count = table_size(deliveries)
-    if count == 0 then return end
+    local delivery_count = table_size(deliveries)
+    if delivery_count == 0 then return end
 
-    local ticks_per_entity = math.max(1, math.floor(interval / count)) -- at least one
-    if ticker.last_tick + ticks_per_entity > game.tick then return end
+    local ticks_per_entity = math.max(1, math.floor(tick_interval / delivery_count)) -- at least one
+    if ticker_info.last_tick + ticks_per_entity > game.tick then return end
 
-    local process_count = math.ceil(count / interval)
-    local index = ticker.last_tick_index
+    local process_count = math.ceil(delivery_count / tick_interval)
 
-    -- if the delivery that the index points to has been removed in the meantime, reset the index
-    if index and not deliveries[index] then index = nil end
+    local context = ticker_info.context or {}
 
-    if process_count > 0 then
-        repeat
-            index = next(deliveries, index)
-            if index and not game.train_manager.get_train_by_id(index) then
-                This.Lti:clearDelivery(index)
-            end
-            process_count = process_count - 1
-        until process_count == 0 or not index
-    else
-        index = nil
+    local iterator = Ticker.createWorkIterator {
+        context = context,
+        field_name = 'delivery',
+        iterable = deliveries,
+    }
+
+    while process_count > 0 do
+        iterator.process(ticker_unit_of_work)
+        process_count = process_count - 1
     end
 
-    ticker.last_tick_index = index
-    ticker.last_tick = game.tick
+    ticker_info.context = context
+    ticker_info.last_tick = game.tick
 end
 
 --------------------------------------------------------------------------------
@@ -222,7 +237,9 @@ local function register_events()
     Event.register(Matchers.DELETION_EVENTS, on_entity_deleted, lti_entity_filter)
 
     -- manage ghost building (robot building)
-    Framework.ghost_manager:registerForName(const.lti_name)
+    Framework.Ghost:registerForName {
+        names = const.lti_name,
+    }
 
     -- entity destroy (can't filter on that)
     Event.register(defines.events.on_object_destroyed, on_object_destroyed)
@@ -234,9 +251,9 @@ local function register_events()
     Framework.blueprint:registerCallbackForNames(const.lti_name, serialize_config)
 
     -- manage tombstones for undo/redo and dead entities
-    Framework.tombstone:registerCallback(const.lti_name, {
+    Framework.Tombstone:registerCallback(const.lti_name, {
         create_tombstone = serialize_config,
-        apply_tombstone = Framework.ghost_manager.mapTombstoneToGhostTags,
+        apply_tombstone = Framework.Ghost.mapTombstoneToGhostTags,
     })
 
     -- Entity cloning
@@ -253,7 +270,7 @@ local function register_events()
     Event.register(Matchers.DELETION_EVENTS, on_train_stop_deleted, train_stop_filter)
 
     -- Ticker
-    Event.register(defines.events.on_tick, onTick)
+    Event.register(defines.events.on_tick, on_tick)
 end
 
 --------------------------------------------------------------------------------
