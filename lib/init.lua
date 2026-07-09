@@ -5,11 +5,11 @@
 local const = require('lib.constants')
 
 -- Framework core
-local Framework = require('framework.init'):init(const.framework_init)
+local framework = require('framework.init'):init(const.framework_init)
 
 -- mod code
-local This = require('lib.this')
+local this = require('lib.this')
 
 return function()
-    return This, Framework
+    return this, framework
 end
