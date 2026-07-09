@@ -22,7 +22,7 @@ local Is = require('stdlib.utils.is')
 ---@field logger FrameworkLogger?
 ---@field runtime FrameworkRuntime?
 ---@field gui_manager framework.gui_manager?
----@field ghost_manager framework.ghost_manager?
+---@field Ghost ff2.ghost_manager?
 ---@field blueprint framework.blueprint.Manager?
 ---@field Tombstone ff2.TombstoneManager?
 ---@field translation_manager framework.translation.Manager?
@@ -85,7 +85,7 @@ function FrameworkInit:init_runtime(config)
     self.logger:flush()
 
     self.gui_manager = self.gui_manager or require('framework.gui_manager')
-    self.ghost_manager = self.ghost_manager or require('framework.ghost_manager')
+    self.Ghost = self.Ghost or require('framework.ghost_manager')
     self.blueprint = self.blueprint or require('framework.blueprint_manager')
     self.translation_manager = self.translation_manager or require('framework.translation_manager')
     self.Tombstone = self.Tombstone or require('framework.tombstone_manager')

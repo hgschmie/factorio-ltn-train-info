@@ -27,8 +27,8 @@ local LIFETIME_IN_TICKS = 60 * 86400 -- 24 hours
 ---@field tombstone_count integer
 
 ---@alias ff2.tombstone.UndoRedoAction fun(action: UndoRedoAction.base)
----@alias ff2.tombstone.CreateTombstoneCallback fun(entity: LuaEntity): table<string, any>, number?
----@alias ff2.tombstone.ApplyTombstoneCallback fun(entity_data: table<string, any>, position: MapPosition, surface_index: number, name: string)
+---@alias ff2.tombstone.CreateTombstoneCallback fun(entity: LuaEntity): Tags?
+---@alias ff2.tombstone.ApplyTombstoneCallback fun(entity_data: Tags?, position: MapPosition, surface_index: number, name: string)
 
 ---@class ff2.tombstone.TombstoneCallback
 ---@field create_tombstone ff2.tombstone.CreateTombstoneCallback
@@ -305,9 +305,9 @@ function FrameworkTombstoneManager:registerCallback(names, callback)
     Event.register(Matchers.CREATION_EVENTS, creation_events, entity_filter, nil, { framework = true })
 
     Event.register(Matchers.DELETION_EVENTS, deletion_events, entity_filter, nil, { framework = true })
-    Event.register(defines.events.on_entity_died, deletion_events, entity_filter, { framework = true })
+    Event.register(defines.events.on_entity_died, deletion_events, entity_filter, nil, { framework = true })
 
-    Event.register(defines.events.on_post_entity_died, died_event, ghost_filter, { framework = true })
+    Event.register(defines.events.on_post_entity_died, died_event, ghost_filter, nil, { framework = true })
 end
 
 --------------------------------------------------------------------------------

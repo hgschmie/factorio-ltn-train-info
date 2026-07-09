@@ -12,15 +12,23 @@
 --@field surface_index number
 --@field direction defines.direction
 
----@class framework.ghost_manager.AttachedEntity
+---@class ff2.ghost_manager.AttachedEntity
 ---@field entity LuaEntity
 ---@field key string
 ---@field tags Tags?
 ---@field player_index integer
 ---@field tick integer
+---@field pre_build ff2.ghost_manager.PreBuild?
 
----@class framework.ghost_manager.State
----@field ghost_entities framework.ghost_manager.AttachedEntity[]
+---@class ff2.ghost_manager.PreBuild
+---@field tick integer
+---@field direction defines.direction
+---@field flip_horizontal boolean
+---@field flip_vertical boolean
+
+---@class ff2.ghost_manager.State
+---@field ghost_entities ff2.ghost_manager.AttachedEntity[]
+---@field pre_build ff2.ghost_manager.PreBuild[]
 
 ----------------------------------------------------------------------------------------------------
 --- gui.lua
