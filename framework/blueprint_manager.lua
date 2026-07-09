@@ -2,6 +2,7 @@
 -- Manage blueprint related state
 ------------------------------------------------------------------------
 assert(script)
+assert(Framework)
 
 local Event = require('stdlib.event.event')
 local Is = require('stdlib.utils.is')
@@ -15,9 +16,8 @@ local tools = require('framework.tools')
 ---@field for_type table<string, any>
 
 ---@alias framework.blueprint.PrepareCallback fun(blueprint: LuaItemStack): BlueprintEntity[]?
----@alias framework.blueprint.MapCallback fun(entity: LuaEntity, idx: integer, context: table<string, any>)
----@alias framework.blueprint.Callback fun(entity: LuaEntity, context: table<string, any>): table<string, any>?
----@alias framework.blueprint.Context table<string, any?>
+---@alias framework.blueprint.MapCallback fun(entity: LuaEntity, idx: integer, context: Tags?)
+---@alias framework.blueprint.Callback fun(entity: LuaEntity, context: Tags?): table<string, any>?
 ---@alias framework.blueprint.EntityMap table<string, LuaEntity>
 
 ---@class framework.blueprint.Manager
@@ -61,7 +61,7 @@ end
 
 ---@param blueprint (LuaItemStack | LuaRecord)?
 ---@param entity_map framework.blueprint.EntityMap
----@param context framework.blueprint.Context
+---@param context Tags?
 function FrameworkBlueprintManager:augmentBlueprint(blueprint, entity_map, context)
     if not entity_map or (table_size(entity_map) < 1) then return end
     if not (blueprint and blueprint.is_blueprint_setup()) then return end
@@ -91,7 +91,7 @@ function FrameworkBlueprintManager:augmentBlueprint(blueprint, entity_map, conte
 end
 
 ---@param entities LuaEntity[]
----@param context framework.blueprint.Context
+---@param context Tags?
 ---@return framework.blueprint.EntityMap entity_map
 function FrameworkBlueprintManager:createEntityMap(entities, context)
     if not entities then return {} end

@@ -12,15 +12,23 @@
 --@field surface_index number
 --@field direction defines.direction
 
----@class framework.ghost_manager.AttachedEntity
+---@class ff2.ghost_manager.AttachedEntity
 ---@field entity LuaEntity
 ---@field key string
 ---@field tags Tags?
 ---@field player_index integer
 ---@field tick integer
+---@field pre_build ff2.ghost_manager.PreBuild?
 
----@class framework.ghost_manager.State
----@field ghost_entities framework.ghost_manager.AttachedEntity[]
+---@class ff2.ghost_manager.PreBuild
+---@field tick integer
+---@field direction defines.direction
+---@field flip_horizontal boolean
+---@field flip_vertical boolean
+
+---@class ff2.ghost_manager.State
+---@field ghost_entities ff2.ghost_manager.AttachedEntity[]
+---@field pre_build ff2.ghost_manager.PreBuild[]
 
 ----------------------------------------------------------------------------------------------------
 --- gui.lua
@@ -35,7 +43,7 @@
 ---@field prefix string A prefix for all game registered elements
 ---@field root string The module root name
 ---@field log_tag string? A custom logger tag
----@field remote_name string? The name for the remote interface. If defined, the mod will have a remote interface.
+---@field exported_api_name string? The name for the remote interface. If defined, the mod will expose an API for other mods to call.
 
 ----------------------------------------------------------------------------------------------------
 --- settings.lua

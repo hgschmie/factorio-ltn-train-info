@@ -30,7 +30,8 @@ setmetatable(Event, Event)
 Event.options = {
     protected_mode = false,
     skip_valid = false,
-    force_crc = false -- Requires debug_mode to be true
+    force_crc = false, -- Requires debug_mode to be true
+    framework = false,    -- marks an event registration as done by the framework
 }
 local Event_options_meta = { __index = Event.options }
 
@@ -53,6 +54,34 @@ Event.script = {
     on_configuration_changed = script.on_configuration_changed,
     generate_event_name = script.generate_event_name,
     get_event_handler = script.get_event_handler,
+}
+
+---@type table<defines.events, boolean>
+local PRIORITY = {
+    -- creation events
+    -- mod events before framework events
+    [defines.events.on_built_entity] = true,
+    [defines.events.on_robot_built_entity] = true,
+    [defines.events.on_space_platform_built_entity] = true,
+    [defines.events.script_raised_built] = true,
+    [defines.events.script_raised_revive] = true,
+
+    -- pre-deletion events
+    -- framework events before mod events
+    [defines.events.on_pre_player_mined_item] = false,
+    [defines.events.on_robot_pre_mined] = false,
+    [defines.events.on_space_platform_pre_mined] = false,
+
+    -- deletion events
+    -- framework events before mod events
+    [defines.events.on_player_mined_entity] = false,
+    [defines.events.on_robot_mined_entity] = false,
+    [defines.events.on_space_platform_mined_entity] = false,
+    [defines.events.script_raised_destroy] = false,
+
+    -- death
+    -- framework events before mod events
+    [defines.events.on_entity_died] = false,
 }
 
 local Type = require('stdlib.utils.type')
@@ -188,7 +217,26 @@ function Event.register(event_id, handler, filter, pattern, options)
     end
 
     --Finally insert the handler
-    table.insert(registry, { handler = handler, filter = filter, pattern = pattern, options = options })
+
+    local prio = PRIORITY[event_id]
+    local registry_entry = { handler = handler, filter = filter, pattern = pattern, options = options }
+
+    -- has a priority assigned
+    if prio ~= nil then
+        -- framework events are inserted from the opposite end as mod events
+        if options.framework then prio = not prio end
+
+        if prio then
+            -- true -> Insert at the head
+            table.insert(registry, 1, registry_entry)
+        else
+            -- false --> insert at the tail
+            table.insert(registry, registry_entry)
+        end
+    else
+        table.insert(registry, registry_entry)
+    end
+
     return Event
 end
 

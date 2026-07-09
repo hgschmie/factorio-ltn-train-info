@@ -1,6 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 -- sprites supplied by the framework - from flib
 ----------------------------------------------------------------------------------------------------
+assert(data and data.raw)
+assert(Framework)
 
 local indicators = {}
 for i, color in ipairs { 'black', 'white', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink' } do

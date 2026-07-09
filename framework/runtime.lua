@@ -1,9 +1,10 @@
 ----------------------------------------------------------------------------------------------------
 -- access to the framework provided runtime storage - ported from flib
 ----------------------------------------------------------------------------------------------------
+assert(script)
+assert(Framework)
 
 local Player = require('stdlib.event.player')
-local table = require('stdlib.utils.table')
 
 --- Main class governing the runtime.
 -- Runtime exists during gameplay.
@@ -13,8 +14,8 @@ local FrameworkRuntime = {}
 --- Framework storage, not intended for direct access from the mod
 ---@return table<string,any?> framework_storage
 function FrameworkRuntime:storage()
-    storage[Framework.STORAGE] = storage[Framework.STORAGE] or {}
-    return storage[Framework.STORAGE] --[[@as table<string, any?>>]]
+    storage.framework = storage.framework or {}
+    return storage.framework
 end
 
 --- Returns framework managed per-player storage
@@ -23,8 +24,8 @@ end
 function FrameworkRuntime:player_storage(player_index)
     local player_data = Player.pdata(player_index)
 
-    player_data[Framework.STORAGE] = player_data[Framework.STORAGE] or {}
-    return player_data[Framework.STORAGE] --[[@as table<string, any?>>]]
+    player_data.framework = player_data.framework or {}
+    return player_data.framework
 end
 
 local function get_id(self, name, initial_function)

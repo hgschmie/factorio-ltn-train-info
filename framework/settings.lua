@@ -5,6 +5,7 @@
 local table = require('stdlib.utils.table')
 
 ----------------------------------------------------------------------------------------------------
+assert(Framework)
 
 ---@enum FrameworkSettings.name
 local setting_types = {
@@ -109,7 +110,11 @@ function FrameworkSettings:get_settings(setting_type, player_index)
 
     for key, setting_def in pairs(settings_group.definitions) do
         local setting = settings_group.load_value(setting_def.key, player_index)
-        values[key] = (setting and (setting.value ~= nil) and setting.value) or setting_def.value
+        if setting and (setting.value ~= nil) then
+            values[key] = setting.value
+        else
+            values[key] = setting_def.value
+        end
     end
 
     Framework.logger:debugf("Loaded '%s' settings: %s", setting_type, serpent.line(settings_group:get_values()))
@@ -193,7 +198,7 @@ if script then
     local Event = require('stdlib.event.event')
 
     local function flush()
-        Framework.settings:flush()
+        FrameworkSettings:flush()
     end
 
     local function register_events()

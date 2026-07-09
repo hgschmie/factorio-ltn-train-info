@@ -54,11 +54,16 @@ end
 
 ---@alias framework.tools.EntityKey string
 
----@param entity LuaEntity?
----@return string?
-function Tools:getName(entity)
-    if not (entity and entity.valid) then return nil end
+---@param entity LuaEntity
+---@return string
+function Tools.getName(entity)
     return entity.type == 'entity-ghost' and entity.ghost_name or entity.name
+end
+
+---@param entity LuaEntity
+---@return string
+function Tools.getType(entity)
+    return entity.type == 'entity-ghost' and entity.ghost_type or entity.type
 end
 
 ---@param position MapPosition
@@ -83,7 +88,7 @@ end
 ---@param surface_index number?
 ---@return framework.tools.EntityKey?
 function Tools:createEntityKeyFromEntity(entity, surface_index)
-    local name = self:getName(entity)
+    local name = self.getName(entity)
     if not name then return nil end
     return self:createEntityKey(entity.position, surface_index and surface_index or entity.surface_index, name)
 end
