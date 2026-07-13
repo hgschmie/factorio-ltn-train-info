@@ -190,7 +190,7 @@ end
 ---@return any
 local function ticker_unit_of_work(keys, values)
     local delivery = keys.delivery
-    if game.train_manager.get_train_by_id(delivery) then
+    if not game.train_manager.get_train_by_id(delivery) then
         This.Lti:clearDelivery(delivery)
     end
 end
