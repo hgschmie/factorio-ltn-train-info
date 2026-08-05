@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.0
-Date: ????
+Date: 2026-08-05
   Changes:
     - backport 2.1 changes
     - ignore source graphics for the mod distribution
