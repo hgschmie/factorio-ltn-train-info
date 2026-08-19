@@ -1,5 +1,5 @@
 --- Tools for working with bounding boxes.
----@class Area.Area: BoundingBox.0
+---@class Area.Area: BoundingBox.struct
 local Area = { __class = 'Area', __index = require('stdlib.core') }
 setmetatable(Area, Area)
 

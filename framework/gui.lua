@@ -118,6 +118,18 @@ end
 
 ------------------------------------------------------------------------
 
+
+---@param tags Tags?
+---@return Tags
+function FrameworkGui:addTags(tags)
+
+    local result = tags or {}
+    -- must match the tag in gui_manager
+    result['__GUI_TYPE'] = self.type
+
+    return result
+end
+
 local extra_fields = {
     'children',    -- gui elements attached as children to this element
     'elem_mods',   -- set of attributes that should be set on the created LuaGuiElement
@@ -150,8 +162,6 @@ function FrameworkGui:createChildElement(parent, child)
 
     -- add tag for event dispatching
     local tags = gui_element.tags
-    -- must match the tag in gui_manager
-    tags['__GUI_TYPE'] = self.type
 
     if extras.elem_tags then
         for key, value in pairs(extras.elem_tags) do
@@ -159,7 +169,7 @@ function FrameworkGui:createChildElement(parent, child)
         end
     end
 
-    gui_element.tags = tags
+    gui_element.tags = self:addTags(tags)
 
     -- process additional attributes
 

@@ -16,14 +16,16 @@ local setting_types = {
 
 --- Access to all mod settings
 ---@class FrameworkSettings
+---@field DEBUG_LEVEL integer?
 local FrameworkSettings = {
+    DEBUG_LEVEL = nil,
 }
 
 ---@type table<FrameworkSettings.name, FrameworkSettingsProvider>
 local settings_table = {
     startup = {
         values = nil,
-        definitions = { debug_mode = { key = Framework.PREFIX .. 'debug-mode', value = false } },
+        definitions = { debug_mode = { key = Framework.PREFIX .. 'debug-mode', value = '0' } },
         load_value = function(name) return settings.startup[name] end,
         get_values = function(self) return self.values end,
         init_values = function(self)
@@ -82,6 +84,15 @@ local settings_table = {
     },
 }
 
+-- Returns the current debug level.
+---@return integer debuglevel 0..3
+function FrameworkSettings:get_debug_level()
+    if not FrameworkSettings.DEBUG_LEVEL then
+        FrameworkSettings.DEBUG_LEVEL = tonumber(self:startup_setting('debug_mode')) or 0
+    end
+    return FrameworkSettings.DEBUG_LEVEL
+end
+
 --- Add setting definitions of the given setting_type to the corresponding table
 ---@param definitions table<FrameworkSettings.name, FrameworkSettingsGroup>
 ---@return self FrameworkSettings
@@ -109,7 +120,7 @@ function FrameworkSettings:get_settings(setting_type, player_index)
     values = settings_group:init_values(player_index)
 
     for key, setting_def in pairs(settings_group.definitions) do
-        local setting = settings_group.load_value(setting_def.key, player_index)
+        local setting = settings and settings_group.load_value(setting_def.key, player_index) or nil
         if setting and (setting.value ~= nil) then
             values[key] = setting.value
         else
@@ -117,7 +128,6 @@ function FrameworkSettings:get_settings(setting_type, player_index)
         end
     end
 
-    Framework.logger:debugf("Loaded '%s' settings: %s", setting_type, serpent.line(settings_group:get_values()))
     return values
 end
 
@@ -139,6 +149,8 @@ function FrameworkSettings:flush()
     settings_table.player:clear()
     settings_table.runtime:clear()
     settings_table.startup:clear()
+
+    self.DEBUG_LEVEL = nil
 end
 
 --- Access the startup settings.

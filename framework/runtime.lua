@@ -33,11 +33,11 @@ local function get_id(self, name, initial_function)
     assert(self:storage(), 'no framework storage found!')
 
     if self:storage()[name] then
-        Framework.logger:debugf('Loaded %s from storage', name)
+        Framework.logger.log(3, 'runtime', 'Loaded %s from storage', function() return name end)
         self[name] = self:storage()[name]
     else
         self[name] = initial_function and initial_function() or 0
-        Framework.logger:debugf('Created %s (%d)', name, self[name])
+        Framework.logger.log(3, 'runtime', 'Created %s (%d)', function() return name, self[name] end)
         self:storage()[name] = self[name]
     end
     return self[name]

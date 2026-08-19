@@ -108,7 +108,7 @@ function FrameworkBlueprintManager:createEntityMap(entities, context)
         assert(key)
 
         if entity_map[key] then
-            Framework.logger:logf('Duplicate entity found at %s: %s', entity.gps_tag, entity.name)
+            Framework.logger.log(0, 'BlueprintManager', 'Duplicate entity found at %s: %s', function() return entity.gps_tag, entity.name end)
         else
             entity_map[key] = entity
         end

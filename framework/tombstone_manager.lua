@@ -35,13 +35,13 @@ local LIFETIME_IN_TICKS = 60 * 86400 -- 24 hours
 ---@field apply_tombstone ff2.tombstone.ApplyTombstoneCallback
 
 ---@class ff2.tombstone.TombstoneKey
----@field position data.MapPosition
+---@field position MapPosition.struct
 ---@field surface_index integer
 ---@field type string
 ---@field name string?
 
 ---@class ff2.tombstone.Tombstone
----@field position data.MapPosition
+---@field position MapPosition.struct
 ---@field surface_index integer
 ---@field type string
 ---@field name string

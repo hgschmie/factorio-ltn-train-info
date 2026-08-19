@@ -7,86 +7,73 @@ local StdLibLogger = require('stdlib.misc.logger')
 
 ----------------------------------------------------------------------------------------------------
 
-local dummy = function(...) end
-
-local default_logger = { log = log }
+---@alias ff2.logger.logger_function fun():...
+---@alias ff2.logger.print_function fun():LocalisedString
 
 --- Logging
 
 ---@class FrameworkLogger
----@field debug_mode boolean? If true, debug and debugf produce output lines
----@field core_logger table<string, any> The logging target
 local FrameworkLogger = {
-    debug_mode = nil,
-    core_logger = default_logger,
-
-    debug = dummy,
-    debugf = dummy,
-    flush = dummy,
+    PREFIX = '[unset] ',
+    LOG_LEVEL = 1,
 }
 
----@param message string
-function FrameworkLogger:log(message)
-    self.core_logger.log(message)
+local LOG_LEVELS = {
+    [-1] = 'INTERNAL',
+    [0] = 'CRIT',
+    'ERR/WARN',
+    'INFO',
+    'DEBUG',
+}
+
+---@param level integer
+---@param name string
+---@param msg string
+---@param log_func ff2.logger.logger_function?
+function FrameworkLogger.log(level, name, msg, log_func)
+    if FrameworkLogger.LOG_LEVEL < level then return end
+    log(('%s(%s) [%s] - %s'):format(FrameworkLogger.PREFIX, name, LOG_LEVELS[level], log_func and msg:format(log_func()) or msg))
 end
 
----@param message string
----@param ... any
-function FrameworkLogger:logf(message, ...)
-    self.core_logger.log(message:format(table.unpack { ... }))
+---@type PrintSettings
+local PRINT_SETTINGS = {
+    sound = defines.print_sound.use_player_settings,
+    skip = defines.print_skip.if_visible,
+}
+
+--- write msg to console for all member of force or all players
+---@param level number
+---@param msg_func ff2.logger.print_function
+---@param target (LuaPlayer|LuaForce|LuaGameScript)?
+function FrameworkLogger.print(level, msg_func, target)
+    if FrameworkLogger.LOG_LEVEL < level then return end
+
+    if not target then target = game end
+    target.print(msg_func(), PRINT_SETTINGS)
 end
 
-if FrameworkLogger.debug_mode then
-    FrameworkLogger.debug = FrameworkLogger.log
-    FrameworkLogger.debugf = FrameworkLogger.logf
-end
+function FrameworkLogger:updateLogLevel()
+    local new_log_level = Framework.settings:get_debug_level()
 
-function FrameworkLogger:updateDebugSettings()
-    local new_debug_mode = Framework.settings:startup_setting('debug_mode') --[[@as boolean]]
-
-    if new_debug_mode ~= self.debug_mode then
-        self:log('==')
-        self:logf('== Debug Mode %s.', new_debug_mode and 'enabled' or 'disabled')
-        self:log('==')
+    if new_log_level ~= self.LOG_LEVEL then
+        self.log(-1, 'Framework', '==')
+        self.log(-1, 'Framework', '== log level changed: %d -> %d (%s).', function()
+            local msg = new_log_level > 0 and 'enabled' or 'disabled'
+            return self.LOG_LEVEL, new_log_level, msg
+        end)
+        self.log(-1, 'Framework', '==')
     end
 
-    -- reset debug logging, turn back on if debug_mode is still set
-    self.debug = (new_debug_mode and self.log) or dummy
-    self.debugf = (new_debug_mode and self.logf) or dummy
-
-    self.debug_mode = new_debug_mode
+    self.LOG_LEVEL = new_log_level
 end
 
 ----------------------------------------------------------------------------------------------------
 
-if script then
-    local Event = require('stdlib.event.event')
+---@param prefix string Default prefix for log messages
+---@param default_level integer log level 0..3
+return function(prefix, default_level)
+    FrameworkLogger.PREFIX = '[' ..prefix .. '] '
+    FrameworkLogger.DEFAULT_LEVEL = default_level
 
-    local function register_events()
-        Event.on_nth_tick(3600, function(ev)
-            Framework.logger:flush()
-        end)
-
-        -- Runtime settings changed
-        Event.register(defines.events.on_runtime_mod_setting_changed, function()
-            Framework.logger:updateDebugSettings()
-        end)
-    end
-
-    --- Brings up the actual file logging using the stdlib. This only works in runtime mode, otherwise logging
-    --- just goes to the regular logfile/output.
-    ---
-    --- writes a <module-name>/framework.log logfile by default
-    function FrameworkLogger:init()
-        self.core_logger = StdLibLogger.new('framework', self.debug_mode, { force_append = true })
-
-        self.flush = function() self.core_logger.write() end
-
-        self:updateDebugSettings()
-
-        Event.on_init(register_events)
-        Event.on_load(register_events)
-    end
+    return FrameworkLogger
 end
-
-return FrameworkLogger
