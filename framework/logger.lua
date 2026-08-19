@@ -73,7 +73,7 @@ end
 ---@param default_level integer log level 0..3
 return function(prefix, default_level)
     FrameworkLogger.PREFIX = '[' ..prefix .. '] '
-    FrameworkLogger.DEFAULT_LEVEL = default_level
+    FrameworkLogger.LOG_LEVEL = default_level
 
     return FrameworkLogger
 end
