@@ -70,7 +70,8 @@ end
 ---@param delivery LTNDelivery
 function Lti:addDelivery(train_id, delivery)
     if storage.lti_data.deliveries[train_id] then
-        Framework.logger:logf('[BUG] Overwriting existing delivery for train %d', train_id)
+        Framework.logger.log(0, 'addDelivery', '[BUG] Overwriting existing delivery for train %d',
+            function() return train_id end)
     end
 
     storage.lti_data.deliveries[train_id] = delivery
@@ -149,7 +150,8 @@ function Lti:setLtiData(lti_id, lti_data)
     assert(lti_data)
 
     if (storage.lti_data.lti[lti_id]) then
-        Framework.logger:logf('[BUG] Overwriting existing lti_data for unit %d', lti_id)
+        Framework.logger.log(0, 'setLtiData', '[BUG] Overwriting existing lti_data for unit %d',
+            function() return lti_id end)
     end
 
     storage.lti_data.lti[lti_id] = lti_data
@@ -162,7 +164,8 @@ function Lti:clearLtiData(lti_id)
     storage.lti_data.count = storage.lti_data.count - 1
     if storage.lti_data.count < 0 then
         storage.lti_data.count = table_size(storage.lti_data.lti)
-        Framework.logger:logf('Train Info count got negative (bug), size is now: %d', storage.lti_data.count)
+        Framework.logger.log(0, 'clearLtiData', 'Train Info count got negative (bug), size is now: %d',
+            function() return storage.lti_data.count end)
     end
 end
 
