@@ -60,5 +60,9 @@ For a requesting stop, LTN will only ever output the expected cargo in the train
 - `raiguard` - some of the framework code was either lifted or inspired by [flib](https://mods.factorio.com/mod/flib).
 - `modo.lv` - I flat out stole the basic structure using a global called `this` from the stack combinator mod.
 
-This mod contains code and/or graphics that was either created or assisted by AI. If you are violently opposed to using AI for anything,
-feel free to not install it.
+## Legal & Copyright
+
+The code was partially written and reviewed by AI coding agents. If you are fundamentally opposed to using AI tools to develop software and improve software quality, you are free to not install it.
+
+--------------------------------------------------
+Copyright (C) 2024-2026 Henning Schmiedehausen (@hgschmie), licensed under the MIT license.
