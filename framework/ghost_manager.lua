@@ -249,8 +249,8 @@ end
 function FrameworkGhostManager:registerForName(attrs)
     assert(attrs.names)
     local event_matcher = Matchers:matchEventEntityGhostName(attrs.names)
-    Event.register(Matchers.CREATION_EVENTS, on_ghost_entity_created, event_matcher)
-    Event.register(defines.events.on_post_entity_died, on_post_entity_died)
+    Event.register(Matchers.CREATION_EVENTS, on_ghost_entity_created, event_matcher, nil, { framework = true })
+    Event.register(defines.events.on_post_entity_died, on_post_entity_died, event_matcher, nil, { framework = true })
 
     local names = (type(attrs.names) ~= 'table') and { attrs.names } or attrs.names
 
@@ -276,8 +276,8 @@ end
 ---@param values string|string[] One or more values to match.
 function FrameworkGhostManager:registerForAttribute(attribute, values)
     local event_matcher = Matchers:matchEventEntityAsGhost(attribute, values)
-    Event.register(Matchers.CREATION_EVENTS, on_ghost_entity_created, event_matcher)
-    Event.register(defines.events.on_post_entity_died, on_post_entity_died)
+    Event.register(Matchers.CREATION_EVENTS, on_ghost_entity_created, event_matcher, nil, { framework = true })
+    Event.register(defines.events.on_post_entity_died, on_post_entity_died, event_matcher, nil, { framework = true })
 end
 
 --- Can be called by the tombstone manager. Will pass in all the information necessary to find

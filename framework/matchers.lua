@@ -102,7 +102,7 @@ function Matchers:createMatcherFunction(values, extract_function, invert)
 end
 
 --- Wraps a matcher function to provide an event based matcher that can be used with
---- the event library. This method matches *either* event.entity or event.source / event.destination
+--- the event library. This method matches *either* event.entity or event.host or event.source / event.destination
 ---@param matcher_function framework.event_matcher.MatcherFunction
 ---@return framework.event_matcher.MatchEventFunction
 function Matchers:createEventEntityMatcher(matcher_function)
@@ -113,6 +113,8 @@ function Matchers:createEventEntityMatcher(matcher_function)
         ---@diagnostic disable undefined-field
         if event.source and event.destination then
             return matcher_function(event.source, context) and matcher_function(event.destination, context)
+        elseif event.ghost then
+            return matcher_function(event.ghost, context)
         else
             return matcher_function(event.entity, context)
         end

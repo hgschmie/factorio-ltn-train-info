@@ -274,17 +274,6 @@ end
 -- Registration API
 --------------------------------------------------------------------------------
 
----@param matcher_function framework.event_matcher.MatcherFunction
----@return framework.event_matcher.MatchEventFunction
-local function create_event_ghost_matcher(matcher_function)
-    return function(event, context)
-        if not event then return false end
-        -- move / clone events
-        ---@diagnostic disable-next-line: undefined-field
-        return matcher_function(event.ghost, context)
-    end
-end
-
 --- Register a callback when an entity is replaced with a tombstone.
 --- This must be called from an on_init / on_load callback because it registers
 --- new events.
@@ -300,7 +289,7 @@ function FrameworkTombstoneManager:registerCallback(names, callback)
     end
 
     local entity_filter = Matchers:matchEventEntityName(names)
-    local ghost_filter = create_event_ghost_matcher(Matchers:createMatcherFunction(names, Matchers.GHOST_NAME_EXTRACTOR))
+    local ghost_filter = Matchers:matchEventEntityGhostName(names)
 
     Event.register(Matchers.CREATION_EVENTS, creation_events, entity_filter, nil, { framework = true })
 
