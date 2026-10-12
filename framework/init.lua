@@ -74,10 +74,11 @@ end
 
 --- Initialize the core framework.
 --- the code itself references the global Framework table.
----@param config FrameworkConfig|function():FrameworkConfig config provider
+---@param config FrameworkConfig|fun():FrameworkConfig config provider
 function FrameworkInit:init(config)
     assert(Is.Function(config) or Is.Table(config), 'configuration must either be a table or a function that provides a table')
     if Is.Function(config) then
+        ---@diagnostic disable-next-line: call-non-callable
         config = config()
     end
 
@@ -96,9 +97,11 @@ function FrameworkInit:init(config)
     self.other_mods = self.other_mods or require('framework.other-mods')
     self.RemoteApis = self.RemoteApis or require('framework.remote-apis')
 
+    ---@diagnostic disable-next-line: unnecessary-if
     if data and data.raw['gui-style'] then
         -- data stage
         require('framework.prototype')
+    ---@diagnostic disable-next-line: unnecessary-if
     elseif script then
         -- runtime stage
         self:init_runtime(config --[[@as FrameworkConfig]])
@@ -124,6 +127,7 @@ local prototype = {}
 for _, game_stage in pairs(game_stages) do
     prototype['post_' .. game_stage .. '_stage'] = function()
         -- otherwise, it is an stage method, pass it to the submodules
+        ---@diagnostic disable-next-line: undefined-field
         FrameworkInit.other_mods[game_stage]() -- other-mods subsystem
         FrameworkInit.RemoteApis[game_stage]() -- remote-apis subsystem
     end

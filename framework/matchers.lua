@@ -3,7 +3,6 @@
 --------------------------------------------------------------------------------
 assert(script)
 
-local Is = require('stdlib.utils.is')
 local table = require('stdlib.utils.table')
 
 --- A function that matches a given entity. Returns true or false.

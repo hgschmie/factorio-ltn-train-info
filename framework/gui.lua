@@ -58,7 +58,7 @@ require('stdlib.utils.string')
 ---@field event_handlers table<defines.events, table<string, string>> -- map from the event to the handler name. The handler can not be stored here because it is not serializable
 ---@field entity_id number? The entity for which the Gui has been opened
 ---@field player_index number
----@field context framework.gui.context
+---@field context framework.gui.context?
 local FrameworkGui = {
     count = 0,
 }
@@ -209,8 +209,8 @@ end
 ---@param child framework.gui.element_definition The elements that are added to the tab.
 ---@return LuaGuiElement gui_element The content of the tab.
 function FrameworkGui:addTab(parent, child)
-    local tab = self:createChildElement(parent, child.tab)
-    local gui_element = self:createChildElement(parent, child.content)
+    local tab = self:createChildElement(parent, assert(child.tab))
+    local gui_element = self:createChildElement(parent, assert(child.content))
     parent.add_tab(tab, gui_element)
 
     return gui_element
@@ -241,10 +241,13 @@ function FrameworkGui:addChildElements(parent, children, existing_elements)
     if not children then return nil end
 
     -- If a single def was passed, wrap it in an array
-    children = #children > 0 and children or { children } --[[@as table<string, framework.gui.element_definition>]]
+    children = #children > 0
+        and children --[[@as framework.gui.element_definition[] ]]
+        or { children --[[@as framework.gui.element_definition ]] }
 
     local root
     for _, child in pairs(children) do
+        ---@diagnostic disable-next-line: undefined-field
         assert(not child[1], 'children as arrays are not supported, use the children attribute!')
 
         local gui_element
@@ -267,6 +270,7 @@ end
 ---@param map framework.gui.create parameters
 ---@return framework.gui gui A FrameworkGui instance that can be used for creating a Gui.
 function FrameworkGui.create(map)
+    ---@diagnostic disable-next-line: missing-fields
     ---@type framework.gui
     local gui = {
         -- elements
@@ -316,7 +320,7 @@ function FrameworkGui:removeChildrenAndHandlers(ui_element)
                     self:removeChildrenAndHandlers(self.ui_elements[child_name])
                 end
                 for _, event_handlers in pairs(self.event_handlers) do
-                    if event_handlers then event_handlers[child_name] = nil end
+                    event_handlers[child_name] = nil
                 end
             end
         end

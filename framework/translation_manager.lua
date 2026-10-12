@@ -38,7 +38,7 @@ end
 --- Trigger processing the translation queue.
 ---@param player LuaPlayer
 local function trigger_translation(player)
-    local player_data = assert(Player.pdata(player.index))
+    local player_data = Player.pdata(player.index)
     player_data.translation = player_data.translation or init()
     ---@type framework.translation.player_state
     local translation = player_data.translation
@@ -72,7 +72,7 @@ end
 --- Trigger retranslation for a given player. This might happen if the player changes their locale.
 ---@param player LuaPlayer
 local function retranslate(player)
-    local player_data = assert(Player.pdata(player.index))
+    local player_data = Player.pdata(player.index)
     player_data.translation = player_data.translation or init()
     ---@type framework.translation.player_state
     local translation = player_data.translation
@@ -90,7 +90,7 @@ end
 
 ---@param player LuaPlayer
 local function reset_active(player)
-    local player_data = assert(Player.pdata(player.index))
+    local player_data = Player.pdata(player.index)
     player_data.translation = player_data.translation or init()
     ---@type framework.translation.player_state
     local translation = player_data.translation
@@ -103,7 +103,7 @@ end
 
 ---@param event EventData.on_string_translated
 local function process_translation(event)
-    local player_data = assert(Player.pdata(event.player_index))
+    local player_data = Player.pdata(event.player_index)
     if not player_data.translation then return end
 
     ---@type framework.translation.player_state
@@ -133,7 +133,7 @@ end
 ---@param player LuaPlayer
 ---@param keys framework.translation.key|framework.translation.key[]
 function FrameworkTranslationManager:registerTranslation(player, keys)
-    local player_data = assert(Player.pdata(player.index))
+    local player_data = Player.pdata(player.index)
     player_data.translation = player_data.translation or init()
     ---@type framework.translation.player_state
     local translation = player_data.translation
@@ -158,7 +158,7 @@ end
 ---@param key string
 ---@return string? result
 function FrameworkTranslationManager:translate(player, key)
-    local player_data = assert(Player.pdata(player.index))
+    local player_data = Player.pdata(player.index)
     ---@type framework.translation.player_state
     local translation = assert(player_data.translation)
 

@@ -11,7 +11,7 @@ local sprites = require('stdlib.data.modules.sprites')
 
 ---@class framework.prototypes.data_util
 ---@field EMPTY_LED_LIGHT_OFFSETS  Vector[]
----@field EMPTY_ENTITY_FLAGS string[]
+---@field EMPTY_ENTITY_FLAGS data.EntityPrototypeFlags
 local FrameworkDataUtil = {
     EMPTY_LED_LIGHT_OFFSETS = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
     EMPTY_ENTITY_FLAGS = {
@@ -42,10 +42,10 @@ FrameworkDataUtil.dark_red_button_tileset = Framework.ROOT .. '/framework/graphi
 
 --- Copy a prototype, assigning a new name and minable properties.
 
----@param prototype EntityPrototype
+---@param prototype data.EntityPrototype
 ---@param new_name string The new name of the entity
----@param make_invisible? boolean If true, make the entity invisble, e.g. for packed entities.
----@return EntityPrototype
+---@param make_invisible? boolean If true, make the entity invisible, e.g. for packed entities.
+---@return data.EntityPrototype
 function FrameworkDataUtil.copy_entity_prototype(prototype, new_name, make_invisible)
     if not prototype.type or not prototype.name then
         error('Invalid prototype: prototypes must have name and type properties.')
@@ -100,9 +100,9 @@ function FrameworkDataUtil.copy_entity_prototype(prototype, new_name, make_invis
     return p
 end
 
----@param prototype Prototype
+---@param prototype data.Prototype
 ---@param new_name string The new name of the entity
----@return Prototype
+---@return data.Prototype
 function FrameworkDataUtil.copy_other_prototype(prototype, new_name)
     if not prototype.type or not prototype.name then
         error('Invalid prototype: prototypes must have name and type properties.')

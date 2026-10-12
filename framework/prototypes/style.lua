@@ -100,6 +100,8 @@ local slot_data = {
     { name = 'pink',    y = 720, glow = { 230, 135, 230 } },
 }
 
+assert(styles)
+
 for _, data in pairs(slot_data) do
     styles['framework_slot_' .. data.name] = gen_slot(0, data.y)
     styles['framework_selected_slot_' .. data.name] = gen_slot(0, data.y, 80)

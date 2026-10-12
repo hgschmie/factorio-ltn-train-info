@@ -31,6 +31,11 @@ local _Log_mt = {
 
 local format = string.format
 
+---@class Logger.Options
+---@field log_ticks? boolean whether to include the game tick timestamp in the logs
+---@field file_extension? string overrides the default logfile extension
+---@field force_append? boolean append every new message to the current logfile instead of creating a new one
+
 --- Get a saved log or create a new one if there is no saved log.
 function Logger.get(...)
     local log_name = (...) or 'log'
@@ -55,10 +60,10 @@ end
 --Log = Logger.new('cool_mod_name', 'test', true, { file_extension = data })
 --Log("this msg will be logged and written immediately in /script-output/YourModName/test.data!")
 --
--- @tparam[opt='log'] string log_name the name of the logger
--- @tparam[opt=false] boolean debug_mode toggles the debug state of logger
--- @tparam[opt={...}] options options a table with optional arguments
--- @return (<span class="types">@{Logger}</span>) the logger instance
+---@param log_name? string the name of the logger
+---@param debug_mode? boolean toggles the debug state of logger
+---@param options? Logger.Options a table with optional arguments
+---@return table logger the logger instance
 function Logger.new(log_name, debug_mode, options)
     local mod_name = script and script.mod_name or 'Data'
     log_name = log_name or 'log'
@@ -77,12 +82,6 @@ function Logger.new(log_name, debug_mode, options)
         ever_written = false,
     }
 
-    ---
-    -- Used in the @{new} function for logging game ticks, specifying logfile extension, or forcing the logs to append to the end of the logfile.
-    -- @tfield[opt=false] boolean log_ticks whether to include the game tick timestamp in the logs
-    -- @tfield[opt="log"] string file_extension a string that overrides the default logfile extension
-    -- @tfield[opt=false] boolean force_append if true, every new message appends to the current logfile instead of creating a new one
-    -- @table Log.options
     Log.options = {
         log_ticks = options.log_ticks or false,
         file_extension = options.file_extension or 'log',
@@ -93,9 +92,9 @@ function Logger.new(log_name, debug_mode, options)
     Log.ever_written = Log.options.force_append
 
     --- Logs a message.
-    -- @tparam string|table msg the message to log. @{table}s will be dumped using [serpent](https://github.com/pkulchenko/serpent)
+    ---@param msg string|table the message to log. @{table}s will be dumped using [serpent](https://github.com/pkulchenko/serpent)
     -- which is included in the official Factorio Lualib
-    -- @return (<span class="types">@{Logger}</span>) the logger instance
+    ---@return table logger the logger instance
     -- @see https://forums.factorio.com/viewtopic.php?f=25&t=23844 Debugging utilities built in to Factorio
     function Log.log(msg)
         if type(msg) ~= 'string' then
@@ -134,7 +133,7 @@ function Logger.new(log_name, debug_mode, options)
     end
 
     --- Writes out all buffered messages immediately.
-    -- @return (<span class="types">@{Logger}</span>) the logger instance
+    ---@return table logger the logger instance
     function Log.write()
         if _G.game and table.size(Log.buffer) > 0 then
             Log.last_written = game.tick

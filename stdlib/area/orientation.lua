@@ -39,9 +39,9 @@ Orientation.westsouthwest = defines.direction.westsouthwest / 16
 local floor = math.floor
 
 --- Returns a 4way or 8way direction from an orientation.
--- @tparam float orientation
--- @tparam[opt=false] boolean eight_way
--- @treturn defines.direction
+---@param orientation number
+---@param eight_way? boolean
+---@return defines.direction
 function Orientation.to_direction(orientation, eight_way)
     local ways = eight_way and 16 or 8
     local mod = eight_way and 2 or 4
@@ -49,16 +49,16 @@ function Orientation.to_direction(orientation, eight_way)
 end
 
 --- Returns the opposite orientation.
--- @tparam float orientation
--- @treturn float the opposite orientation
+---@param orientation number
+---@return number orientation the opposite orientation
 function Orientation.opposite(orientation)
     return (orientation + 0.5) % 1
 end
 
 --- Add two orientations together.
--- @tparam float orientation1
--- @tparam float orientation2
--- @treturn float the orientations added together
+---@param orientation1 number
+---@param orientation2 number
+---@return number orientation the orientations added together
 function Orientation.add(orientation1, orientation2)
     return (orientation1 + orientation2) % 1
 end

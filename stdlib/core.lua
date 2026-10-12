@@ -38,8 +38,8 @@ Core.Unique_Array = require('stdlib.utils.classes.unique_array')
 Core.String_Array = Core.Unique_Array
 
 --- Prints and logs the msg
--- @tparam string msg
--- @treturn boolean true if the message was printed to someone
+---@param msg string
+---@return boolean printed true if the message was printed to someone
 function Core.log_and_print(msg)
     if game and #game.connected_players > 0 then
         log(script.mod_name .. ':' .. msg)
@@ -47,6 +47,7 @@ function Core.log_and_print(msg)
         return true
     else
         log(msg)
+        return false
     end
 end
 

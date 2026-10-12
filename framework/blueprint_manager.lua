@@ -15,7 +15,7 @@ local tools = require('framework.tools')
 ---@field for_name table<string, any>
 ---@field for_type table<string, any>
 
----@alias framework.blueprint.PrepareCallback fun(blueprint: LuaItemStack): BlueprintEntity[]?
+---@alias framework.blueprint.PrepareCallback fun(blueprint: LuaItemStack|LuaRecord): BlueprintEntity[]?
 ---@alias framework.blueprint.MapCallback fun(entity: LuaEntity, idx: integer, context: Tags?)
 ---@alias framework.blueprint.Callback fun(entity: LuaEntity, context: Tags?): table<string, any>?
 ---@alias framework.blueprint.EntityMap table<string, LuaEntity>
@@ -76,7 +76,7 @@ function FrameworkBlueprintManager:augmentBlueprint(blueprint, entity_map, conte
     for idx, entity in pairs(blueprint_entities) do
         local key = tools:createEntityKeyFromBlueprintEntity(entity) -- override surface index to 0
         if entity_map[key] then
-            ---@type framework.blueprint.Callback
+            ---@type framework.blueprint.Callback?
             local callback = match_entity(entity_map[key], FrameworkBlueprintManager.callbacks)
             if callback then
                 local tags = callback(entity_map[key], context)
@@ -98,7 +98,7 @@ function FrameworkBlueprintManager:createEntityMap(entities, context)
 
     local entity_map = {}
     for idx, entity in pairs(entities) do
-        ---@type framework.blueprint.MapCallback
+        ---@type framework.blueprint.MapCallback?
         local map_callback = match_entity(entity, FrameworkBlueprintManager.map_callbacks)
         if map_callback then -- there is a callback for this entity
             map_callback(entity, idx, context)
@@ -124,11 +124,13 @@ end
 ---@param event EventData.on_player_setup_blueprint
 local function on_player_setup_blueprint(event)
     local player, player_data = Player.get(event.player_index)
-    if not (player or player_data) then return end
+    if not (player and player_data) then return end
 
     local self = assert(Framework.blueprint)
 
     local selected_entities = event.mapping.get()
+    --- @cast selected_entities LuaEntity[]
+
     -- for large blueprints, the event mapping might come up empty
     -- which seems to be a limitation of the game. Fall back to an
     -- area scan
@@ -143,7 +145,7 @@ local function on_player_setup_blueprint(event)
             area = event.area,
             force = player.force,
             type = table.keys(self.callbacks.for_type),
-        })
+        }) --[[@as LuaEntity[] ]]
     end
 
     local context = {}
@@ -151,7 +153,7 @@ local function on_player_setup_blueprint(event)
 
     -- See https://forums.factorio.com/viewtopic.php?p=661598#p661598 for the event.record / event.stack selection
     ---@type (LuaItemStack | LuaRecord)?
-    local blueprint_item_stack = event.record or event.stack or (can_access_blueprint(player) and player.cursor_stack)
+    local blueprint_item_stack = event.record or event.stack or (can_access_blueprint(player) and player.cursor_stack or nil)
 
     if blueprint_item_stack then
         self:augmentBlueprint(blueprint_item_stack, entity_map, context)
@@ -168,7 +170,7 @@ end
 ---@param event EventData.on_player_configured_blueprint
 local function on_player_configured_blueprint(event)
     local player, player_data = Player.get(event.player_index)
-    if not (player or player_data) then return end
+    if not (player and player_data) then return end
 
     local self = assert(Framework.blueprint)
 

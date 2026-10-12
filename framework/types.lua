@@ -16,7 +16,7 @@
 ---@field entity LuaEntity
 ---@field key string
 ---@field tags Tags?
----@field player_index integer
+---@field player_index integer?
 ---@field tick integer
 ---@field pre_build ff2.ghost_manager.PreBuild?
 
@@ -28,7 +28,9 @@
 
 ---@class ff2.ghost_manager.State
 ---@field ghost_entities ff2.ghost_manager.AttachedEntity[]
----@field pre_build ff2.ghost_manager.PreBuild[]
+---@field pre_build table<uint32, ff2.ghost_manager.PreBuild>
+
+-- field pre_build ff2.ghost_manager.PreBuild[]
 
 ----------------------------------------------------------------------------------------------------
 --- gui.lua
@@ -51,15 +53,15 @@
 ----------------------------------------------------------------------------------------------------
 
 ---@alias ff2.ModSettings table<FrameworkSettings.name, FrameworkSettingsGroup>
----@alias FrameworkSettingsStorage table<string, (FrameworkSettingValue|table<string, FrameworkSettingValue?>)?>?
+---@alias FrameworkSettingsStorage table<string, FrameworkSettingValue?>
 
 ---@class FrameworkSettingsProvider
----@field values FrameworkSettingsStorage
+---@field values FrameworkSettingsStorage?
 ---@field definitions FrameworkSettingsGroup
 ---@field load_value fun(name: string, player_index: integer?): ModSetting?
 ---@field store_value fun(name: string, value: FrameworkSettingValue, player_index: integer?)?
----@field get_values fun(self: FrameworkSettingsProvider, player_index: integer?): FrameworkSettingsStorage
----@field set_values fun(self: FrameworkSettingsProvider, values: table<string, FrameworkSettingValue?>, player_index: integer?)
+---@field get_values fun(self: FrameworkSettingsProvider, player_index: integer?): FrameworkSettingsStorage?
+---@field init_values fun(self: FrameworkSettingsProvider, player_index: integer?): FrameworkSettingsStorage
 ---@field clear fun(self: FrameworkSettingsProvider, player_index: integer?)
 
 ---@alias FrameworkSettingValue (int)|(double)|(boolean)|(string)|(Color)

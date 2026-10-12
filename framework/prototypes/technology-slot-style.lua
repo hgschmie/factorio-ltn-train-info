@@ -9,6 +9,7 @@ local styles = data.raw['gui-style'].default
 
 -- global in data stage
 assert(default_shadow) ---@diagnostic disable-line: undefined-global
+assert(styles)
 
 ---@param name string
 ---@param y number

@@ -45,9 +45,9 @@ function Force.additional_data(...)
 end
 
 --- Get `game.forces[name]` & `storage.forces[name]`, or create `storage.forces[name]` if it doesn't exist.
--- @tparam string|LuaForce force the force to get data for
--- @treturn LuaForce the force instance
--- @treturn table the force's storage data
+---@param force string|LuaForce the force to get data for
+---@return LuaForce force the force instance
+---@return table force_data the force's storage data
 -- @usage
 -- local Force = require('stdlib.event.force')
 -- local force_name, force_data = Force.get("player")
@@ -60,7 +60,7 @@ function Force.get(force)
 end
 
 --- Merge a copy of the passed data to all forces in `storage.forces`.
--- @tparam table data a table containing variables to merge
+---@param data table a table containing variables to merge
 -- @usage
 -- local data = {a = "abc", b = "def"}
 -- Force.add_data_all(data)
@@ -75,8 +75,8 @@ end
 
 --- Init or re-init a force or forces.
 -- Passing a `nil` event will iterate all existing forces.
--- @tparam[opt] string|table event table or a string containing force name
--- @tparam[opt=false] boolean overwrite the force data
+---@param event? string|table table or a string containing force name
+---@param overwrite? boolean the force data
 function Force.init(event, overwrite)
     storage.forces = storage.forces or {}
 

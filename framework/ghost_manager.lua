@@ -7,7 +7,6 @@ assert(Framework)
 -- Factorio Framework 2 (ff2)
 
 local Event = require('stdlib.event.event')
-local Is = require('stdlib.utils.is')
 local Position = require('stdlib.area.position')
 
 local Matchers = require('framework.matchers')
@@ -54,7 +53,7 @@ local function on_pre_build(event)
     }
 end
 
----@param player_index integer
+---@param player_index integer?
 ---@return ff2.ghost_manager.PreBuild? pre_build
 function FrameworkGhostManager:getPreBuild(player_index)
     local state = self:state()
@@ -72,9 +71,10 @@ function FrameworkGhostManager:registerGhost(entity, player_index)
 
     local state = self:state()
 
+    ---@type ff2.ghost_manager.AttachedEntity
     local attached_entity = {
         entity = entity,
-        key = tools:createEntityKeyFromEntity(entity),
+        key = assert(tools:createEntityKeyFromEntity(entity)),
         tags = entity.tags,
         player_index = player_index,
         -- allow 10 seconds of lingering time until a refresh must have happened
@@ -86,7 +86,7 @@ function FrameworkGhostManager:registerGhost(entity, player_index)
         self.ghost_callbacks[entity.ghost_name](attached_entity)
     end
 
-    state.ghost_entities[entity.unit_number] = attached_entity
+    state.ghost_entities[assert(entity.unit_number)] = attached_entity
 end
 
 ---@param unit_number integer
@@ -167,7 +167,7 @@ end
 ---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.on_space_platform_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 local function on_ghost_entity_created(event)
     local entity = event and event.entity
-    if not Is.Valid(entity) then return end
+    if not (entity and entity.valid) then return end
 
     script.register_on_object_destroyed(entity)
 
@@ -177,7 +177,7 @@ end
 ---@param event EventData.on_post_entity_died
 local function on_post_entity_died(event)
     local entity = event and event.ghost
-    if not Is.Valid(entity) then return end
+    if not (entity and entity.valid) then return end
 
     script.register_on_object_destroyed(entity)
 
@@ -253,6 +253,7 @@ function FrameworkGhostManager:registerForName(attrs)
     Event.register(defines.events.on_post_entity_died, on_post_entity_died, event_matcher, nil, { framework = true })
 
     local names = (type(attrs.names) ~= 'table') and { attrs.names } or attrs.names
+    ---@cast names string[]
 
     -- if a callback was provided, register callback and turn on the ticker
     if attrs.refresh_callback then

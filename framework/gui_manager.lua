@@ -30,9 +30,9 @@ local GUI_UPDATE_TICK_INTERVAL = 11
 ---@alias framework.gui.event_data EventData.on_gui_checked_state_changed|EventData.on_gui_click|EventData.on_gui_closed|EventData.on_gui_confirmed|EventData.on_gui_elem_changed|EventData.on_gui_location_changed|EventData.on_gui_opened|EventData.on_gui_selected_tab_changed|EventData.on_gui_selection_state_changed|EventData.on_gui_switch_state_changed|EventData.on_gui_text_changed|EventData.on_gui_value_changed
 
 ---@class framework.gui_manager.create_gui
----@field player_index integer      Player Index
+---@field player_index integer Player Index
 ---@field type string GUI type
----@field parent LuaGuiElement      Parent to associate with
+---@field parent LuaGuiElement Parent to associate with
 ---@field ui_tree_provider fun(context: framework.gui): framework.gui.element_definitions?
 ---@field existing_elements table<string, LuaGuiElement>? Optional set of existing GUI elements.
 ---@field context framework.gui.context? Context element
@@ -55,7 +55,7 @@ local GUI_UPDATE_TICK_INTERVAL = 11
 ---@alias framework.guis table<string, framework.gui> gui Type to actual gui element
 
 ---@class framework.gui_manager.player_state
----@field custominput_event framework.gui_manager.custominput_event -- last custom input event registered
+---@field custominput_event framework.gui_manager.custominput_event --last custom input event registered
 ---@field guis framework.guis All registered and known guis for this manager.
 
 ---@class framework.gui_manager
@@ -76,10 +76,11 @@ function FrameworkGuiManager:playerState(player_index)
     local state = Framework.runtime:player_storage(assert(player_index))
 
     ---@type framework.gui_manager.player_state
-    state.gui_manager = state.gui_manager or {
-        custominput_event = {},
-        guis = {},
-    }
+    state.gui_manager = state.gui_manager
+        or {
+            custominput_event = {},
+            guis = {},
+        }
 
     return state.gui_manager
 end
@@ -120,6 +121,7 @@ end
 function FrameworkGuiManager:executeGuiHandler(handler_id, event, gui)
     -- find the event mapping for the GUI
     local gui_definition = assert(self.known_gui_types[gui.type])
+    if not gui_definition.events then return false end
     local event_handler = gui_definition.events[handler_id]
     if not event_handler then return false end
     event_handler(event, gui)
@@ -132,7 +134,6 @@ end
 function FrameworkGuiManager:determineGuiHandlerId(event, gui)
     local event_handler_map = assert(gui.event_handlers[event.name])
 
-    ---@type LuaGuiElement
     local elem = event.element
     assert(elem and elem.valid)
     return event_handler_map[elem.name]
@@ -144,14 +145,13 @@ end
 function FrameworkGuiManager:dispatch(event)
     if not event then return false end
 
-    ---@type LuaGuiElement
     local elem = event.element
     if not (elem and elem.valid) then return false end
 
     local player_index = event.player_index
 
     -- find the GUI for the player
-    local gui_type = elem.tags['__GUI_TYPE']
+    local gui_type = elem.tags['__GUI_TYPE'] and tostring(elem.tags['__GUI_TYPE']) or nil
     if not gui_type then return false end
 
     local gui = self:findGui(player_index, gui_type)
@@ -163,8 +163,8 @@ function FrameworkGuiManager:dispatch(event)
         ---@type framework.gui.custominput_data
         local data = {
             input_name = handler_id,
-            player_index = event.player_index,
-            tick = game.tick
+            player_index = player_index,
+            tick = game.tick,
         }
         input_handler(data, gui)
         return true
@@ -234,7 +234,7 @@ function FrameworkGuiManager:findGui(player_index, gui_type)
 end
 
 ---@param player_index integer The player to add the GUI for.
----@param gui framework.gui   The Framework GUI definition.
+---@param gui framework.gui The Framework GUI definition.
 function FrameworkGuiManager:addGui(player_index, gui)
     assert(player_index)
     assert(gui)
@@ -299,14 +299,16 @@ end
 ---@return framework.gui A framework gui instance
 function FrameworkGuiManager:createGui(map)
     assert(map)
+    assert(map.type, 'A map type must be given')
+    assert(map.player_index, 'A player index must be given')
 
-    assert(map.type)
-    assert(map.player_index)
     local player_index = map.player_index
 
     local gui_type = self.known_gui_types[map.type]
 
     assert(gui_type, 'No Gui definition for "' .. map.type .. '" registered!')
+    ---@cast gui_type.events -?
+    ---@cast gui_type.custominput_events -?
 
     -- must be set
     assert(map.parent)
@@ -315,10 +317,10 @@ function FrameworkGuiManager:createGui(map)
     local gui = FrameworkGui.create {
         type = map.type,
         prefix = self.GUI_PREFIX .. map.type .. '-',
-        gui_events = table.array_to_dictionary(table.keys(gui_type.events)),
-        custominput_events = table.array_to_dictionary(table.keys(gui_type.custominput_events)),
+        gui_events = table.array_to_dictionary(table.keys(gui_type.events)) --[[@as framework.gui_events]],
+        custominput_events = table.array_to_dictionary(table.keys(gui_type.custominput_events)) --[[@as framework.custominput_events]],
         entity_id = map.entity_id,
-        player_index = map.player_index,
+        player_index = player_index,
         context = map.context or {},
     }
 
@@ -479,7 +481,9 @@ local function register_events()
         ---@diagnostic disable-next-line: undefined-field
         if name:starts_with('on_gui_') then
             Event.on_event(id, function(ev)
-                Framework.gui_manager:dispatch(ev --[[@as framework.gui.event_data]])
+                Framework.gui_manager:dispatch(
+                    ev --[[@as framework.gui.event_data]]
+                )
             end)
         end
     end

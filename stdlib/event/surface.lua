@@ -38,7 +38,7 @@ function Surface.additional_data(...)
 end
 
 --- Remove data for a surface when it is deleted.
--- @tparam table event event table containing the surface index
+---@param event table event table containing the surface index
 function Surface.remove(event)
     storage.surfaces[event.surface_index] = nil
 end
@@ -56,8 +56,8 @@ end
 
 --- Init or re-init the surfaces.
 -- Passing a `nil` event will iterate all existing surfaces.
--- @tparam[opt] number|table|string|LuaSurface event
--- @tparam[opt=false] boolean overwrite the surface data
+---@param event? number|table|string|LuaSurface
+---@param overwrite? boolean the surface data
 function Surface.init(event, overwrite)
     -- Create the storage.surfaces table if it doesn't exisit
     storage.surfaces = storage.surfaces or {}

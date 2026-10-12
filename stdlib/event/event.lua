@@ -130,7 +130,8 @@ local stupid_events = {
     [defines.events.on_entity_cloned] = 'destination'
 }
 
----@alias stdlib.event_type defines.events | integer | string
+---@alias stdlib.event_id defines.events | integer
+---@alias stdlib.event_type stdlib.event_id | string
 
 --- Registers a handler for the given events.
 -- If a `nil` handler is passed, remove the given events and stop listening to them.
@@ -146,17 +147,12 @@ local stupid_events = {
 -- Event.register(-120, function() game.print('Every 120 ticks') end
 -- -- Function call chaining
 -- Event.register(event1, handler1).register(event2, handler2)
---- @param event_id stdlib.event_type | stdlib.event_type[]
---- @param handler fun(event: EventData)
---- @param filter (fun(event: EventData, pattern: any?): boolean)?
---- @param pattern  any?
---- @param options table<string, any>?
---- @return event.Event
--- @tparam function handler the function to call when the given events are triggered
--- @tparam[opt=nil] function filter a function whose return determines if the handler is executed. event and pattern are passed into this
--- @tparam[opt=nil] mixed pattern an invariant that can be used in the filter function, passed as the second parameter to your filter
--- @tparam[opt=nil] table options a table of options that take precedence over the module options.
--- @return (<span class="types">@{Event}</span>) Event module object allowing for call chaining
+---@param event_id stdlib.event_type | stdlib.event_type[]
+---@param handler fun(event: EventData) the function to call when the given events are triggered
+---@param filter? fun(event: EventData, pattern?: any): boolean a function whose return determines if the handler is executed
+---@param pattern? any an invariant passed as the second argument to the filter
+---@param options? table<string, any> options that take precedence over the module defaults
+---@return event.Event
 function Event.register(event_id, handler, filter, pattern, options)
     assert(event_id, 'missing event_id argument')
     assert(Type.Function(handler), 'handler function is missing, use Event.remove to un register events')
@@ -246,11 +242,11 @@ end
 -- @{LuaBootstrap.generate_event_name|script.generate_event_name} which is in <span class="types">@{int}</span>,
 -- and can be a custom input name which is in <span class="types">@{string}</span>.
 -- <p>The `event_id` parameter takes in either a single, multiple, or mixture of @{defines.events}, @{int}, and @{string}.
--- @param event_id (<span class="types">@{defines.events}, @{int}, @{string}, or {@{defines.events}, @{int}, @{string},...}</span>)
--- @tparam[opt] function handler the handler to remove, if not present remove all registered handlers for the event_id
--- @tparam[opt] function filter
--- @tparam[opt] mixed pattern
--- @return (<span class="types">@{Event}</span>) Event module object allowing for call chaining
+---@param event_id stdlib.event_type | stdlib.event_type[]
+---@param handler? fun(event: EventData) the handler to remove; removes all handlers for the event when omitted
+---@param filter? fun(event: EventData, pattern?: any): boolean
+---@param pattern? any
+---@return event.Event
 function Event.remove(event_id, handler, filter, pattern)
     assert(event_id, 'missing event_id argument')
 
@@ -338,7 +334,7 @@ function Event.remove(event_id, handler, filter, pattern)
 end
 
 --- Shortcut for `Event.register(Event.core_events.on_load, function)`
--- @return (<span class="types">@{Event}</span>) Event module object allowing for call chaining
+---@return event.Event
 function Event.on_load(...)
     return Event.register(Event.core_events.on_load, ...)
 end
@@ -351,13 +347,13 @@ function Event.on_load_if(truthy, ...)
 end
 
 --- Shortcut for `Event.register(Event.core_events.on_configuration_changed, function)`
--- @return (<span class="types">@{Event}</span>) Event module object allowing for call chaining
+---@return event.Event
 function Event.on_configuration_changed(...)
     return Event.register(Event.core_events.on_configuration_changed, ...)
 end
 
 --- Shortcut for `Event.register(Event.core_events.on_init, function)`
--- @return (<span class="types">@{Event}</span>) Event module object allowing for call chaining
+---@return event.Event
 function Event.on_init(...)
     return Event.register(Event.core_events.on_init, ...)
 end
@@ -370,14 +366,14 @@ function Event.on_init_if(truthy, ...)
 end
 
 --- Shortcut for `Event.register(-nthTick, function)`
--- @return (<span class="types">@{Event}</span>) Event module object allowing for call chaining
+---@return event.Event
 function Event.on_nth_tick(nth_tick, ...)
     return Event.register(-math.abs(nth_tick), ...)
 end
 
 --- Shortcut for `Event.register(defines.events, function)`
 -- @function Event.on_event
--- @return (<span class="types">@{Event}</span>) Event module object allowing for call chaining
+---@type fun(event_id: stdlib.event_type | stdlib.event_type[], handler: fun(event: EventData), filter?: (fun(event: EventData, pattern?: any): boolean), pattern?: any, options?: table<string, any>): event.Event
 Event.on_event = Event.register
 
 function Event.register_if(truthy, id, ...)
@@ -433,9 +429,10 @@ end
 --- The user should create a table in this format, for a table that will be passed into @{Event.dispatch}.
 -- <p>In general, the user should create an event data table that is in a similar format as the one that Factorio returns.
 --> The event data table **MUST** have either `name` or `input_name`.
--- @tfield[opt] int|defines.events name unique event ID generated with @{LuaBootstrap.generate_event_name|script.generate_event_name} ***OR*** @{defines.events}
--- @tfield[opt] string input_name custom input name of an event
--- @field[opt] ... any # of additional fields with extra data, which are passed into the handler registered to an event that this table represents
+---@class event.EventData
+---@field name? stdlib.event_type event ID, bootstrap event name, or custom input name
+---@field input_name? string custom input name of an event
+---@field [string] any additional data passed into registered handlers
 -- @usage
 -- -- below code is from Trains module.
 -- -- old_id & new_id are additional fields passed into the handler that's registered to Trains.on_train_id_changed event.
@@ -450,7 +447,7 @@ end
 --- Calls the handlers that are registered to the given event.
 -- <p>Abort calling remaining handlers if any one of them has invalid userdata.
 -- <p>Handlers are dispatched in the order they were created.
--- @param event (<span class="types">@{event_data}</span>) the event data table
+---@param event event.EventData the event data table
 -- @see https://forums.factorio.com/viewtopic.php?t=32039#p202158 Invalid Event Objects
 function Event.dispatch(event)
     if type(event) ~= 'table' then
@@ -522,8 +519,8 @@ function Event.register_surface(bool)
 end
 
 --- Retrieve or Generate an event_name and store it in Event.custom_events
--- @tparam string event_name the custom name for your event.
--- @treturn int the id associated with the event.
+---@param event_name string the custom name for your event.
+---@return stdlib.event_id event_id the id associated with the event.
 -- @usage
 -- Event.register(Event.generate_event_name("my_custom_event"), handler)
 function Event.generate_event_name(event_name)

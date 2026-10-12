@@ -99,25 +99,25 @@ function Math.log10(x)
 end
 
 --- Round a number.
--- @tparam number x
--- @treturn number the rounded number
+---@param x number
+---@return number rounded the rounded number
 function Math.round(x)
     return x >= 0 and math_floor(x + 0.5) or math_ceil(x - 0.5)
 end
 
 -- Returns the number x rounded to p decimal places.
--- @tparam number x
--- @tparam[opt=0] int p the number of decimal places to round to
--- @treturn number rounded to p decimal spaces.
+---@param x number
+---@param p? integer the number of decimal places to round to
+---@return number rounded to p decimal spaces.
 function Math.round_to(x, p)
     local e = 10 ^ (p or 0)
     return math_floor(x * e + 0.5) / e
 end
 
 -- Returns the number floored to p decimal spaces.
--- @tparam number x
--- @tparam[opt=0] int p the number of decimal places to floor to
--- @treturn number floored to p decimal spaces.
+---@param x number
+---@param p? integer the number of decimal places to floor to
+---@return number floored to p decimal spaces.
 function Math.floor_to(x, p)
     if (p or 0) == 0 then return math_floor(x) end
     local e = 10 ^ p
@@ -125,9 +125,9 @@ function Math.floor_to(x, p)
 end
 
 -- Returns the number ceiled to p decimal spaces.
--- @tparam number x
--- @tparam[opt=0] int p the number of decimal places to ceil to
--- @treturn number ceiled to p decimal spaces.
+---@param x number
+---@param p? integer the number of decimal places to ceil to
+---@return number ceiled to p decimal spaces.
 function Math.ceil_to(x, p)
     local e = 10 ^ (p or 0)
     return math_ceil(x * e + 0.5) / e
@@ -137,8 +137,8 @@ end
 -- See: http://en.wikipedia.org/wiki/Average
 
 --- Calculates the sum of a sequence of values.
--- @tparam tuple ... a tuple of numbers
--- @treturn the sum
+---@param ... number a tuple of numbers
+---@return number sum the sum
 function Math.sum(...)
     local x = tuple(...)
     local s = 0
@@ -147,8 +147,8 @@ function Math.sum(...)
 end
 
 --- Calculates the arithmetic mean of a set of values.
--- @tparam array x an array of numbers
--- @treturn number the arithmetic mean
+---@param ... number|number[] numbers to average, or a single array of numbers
+---@return number mean the arithmetic mean
 function Math.arithmetic_mean(...)
     local x = tuple(...)
     return (Math.sum(x) / #x)
@@ -158,8 +158,8 @@ Math.avg = Math.arithmetic_mean
 Math.average = Math.arithmetic_mean
 
 --- Calculates the geometric mean of a set of values.
--- @tparam array x an array of numbers
--- @treturn number the geometric mean
+---@param ... number|number[] numbers to average, or a single array of numbers
+---@return number mean the geometric mean
 function Math.geometric_mean(...)
     local x = tuple(...)
     local prod = 1
@@ -168,8 +168,8 @@ function Math.geometric_mean(...)
 end
 
 --- Calculates the harmonic mean of a set of values.
--- @tparam tuple ... an array of numbers
--- @treturn number the harmonic mean
+---@param ... number|number[] numbers to average, or a single array of numbers
+---@return number mean the harmonic mean
 function Math.harmonic_mean(...)
     local x = tuple(...)
     local s = 0
@@ -178,8 +178,8 @@ function Math.harmonic_mean(...)
 end
 
 --- Calculates the quadratic mean of a set of values.
--- @tparam tuple ... an array of numbers
--- @treturn number the quadratic mean
+---@param ... number|number[] numbers to average, or a single array of numbers
+---@return number mean the quadratic mean
 function Math.quadratic_mean(...)
     local x = tuple(...)
     local squares = 0
@@ -188,9 +188,9 @@ function Math.quadratic_mean(...)
 end
 
 --- Calculates the generalized mean (to a specified power) of a set of values.
--- @tparam number p power
--- @tparam tuple ... an array of numbers
--- @treturn number the generalized mean
+---@param p number power
+---@param ... number|number[] numbers to average, or a single array of numbers
+---@return number mean the generalized mean
 function Math.generalized_mean(p, ...)
     local x = tuple(...)
     local sump = 0
@@ -199,9 +199,9 @@ function Math.generalized_mean(p, ...)
 end
 
 --- Calculates the weighted mean of a set of values.
--- @tparam array x an array of numbers
--- @tparam array w an array of number weights for each value
--- @treturn number the weighted mean
+---@param x number[] an array of numbers
+---@param w number[] an array of number weights for each value
+---@return number mean the weighted mean
 function Math.weighted_mean(x, w)
     local sump = 0
     for i, v in ipairs(x) do sump = sump + (v * w[i]) end
@@ -209,16 +209,16 @@ function Math.weighted_mean(x, w)
 end
 
 --- Calculates the midrange mean of a set of values.
--- @tparam array x an array of numbers
--- @treturn number the midrange mean
+---@param ... number|number[] numbers to average, or a single array of numbers
+---@return number mean the midrange mean
 function Math.midrange_mean(...)
     local x = tuple(...)
     return 0.5 * (math_min(unpack(x)) + math_max(unpack(x)))
 end
 
 --- Calculates the energetic mean of a set of values.
--- @tparam array x an array of numbers
--- @treturn number the energetic mean
+---@param ... number|number[] numbers to average, or a single array of numbers
+---@return number mean the energetic mean
 function Math.energetic_mean(...)
     local x = tuple(...)
     local s = 0
@@ -227,29 +227,29 @@ function Math.energetic_mean(...)
 end
 
 --- Returns the number x clamped between the numbers min and max.
--- @tparam number x
--- @tparam[opt=0] number min
--- @tparam[opt=1] number max
--- @treturn number clamped between min and max
+---@param x number
+---@param min? number
+---@param max? number
+---@return number clamped between min and max
 function Math.clamp(x, min, max)
     min, max = min or 0, max or 1
     return x < min and min or (x > max and max or x)
 end
 
 --- Linear interpolation or 2 numbers.
--- @tparam number a
--- @tparam number b
--- @tparam float amount
--- @treturn number
+---@param a number
+---@param b number
+---@param amount number
+---@return number
 function Math.lerp(a, b, amount)
     return a + (b - a) * Math.clamp(amount, 0, 1)
 end
 
 --- Smooth.
--- @tparam number a
--- @tparam number b
--- @tparam float amount
--- @treturn number
+---@param a number
+---@param b number
+---@param amount number
+---@return number
 function Math.smooth(a, b, amount)
     local t = Math.clamp(amount, 0, 1)
     local m = t * t * (3 - 2 * t)
@@ -257,30 +257,30 @@ function Math.smooth(a, b, amount)
 end
 
 --- Approximately the same
--- @tparam number a
--- @tparam number b
--- @treturn boolean
+---@param a number
+---@param b number
+---@return boolean
 function Math.approximately(a, b)
     return math_abs(b - a) < math_max(1e-6 * math_max(math_abs(a), math_abs(b)), 1.121039e-44)
 end
 
 --- Is x a number.
--- @tparam number x
--- @treturn boolean
+---@param x number
+---@return boolean
 function Math.is_number(x)
     return x == x and x ~= math_huge
 end
 
 --- Is x an integer.
--- @tparam number x
--- @treturn boolean
+---@param x number
+---@return boolean
 function Math.is_integer(x)
     return x == math_ceil(x)
 end
 
 --- Is x unsigned.
--- @tparam number x
--- @treturn boolean
+---@param x number
+---@return boolean
 function Math.is_unsigned(x)
     return x >= 0
 end
@@ -292,9 +292,10 @@ function Math.sign(x)
 end
 
 -- compute 1-based modulo.
----@param x number
----@param y number
----@return number
+---@generic T : number
+---@param x T
+---@param y integer
+---@return T
 function Math.one_mod(x, y)
     return ((x - 1) % y) + 1
 end

@@ -1,6 +1,5 @@
 --- Unique Array class
 -- For working with unique string array values. Creates an array with hash/dictionary indexing.
--- @classmod unique_array
 -- Adding or removeing values without using the provided methods can break the functionality of this class.
 -- Additional methods exported by requering unique_array are .set and .make_dictionary
 -- @usage local Unique_Array = require('stdlib.utils.classes.unique_array')
@@ -11,6 +10,8 @@
 -- end'
 -- @set all=true
 
+---@class unique_array
+---@field [integer] string
 local M = {
     __class = 'unique_array'
 }
@@ -93,15 +94,15 @@ end
 -- @section Methods
 
 --- Create a new unique array.
--- @tparam unique_array|string|{string,...} ... strings to initialize the unique array with
--- @treturn @{unique_array} new
+---@param ... unique_array|string|string[] strings to initialize the unique array with
+---@return unique_array array
 function M.new(...)
     return create_class {}:add(type((...)) == 'table' and (...) or { ... })
 end
 
 --- Add a string to the array if it doesn't exist in the array.
--- @tparam unique_array|string|{string,...} other
--- @treturn @{unique_array} self
+---@param other unique_array|string|string[]
+---@return unique_array self
 function M:add(other)
     local class = getmetatable(self)
     for _, param in ipairs(type(other) == 'table' and other or { other }) do
@@ -113,8 +114,8 @@ function M:add(other)
 end
 
 --- Remove the strings from the array if they exist.
--- @tparam unique_array|string|{string,...} other
--- @treturn @{unique_array} self
+---@param other unique_array|string|string[]
+---@return unique_array self
 function M:remove(other)
     local class = getmetatable(self)
     for _, param in ipairs(type(other) == 'table' and other or { other }) do
@@ -126,8 +127,8 @@ function M:remove(other)
 end
 
 --- Toggles the passed name in the array by adding it if not present or removing it if it is.
--- @tparam unique_array|string|{string,...} other
--- @treturn @{unique_array} self
+---@param other unique_array|string|string[]
+---@return unique_array self
 function M:toggle(other)
     local class = getmetatable(self)
     for _, param in ipairs(type(other) == 'table' and other or { other }) do
@@ -141,8 +142,8 @@ function M:toggle(other)
 end
 
 --- Get all items that are NOT in both arrays.
--- @tparam unique_array|string|{string,...} other
--- @treturn @{unique_array} new
+---@param other unique_array|string|string[]
+---@return unique_array difference
 function M:diff(other)
     other = unique_or_new(other)
     local diff = M.new()
@@ -160,8 +161,8 @@ function M:diff(other)
 end
 
 --- Get all items that are in both arrays.
--- @tparam unique_array|string|{string,...} other
--- @treturn @{unique_array} new
+---@param other unique_array|string|string[]
+---@return unique_array intersection
 function M:intersects(other)
     other = unique_or_new(other)
     local intersection = M.new()
@@ -179,8 +180,8 @@ function M:intersects(other)
 end
 
 --- Sort the unique_array in place.
--- @tparam[opt] function cmp Comparator @{sort} function to use
--- @treturn @{unique_array} self
+---@param cmp? function Comparator @{sort} function to use
+---@return unique_array self
 function M:sort(cmp)
     local class = getmetatable(self)
     t_sort(self, cmp)
@@ -189,15 +190,15 @@ function M:sort(cmp)
 end
 
 --- Create a new unique_array by concatenating together.
--- @tparam unique_array|string|{string,...} other
--- @treturn @{unique_array} new
+---@param other unique_array|string|string[]
+---@return unique_array array
 function M:concat(other)
     return M.new(self):add(other)
 end
 
 --- Find all members in a unique array that match the pattern.
--- @tparam string pattern Lua @{pattern}
--- @treturn @{unique_array} new unique array containing all elements that match.
+---@param pattern string Lua @{pattern}
+---@return unique_array matches unique array containing all elements that match
 function M:find(pattern)
     local matches = M.new()
     for _, value in ipairs(self) do
@@ -209,7 +210,7 @@ function M:find(pattern)
 end
 
 --- Clear the array returning an empty array object
--- @treturn @{unique_array} self
+---@return unique_array self
 function M:clear()
     local class = getmetatable(self)
     for i = #self, 1, -1 do
@@ -224,8 +225,8 @@ end
 -- @section Functions
 
 --- Does this array have all of the passed strings.
--- @tparam unique_array|string|{string,...} other
--- @treturn boolean every passed string is in the array
+---@param other unique_array|string|string[]
+---@return boolean contains_all true if every passed string is in the array
 function M:all(other)
     local params = type(other) == 'table' and other or { other }
     local count = 0
@@ -239,8 +240,8 @@ end
 M.has = M.all
 
 --- Does this array have any of the passed strings.
--- @tparam unique_array|string|{string,...} other
--- @treturn boolean any passed string is in the array
+---@param other unique_array|string|string[]
+---@return boolean contains_any true if any passed string is in the array
 function M:any(other)
     for _, param in ipairs(type(other) == 'table' and other or { other }) do
         if self[param] then
@@ -251,8 +252,8 @@ function M:any(other)
 end
 
 --- Does this array have none of the passed strings.
--- @tparam unique_array|string|{string,...} other
--- @treturn boolean no passed strings are in the array
+---@param other unique_array|string|string[]
+---@return boolean contains_none true if no passed strings are in the array
 function M:none(other)
     for _, param in ipairs(type(other) == 'table' and other or { other }) do
         if self[param] then
@@ -263,8 +264,8 @@ function M:none(other)
 end
 
 --- Do both arrays contain the same items
--- @tparam unique_array|string|{string,...} other
--- @treturn boolean
+---@param other unique_array|string|string[]
+---@return boolean
 function M:same(other)
     other = unique_or_new(other)
     if #self == #other then
@@ -279,23 +280,23 @@ function M:same(other)
 end
 
 --- Do the unique arrays have no items in common
--- @tparam unique_array|string|{string,...} other
--- @treturn boolean
+---@param other unique_array|string|string[]
+---@return boolean
 function M:disjointed(other)
     return #self:intersects(other) == 0
 end
 
 --- Convert the array to a string.
--- @treturn string
+---@return string
 function M:tostring()
     return table.concat(self, ', ')
 end
 
 --- Return a dictionary mapping of the array.
 -- can be passed a function to set the value of the field.
--- @tparam[opt] function func value, index are passed as the first two paramaters
--- @tparam[opt] any ... additional values to pass to the function
--- @treturn dictionary
+---@param func? function value, index are passed as the first two paramaters
+---@param ... any additional values to pass to the function
+---@return table<any, any>
 function M:make_dictionary(func, ...)
     local dict = {}
     for index, value in ipairs(self) do

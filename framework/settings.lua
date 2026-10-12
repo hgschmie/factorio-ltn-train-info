@@ -8,7 +8,7 @@ local table = require('stdlib.utils.table')
 assert(Framework)
 
 ---@enum FrameworkSettings.name
-local setting_types = {
+local _setting_types = {
     startup = 'startup',
     runtime = 'runtime',
     player = 'player',
@@ -30,7 +30,7 @@ local settings_table = {
         get_values = function(self) return self.values end,
         init_values = function(self)
             self.values = {}
-            return self.values
+            return self.values --[[@as table<string, FrameworkSettingValue?> ]]
         end,
         clear = function(self) self.values = nil end,
     },
@@ -60,21 +60,26 @@ local settings_table = {
         end,
         store_value = function(name, value, player_index)
             if player_index then
-                game.players[player_index].mod_settings[name] = { value = value }
+                if game.players[player_index] then
+                    game.players[player_index].mod_settings[name] = { value = value }
+                end
             else
                 settings.player_default[name] = { value = value }
             end
         end,
         get_values = function(self, player_index)
             local index = player_index or 'default'
+            ---@cast self.values table<uint32|string, table<string, FrameworkSettingValue?>>
             return self.values[index]
         end,
         init_values = function(self, player_index)
             local index = player_index or 'default'
+            ---@cast self.values table<uint32|string, table<string, FrameworkSettingValue?>>
             self.values[index] = {}
             return self.values[index]
         end,
         clear = function(self, player_index)
+            ---@cast self.values table<uint32|string, table<string, FrameworkSettingValue?>>
             if player_index then
                 self.values[player_index] = {}
             else
@@ -90,18 +95,16 @@ function FrameworkSettings:get_debug_level()
     if not FrameworkSettings.DEBUG_LEVEL then
         FrameworkSettings.DEBUG_LEVEL = tonumber(self:startup_setting('debug_mode')) or 0
     end
-    return FrameworkSettings.DEBUG_LEVEL
+    return FrameworkSettings.DEBUG_LEVEL or 0
 end
 
 --- Add setting definitions of the given setting_type to the corresponding table
 ---@param definitions table<FrameworkSettings.name, FrameworkSettingsGroup>
 ---@return self FrameworkSettings
 function FrameworkSettings:add_defaults(definitions)
-    for key in pairs(setting_types) do
-        if settings_table[key].definitions then
-            table.merge(settings_table[key].definitions, definitions[key])
-            settings_table[key]:clear()
-        end
+    for key, value in pairs(settings_table) do
+        table.merge(value.definitions, definitions[key])
+        value:clear()
     end
 
     return self
@@ -112,9 +115,10 @@ end
 ---@param player_index integer? The current player index.
 ---@return table<string, FrameworkSettingValue?> result
 function FrameworkSettings:get_settings(setting_type, player_index)
-    local settings_group = settings_table[setting_type]
+    local settings_group = assert(settings_table[setting_type])
 
     local values = settings_group:get_values(player_index)
+    ---@cast values table<string, FrameworkSettingValue?>?
     if values then return values end
 
     values = settings_group:init_values(player_index)
@@ -136,7 +140,7 @@ end
 ---@param value FrameworkSettingValue
 ---@param player_index integer? The current player index.
 function FrameworkSettings:set_setting(setting_type, name, value, player_index)
-    local settings_group = settings_table[setting_type]
+    local settings_group = assert(settings_table[setting_type])
     if settings_group.store_value then
         settings_group.store_value(name, value, player_index)
         settings_group:clear(player_index)
@@ -146,9 +150,9 @@ end
 --- Flushes all cached settings.
 --- The next access to a setting will reload them from the game.
 function FrameworkSettings:flush()
-    settings_table.player:clear()
-    settings_table.runtime:clear()
-    settings_table.startup:clear()
+    for _, value in pairs(settings_table) do
+        value:clear()
+    end
 
     self.DEBUG_LEVEL = nil
 end
@@ -206,6 +210,7 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
+---@diagnostic disable-next-line: unnecessary-if
 if script then
     local Event = require('stdlib.event.event')
 

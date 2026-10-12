@@ -41,7 +41,7 @@ local LIFETIME_IN_TICKS = 60 * 86400 -- 24 hours
 ---@field name string?
 
 ---@class ff2.tombstone.Tombstone
----@field position MapPosition.struct
+---@field position MapPosition
 ---@field surface_index integer
 ---@field type string
 ---@field name string
@@ -130,6 +130,7 @@ function FrameworkTombstoneManager:createTombstoneFromEntity(entity)
     local entity_data = callback.create_tombstone(entity)
     if not entity_data then return end
 
+    ---@type ff2.tombstone.Tombstone
     local tombstone = {
         name = entity.name,
         type = entity.type,
@@ -151,7 +152,7 @@ function FrameworkTombstoneManager:removeTombstoneForEntity(entity)
         surface_index = entity.surface_index,
         type = tools.getType(entity),
         name = tools.getName(entity),
-    }
+    } --[[@as ff2.tombstone.TombstoneKey ]]
 end
 
 --- Retrieves a tombstone based on a blueprint entity and surface index.
@@ -171,12 +172,12 @@ function FrameworkTombstoneManager:retrieveTombstoneFromBlueprintEntity(blueprin
         surface_index = surface_index,
         name = blueprint_entity.name,
         type = prototype.type,
-    }
+    }  --[[@as ff2.tombstone.TombstoneKey ]]
 
     if not tombstone then return end
 
     local data = tombstone.data
-    callback.apply_tombstone(data, blueprint_entity.position, surface_index, blueprint_entity.name)
+    callback.apply_tombstone(data, blueprint_entity.position, surface_index, tostring(blueprint_entity.name))
 end
 
 --- Retrieves a tombstone created at the current tick from the same position
@@ -213,7 +214,7 @@ function FrameworkTombstoneManager:applyCallbackForEntity(entity)
         surface_index = entity.surface_index,
         type = tools.getType(entity),
         name = name,
-    }
+    } --[[@as ff2.tombstone.TombstoneKey ]]
 
     if not tombstone then return end
 
@@ -252,7 +253,7 @@ local function creation_events(event)
         surface_index = entity.surface_index,
         type = tools.getType(entity),
         name = tools.getName(entity),
-    }
+    } --[[@as ff2.tombstone.TombstoneKey ]]
 
     if not tombstone then return end
 
@@ -282,7 +283,10 @@ end
 ---@param callback ff2.tombstone.TombstoneCallback
 function FrameworkTombstoneManager:registerCallback(names, callback)
     assert(names)
-    if type(names) ~= 'table' then names = { names } end
+    names = type(names) ~= 'table'
+        and { names --[[@as string ]] }
+        or names
+    ---@cast names string[]
 
     for _, name in pairs(names) do
         self.callbacks[name] = callback

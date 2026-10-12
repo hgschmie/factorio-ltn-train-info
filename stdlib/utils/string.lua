@@ -28,83 +28,83 @@ local ceil = math.ceil
 local abs = math.abs
 
 --- Returns a copy of the string with any leading or trailing whitespace from the string removed.
--- @tparam string s the string to remove leading or trailing whitespace from
--- @treturn string a copy of the string without leading or trailing whitespace
+---@param s string the string to remove leading or trailing whitespace from
+---@return string result a copy of the string without leading or trailing whitespace
 function String.trim(s)
     return (s:gsub([[^%s*(.-)%s*$]], '%1'))
 end
 
 --- Tests if a string starts with a given substring.
--- @tparam string s the string to check for the start substring
--- @tparam string start the substring to test for
--- @treturn boolean true if the start substring was found in the string
+---@param s string the string to check for the start substring
+---@param start string the substring to test for
+---@return boolean found true if the start substring was found in the string
 function String.starts_with(s, start)
     return s:find(start, 1, true) == 1
 end
 
 --- Tests if a string ends with a given substring.
--- @tparam string s the string to check for the end substring
--- @tparam string ends the substring to test for
--- @treturn boolean true if the end substring was found in the string
+---@param s string the string to check for the end substring
+---@param ends string the substring to test for
+---@return boolean found true if the end substring was found in the string
 function String.ends_with(s, ends)
     return #s >= #ends and s:find(ends, #s - #ends + 1, true) and true or false
 end
 
 --- Tests if a string contains a given substring.
--- @tparam string s the string to check for the substring
--- @tparam string contains the substring to test for
--- @treturn boolean true if the substring was found in the string
+---@param s string the string to check for the substring
+---@param contains string the substring to test for
+---@return boolean found true if the substring was found in the string
 function String.contains(s, contains)
     return s and s:find(contains) ~= nil
 end
 
 --- Tests whether a string is empty.
--- @tparam string s the string to test
--- @treturn boolean true if the string is empty
+---@param s string the string to test
+---@return boolean empty true if the string is empty
 function String.is_empty(s)
     return s == nil or s == ''
 end
 
 --- does s only contain alphabetic characters?
--- @string s a string
+---@param s string a string
 function String.is_alpha(s)
     return s:find('^%a+$') == 1
 end
 
 --- does s only contain digits?
--- @string s a string
+---@param s string a string
 function String.is_digit(s)
     return s:find('^%d+$') == 1
 end
 
 --- does s only contain alphanumeric characters?
--- @string s a string
+---@param s string a string
 function String.is_alnum(s)
     return s:find('^%w+$') == 1
 end
 
 --- does s only contain spaces?
--- @string s a string
+---@param s string a string
 function String.is_space(s)
     return s:find('^%s+$') == 1
 end
 
 --- does s only contain lower case characters?
--- @string s a string
+---@param s string a string
 function String.is_lower(s)
     return s:find('^[%l%s]+$') == 1
 end
 
 --- does s only contain upper case characters?
--- @string s a string
+---@param s string a string
 function String.is_upper(s)
     return s:find('^[%u%s]+$') == 1
 end
 
 --- iniital word letters uppercase ('title case').
 -- Here 'words' mean chunks of non-space characters.
--- @string s the string
--- @return a string with each word's first letter uppercase
+---@param s string the string
+---@return string result a string with each word's first letter uppercase
 function String.title(s)
     return (s:gsub([[(%S)(%S*)]], function(f, r)
         return f:upper() .. r:lower()
@@ -116,9 +116,9 @@ local n_ellipsis = #ellipsis
 
 --- Return a shortened version of a string.
 -- Fits string within w characters. Removed characters are marked with ellipsis.
--- @string s the string
--- @int w the maxinum size allowed
--- @bool tail true if we want to show the end of the string (head otherwise)
+---@param s string the string
+---@param w integer the maxinum size allowed
+---@param tail boolean true if we want to show the end of the string (head otherwise)
 -- @usage ('1234567890'):shorten(8) == '12345...'
 -- @usage ('1234567890'):shorten(8, true) == '...67890'
 -- @usage ('1234567890'):shorten(20) == '1234567890'
@@ -136,8 +136,8 @@ function String.shorten(s, w, tail)
 end
 
 --- concatenate the strings using this string as a delimiter.
--- @string s the string
--- @param seq a table of strings or numbers
+---@param s string the string
+---@param seq (string|number)[] a table of strings or numbers
 -- @usage (' '):join {1,2,3} == '1 2 3'
 function String.join(s, seq)
     return concat(seq, s)
@@ -167,25 +167,25 @@ local function _just(s, w, ch, left, right)
 end
 
 --- left-justify s with width w.
--- @string s the string
--- @int w width of justification
--- @string[opt=' '] ch padding character
+---@param s string the string
+---@param w integer width of justification
+---@param ch? string padding character
 function String.ljust(s, w, ch)
     return _just(s, w, ch, true, false)
 end
 
 --- right-justify s with width w.
--- @string s the string
--- @int w width of justification
--- @string[opt=' '] ch padding character
+---@param s string the string
+---@param w integer width of justification
+---@param ch? string padding character
 function String.rjust(s, w, ch)
     return _just(s, w, ch, false, true)
 end
 
 --- center-justify s with width w.
--- @string s the string
--- @int w width of justification
--- @string[opt=' '] ch padding character
+---@param s string the string
+---@param w integer width of justification
+---@param ch? string padding character
 function String.center(s, w, ch)
     return _just(s, w, ch, true, true)
 end
@@ -197,11 +197,13 @@ end
 --- Splits a string into an array.
 -- Note: Empty split substrings are not included in the resulting table.
 -- <p>For example, `string.split("foo.bar...", ".", false)` results in the table `{"foo", "bar"}`.
--- @tparam string s the string to split
--- @tparam[opt="."] string sep the separator to use.
--- @tparam[opt=false] boolean pattern whether to interpret the separator as a lua pattern or plaintext for the string split
--- @tparam[opt] function func pass each split string through this function.
--- @treturn {string,...} an array of strings
+---@generic T
+---@param s string the string to split
+---@param sep? string the separator to use.
+---@param pattern? boolean whether to interpret the separator as a lua pattern or plaintext for the string split
+---@param func? fun(value: string): T pass each split string through this function.
+---@return T[] substrings transformed substrings
+---@overload fun(s: string, sep?: string, pattern?: boolean): string[]
 function String.split(s, sep, pattern, func)
     sep = sep or '.'
     sep = sep ~= '' and sep or '.'
@@ -223,9 +225,9 @@ function String.split(s, sep, pattern, func)
 end
 
 --- Return the ordinal suffix for a number.
--- @tparam number n
--- @tparam boolean prepend_number if the passed number should be pre-pended
--- @treturn string the ordinal suffix
+---@param n number
+---@param prepend_number boolean if the passed number should be pre-pended
+---@return string suffix the ordinal suffix
 function String.ordinal_suffix(n, prepend_number)
     if tonumber(n) then
         n = abs(n) % 100
@@ -267,8 +269,8 @@ local exponent_multipliers = {
 }
 
 --- Convert a metric string prefix to a number value.
--- @tparam string str
--- @treturn float
+---@param str string
+---@return number
 function String.exponent_number(str)
     if type(str) == 'string' then
         local value, exp = str:match('([%-+]?[0-9]*%.?[0-9]+)([yzafpnumcdhkMGTPEZY]?)') ---@diagnostic disable-line: spell-check
